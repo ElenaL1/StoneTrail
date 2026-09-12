@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -110,109 +110,6 @@ export default function BlockDetailPage() {
     )}&ref=${encodeURIComponent(ib.label)}`
   }
 
-  const pageWrapRef = useRef<HTMLDivElement>(null)
-  const heroGridRef = useRef<HTMLDivElement>(null)
-  const heroImgRef = useRef<HTMLDivElement>(null)
-  const infoColRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const send = (
-      hypothesisId: string,
-      message: string,
-      data: Record<string, unknown>,
-    ) => {
-      // #region agent log
-      fetch("http://127.0.0.1:7938/ingest/15d6d7cd-3f18-4457-aaaa-42311a1e3018", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "5311dd",
-        },
-        body: JSON.stringify({
-          sessionId: "5311dd",
-          runId: "post-fix",
-          hypothesisId,
-          location: "app/catalog/blocks/[slug]/page.tsx:hero",
-          message,
-          data,
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {})
-      // #endregion
-    }
-
-    const measure = () => {
-      const img = heroImgRef.current
-      const grid = heroGridRef.current
-      const info = infoColRef.current
-      const wrap = pageWrapRef.current
-      if (!img || !grid || !info || !wrap) return
-      const imgCs = getComputedStyle(img)
-      const gridCs = getComputedStyle(grid)
-      const vw = window.innerWidth
-      const imgRect = img.getBoundingClientRect()
-      const wrapRect = wrap.getBoundingClientRect()
-      const gridRect = grid.getBoundingClientRect()
-      const visual = img.parentElement
-      send("A", "hero image box vs viewport units", {
-        vw,
-        imgWidth: Math.round(imgRect.width),
-        imgHeight: Math.round(imgRect.height),
-        sixtyVw: Math.round(vw * 0.6),
-        fortyFiveVw: Math.round(vw * 0.45),
-        heightCloseTo60vw: Math.abs(imgRect.height - vw * 0.6) < 2,
-        heightCloseTo45vw: Math.abs(imgRect.height - vw * 0.45) < 2,
-        heightExceeds520: imgRect.height > 520,
-      })
-      send("C", "computed height constraints", {
-        computedHeight: imgCs.height,
-        computedMaxHeight: imgCs.maxHeight,
-        computedMinHeight: imgCs.minHeight,
-        imgWidth: Math.round(imgRect.width),
-        imgHeight: Math.round(imgRect.height),
-      })
-      send("D", "container vs viewport width", {
-        vw,
-        wrapWidth: Math.round(wrapRect.width),
-        gridWidth: Math.round(gridRect.width),
-        imgWidth: Math.round(imgRect.width),
-        wrapIsNearFullViewport: wrapRect.width >= vw - 16,
-        gridIsNearFullViewport: gridRect.width >= vw - 48,
-      })
-      send("B", "hero grid columns", {
-        vw,
-        gridTemplateColumns: gridCs.gridTemplateColumns,
-        isTwoCol: (gridCs.gridTemplateColumns.match(/px/g) || []).length >= 2,
-      })
-      send("E", "column vertical balance", {
-        visualHeight: visual ? Math.round(visual.getBoundingClientRect().height) : null,
-        infoHeight: Math.round(info.getBoundingClientRect().height),
-        alignItems: gridCs.alignItems,
-        heightDelta: visual
-          ? Math.round(visual.getBoundingClientRect().height - info.getBoundingClientRect().height)
-          : null,
-      })
-      const thumb = document.querySelector(
-        'img[alt^="Миниатюра:"]',
-      ) as HTMLImageElement | null
-      if (thumb) {
-        const tRect = thumb.getBoundingClientRect()
-        const tParent = thumb.parentElement
-        send("F", "table thumb fill leak", {
-          renderedW: Math.round(tRect.width),
-          renderedH: Math.round(tRect.height),
-          parentPosition: tParent ? getComputedStyle(tParent).position : null,
-          parentClass: tParent?.className ?? null,
-          coversViewport: tRect.width > vw * 0.8 || tRect.height > window.innerHeight * 0.8,
-        })
-      }
-    }
-
-    measure()
-    window.addEventListener("resize", measure)
-    return () => window.removeEventListener("resize", measure)
-  }, [])
-
   return (
     <div
       className={cn(
@@ -220,7 +117,7 @@ export default function BlockDetailPage() {
         !arePromotionsEnabled() ? "bg-muted/30" : "bg-background",
       )}
     >
-      <div ref={pageWrapRef} className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl">
         {/* Breadcrumbs */}
         <nav
           aria-label="Хлебные крошки"
@@ -246,16 +143,10 @@ export default function BlockDetailPage() {
         </nav>
 
         {/* Hero */}
-        <div
-          ref={heroGridRef}
-          className="grid gap-8 sm:gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12"
-        >
+        <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
           {/* Visual column */}
           <div className="space-y-4">
-            <div
-              ref={heroImgRef}
-              className="relative h-[60vw] max-h-[520px] min-h-[240px] overflow-hidden rounded-3xl border border-border bg-secondary sm:h-[45vw] lg:h-[420px] xl:h-[480px]"
-            >
+            <div className="relative h-[60vw] max-h-[520px] min-h-[240px] overflow-hidden rounded-3xl border border-border bg-secondary sm:h-[45vw] lg:h-[420px] xl:h-[480px]">
               <Image
                 src={block.image}
                 alt={`Блок: ${block.stoneName}, ${block.stoneType}, ${block.quarry}, ${block.country}`}
@@ -314,7 +205,7 @@ export default function BlockDetailPage() {
           </div>
 
           {/* Info column */}
-          <div ref={infoColRef} className="flex flex-col">
+          <div className="flex flex-col">
             <div className="mb-5 flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="text-primary bg-[var(--primary-soft)]">
                 {block.stoneType}

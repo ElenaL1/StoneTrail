@@ -1,11 +1,9 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Manrope } from 'next/font/google'
+import { AuthModal } from '@/components/auth/auth-modal'
+import { AuthModalProvider } from '@/lib/auth-modal-context'
 import { AuthProvider } from '@/lib/auth-context'
-import { ArticleProvider } from '@/lib/article-context'
-import { CatalogProvider } from '@/lib/catalog-context'
-import { NewsProvider } from '@/lib/news-context'
-import { AuthDebug } from '@/components/community/auth-debug'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { PromotionBanner } from '@/components/promotion-banner'
@@ -62,23 +60,19 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <AuthProvider>
-          <ArticleProvider>
-            <NewsProvider>
-              <CatalogProvider>
-                <div className="flex min-h-screen flex-col bg-background">
-                  <SiteHeader />
-                  <main className="flex-1">
-                    <div className="pt-16">
-                      <PromotionBanner />
-                      {children}
-                    </div>
-                  </main>
-                  <SiteFooter />
+          <AuthModalProvider>
+            <div className="flex min-h-screen flex-col bg-background">
+              <SiteHeader />
+              <main className="flex-1">
+                <div className="pt-16">
+                  <PromotionBanner />
+                  {children}
                 </div>
-                <AuthDebug />
-              </CatalogProvider>
-            </NewsProvider>
-          </ArticleProvider>
+              </main>
+              <SiteFooter />
+            </div>
+            <AuthModal />
+          </AuthModalProvider>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

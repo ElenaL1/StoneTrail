@@ -1,5 +1,5 @@
 import type { CustomGroupId } from "@/lib/custom-catalog"
-import type { FinishedProduct, Product } from "@/lib/mock-data"
+import type { FinishedProduct, Product } from "@/lib/types"
 
 type StoneRef = {
   name: string

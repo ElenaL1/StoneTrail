@@ -6,7 +6,7 @@ import { fieldControlClassName, FormField } from "@/components/auth/form-field"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import { ACTIVITY_TYPES } from "@/lib/auth/types"
-import { AUTH_MESSAGES, AVATAR_MAX_BYTES, COUNTRIES } from "@/lib/auth/constants"
+import { AUTH_MESSAGES, AVATAR_ACCEPTED_TYPES, AVATAR_MAX_BYTES, COUNTRIES } from "@/lib/auth/constants"
 import { formatPhone } from "@/lib/utils"
 import { validatePersonName, validateProfileInput, validateWebsite } from "@/lib/auth/validation"
 
@@ -42,7 +42,7 @@ export function ProfileForm() {
 
   const handleAvatar = (file: File | undefined) => {
     if (!file) return
-    if (!file.type.startsWith("image/")) {
+    if (!(AVATAR_ACCEPTED_TYPES as readonly string[]).includes(file.type)) {
       setErrors((current) => ({ ...current, avatar: AUTH_MESSAGES.avatarInvalid }))
       return
     }
@@ -98,7 +98,7 @@ export function ProfileForm() {
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={AVATAR_ACCEPTED_TYPES.join(",")}
             className="sr-only"
             tabIndex={-1}
             aria-hidden="true"

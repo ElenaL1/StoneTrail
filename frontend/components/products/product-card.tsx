@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
-import type { FinishedProduct, Product } from "@/lib/mock-data"
+import type { Product } from "@/lib/mock-data"
 import { getProductTypeLabel } from "@/lib/product-catalog"
 import {
   getCustomGroupLabel,
@@ -71,15 +71,21 @@ export function ProductCard({ product }: { product: Product }) {
       aria-label={`${title}, ${chip}, ${product.stoneName}`}
     >
       <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
-        <Image
-          src={product.image}
-          alt={imageAlt}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          unoptimized
-        />
+        <Link
+          href={`/catalog/products/${product.slug}`}
+          aria-label={title}
+          className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        >
+          <Image
+            src={product.image}
+            alt={imageAlt}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            unoptimized
+          />
+        </Link>
         {availability ? (
-          <div className="absolute left-3 top-3">
+          <div className="pointer-events-none absolute left-3 top-3">
             <StatusBadge value={availability} />
           </div>
         ) : null}
@@ -132,8 +138,4 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
     </article>
   )
-}
-
-export function FinishedProductCard({ product }: { product: FinishedProduct }) {
-  return <ProductCard product={product} />
 }

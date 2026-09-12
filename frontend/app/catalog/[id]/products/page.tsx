@@ -1,21 +1,19 @@
-"use client"
-
-import { useParams } from "next/navigation"
+import { notFound } from "next/navigation"
 import { Package } from "lucide-react"
 import { FinishedProductCard } from "@/components/products/finished-product-card"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
 import { getFinishedProductsForStone, getStoneById } from "@/lib/stone-inventory"
 
-export default function StoneProductsPage() {
-  const { id } = useParams<{ id: string }>()
-  const material = getStoneById(id ?? "")
+export default async function StoneProductsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const material = getStoneById(id)
 
   if (!material) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <p className="text-xl text-muted-foreground">Материал не найден</p>
-      </div>
-    )
+    notFound()
   }
 
   const products = getFinishedProductsForStone(material)

@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { useAuth } from "@/lib/auth-context"
 import { forumCategories } from "@/lib/mock-data"
 import { PlusCircle } from "lucide-react"
-import { loginPath } from "@/lib/auth/paths"
 
 export function CreateTopicModal() {
   const { user } = useAuth()
@@ -24,19 +24,16 @@ export function CreateTopicModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!user?.emailVerified) return
-    console.log("Creating topic:", formData)
     setOpen(false)
     alert("Тема успешно создана (имитация)!")
   }
 
   if (!user) {
     return (
-      <Button asChild className="gap-2">
-        <Link href={loginPath("/community")}>
-          <PlusCircle className="size-4" />
-          Создать тему
-        </Link>
-      </Button>
+      <OpenAuthButton view="login" next="/community" className="gap-2">
+        <PlusCircle className="size-4" />
+        Создать тему
+      </OpenAuthButton>
     )
   }
 

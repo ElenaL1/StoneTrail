@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 const LABELS: Record<Exclude<PasswordStrength, "empty">, string> = {
   weak: "Слабый пароль",
-  medium: "Надёжный пароль",
+  medium: "Средний пароль",
   strong: "Надёжный пароль",
 }
 

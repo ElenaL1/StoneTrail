@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { ArrowRight, BadgeCheck, MapPin, TrendingUp } from "lucide-react"
+import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { Button } from "@/components/ui/button"
 import { stats } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
@@ -39,9 +40,9 @@ export function Hero() {
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-11 px-5 text-sm">
-              <Link href="/register">Вступить в сообщество</Link>
-            </Button>
+            <OpenAuthButton view="register" variant="outline" className="h-11 px-5 text-sm">
+              Вступить в сообщество
+            </OpenAuthButton>
           </div>
           
           <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">

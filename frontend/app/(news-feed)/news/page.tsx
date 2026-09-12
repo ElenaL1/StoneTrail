@@ -3,9 +3,9 @@
 import React, { useState, useMemo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LayoutGrid, List, ArrowRight } from "lucide-react"
+import { LayoutGrid, List } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { mockPromotions, mockIndustryNews, Promotion, IndustryNews } from "@/lib/mock-data"
+import { Promotion, IndustryNews } from "@/lib/mock-data"
 import { PromotionCard } from "@/components/news/promotion-card"
 import { NewsCard } from "@/components/news/news-card"
 import { NewsListItem } from "@/components/news/news-list-item"
@@ -15,7 +15,6 @@ import { useNews } from "@/lib/news-context"
 type FilterType = "all" | "active-promotion" | "news"
 type ViewMode = "grid" | "list"
 
-// Helper to parse Russian date strings into JS Date objects for sorting
 function parseRussianDate(dateStr: string): Date {
   const months: Record<string, number> = {
     "января": 0, "февраля": 1, "марта": 2, "апреля": 3, "мая": 4, "июня": 5,
@@ -38,7 +37,6 @@ export default function NewsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const isBannerEnabled = arePromotionsEnabled()
 
-  // Unified feed with sorting using context data
   const feed = useMemo(() => {
     const combined = [
       ...promotions.map(p => ({
@@ -71,7 +69,6 @@ export default function NewsPage() {
   return (
     <div className={cn("min-h-screen py-24 px-5 lg:px-8", !isBannerEnabled ? "bg-muted/30" : "bg-background")}>
     <div className="mx-auto max-w-7xl">
-      {/* Header Section */}
       <div className="mb-12 text-left">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Новости и предложения
@@ -82,7 +79,6 @@ export default function NewsPage() {
         </p>
       </div>
 
-      {/* Control Panel */}
       <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <Button 
@@ -128,7 +124,6 @@ export default function NewsPage() {
         </div>
       </div>
 
-      {/* Content Feed */}
       {filteredFeed.length > 0 ? (
         viewMode === "grid" ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -157,7 +152,6 @@ export default function NewsPage() {
         </div>
       )}
 
-      {/* Bottom Action */}
       <div className="mt-24 flex justify-center sm:justify-start">
         <Button variant="ghost" asChild>
           <Link href="/">Вернуться на главную</Link>

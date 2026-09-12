@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { OpenAuthLink } from "@/components/auth/open-auth-link"
 import { Logo } from "@/components/logo"
 
 const columns = [
@@ -62,12 +63,28 @@ export function SiteFooter() {
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.href === "/login" ? (
+                      <OpenAuthLink
+                        view="login"
+                        className="text-sm font-normal text-muted-foreground transition-colors hover:text-foreground hover:no-underline"
+                      >
+                        {link.label}
+                      </OpenAuthLink>
+                    ) : link.href === "/register" ? (
+                      <OpenAuthLink
+                        view="register"
+                        className="text-sm font-normal text-muted-foreground transition-colors hover:text-foreground hover:no-underline"
+                      >
+                        {link.label}
+                      </OpenAuthLink>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

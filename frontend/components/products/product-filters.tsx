@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { RotateCcw, SlidersHorizontal } from "lucide-react"
 import type { Product, ProductCategory } from "@/lib/mock-data"
 import {
@@ -54,25 +54,39 @@ export function ProductFilters({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const meta = PRODUCT_CATEGORY_META[category]
-  const keys = getCatalogFilterKeys(category, customGroup, filters.productType)
+  const keys = useMemo(
+    () => getCatalogFilterKeys(category, customGroup, filters.productType),
+    [category, customGroup, filters.productType],
+  )
   const activeCount = countActiveFilters(filters, keys)
 
-  const optionProducts =
-    category === "custom" && filters.productType !== "all"
-      ? products.filter((product) => product.productType === filters.productType)
-      : products
+  const optionProducts = useMemo(
+    () =>
+      category === "custom" && filters.productType !== "all"
+        ? products.filter((product) => product.productType === filters.productType)
+        : products,
+    [category, filters.productType, products],
+  )
 
-  function optionsFor(key: ProductFilterKey): string[] {
-    if (key === "productType") return getProductTypeOptions(products, customGroup)
-    if (key === "status") {
-      const values = uniqueFilterValues(optionProducts, key)
-      const ordered = ["В наличии", "Под заказ"].filter((item) => values.includes(item))
-      return ordered.length > 0 ? ordered : values
+  const optionMap = useMemo(() => {
+    const map = {} as Record<ProductFilterKey, string[]>
+    for (const key of keys) {
+      if (key === "productType") {
+        map[key] = getProductTypeOptions(products, customGroup)
+        continue
+      }
+      if (key === "status") {
+        const values = uniqueFilterValues(optionProducts, key)
+        const ordered = ["В наличии", "Под заказ"].filter((item) => values.includes(item))
+        map[key] = ordered.length > 0 ? ordered : values
+        continue
+      }
+      map[key] = uniqueFilterValues(optionProducts, key)
     }
-    return uniqueFilterValues(optionProducts, key)
-  }
+    return map
+  }, [keys, products, optionProducts, customGroup])
 
-  const visibleKeys = keys.filter((key) => optionsFor(key).length > 0)
+  const visibleKeys = keys.filter((key) => (optionMap[key] ?? []).length > 0)
 
   const filterControls = (
     <div
@@ -84,7 +98,7 @@ export function ProductFilters({
       {visibleKeys.map((key) => {
         const def = FILTER_DEFS[key]
         const stateKey = FILTER_STATE_KEY[key]
-        const options = optionsFor(key)
+        const options = optionMap[key] ?? []
         if (options.length === 0) return null
         const typeGroups =
           key === "productType" && customGroup === CUSTOM_GROUP_ALL

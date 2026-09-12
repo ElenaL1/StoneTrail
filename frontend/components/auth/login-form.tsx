@@ -12,16 +12,26 @@ import { getSafeNext, registerPath } from "@/lib/auth/paths"
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
 import { validateEmailValue } from "@/lib/auth/validation"
 
-export function LoginForm() {
-  const router = useRouter()
+type LoginFormProps = {
+  next?: string | null
+  autoFocus?: boolean
+  onCreateAccount?: () => void
+  onSuccess?: () => void
+}
+
+export function LoginFormFromQuery() {
   const searchParams = useSearchParams()
+  return <LoginForm next={searchParams.get("next")} />
+}
+
+export function LoginForm({ next = null, autoFocus = false, onCreateAccount, onSuccess }: LoginFormProps) {
+  const router = useRouter()
   const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const next = searchParams.get("next")
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -49,6 +59,11 @@ export function LoginForm() {
       return
     }
 
+    if (onSuccess) {
+      onSuccess()
+      return
+    }
+
     router.push(getSafeNext(next))
   }
 
@@ -62,6 +77,7 @@ export function LoginForm() {
           value={email}
           placeholder="name@company.ru"
           autoComplete="email"
+          autoFocus={autoFocus}
           aria-invalid={Boolean(errors.email)}
           className={fieldControlClassName(errors.email)}
           onChange={(event) => setEmail(event.target.value)}
@@ -101,9 +117,19 @@ export function LoginForm() {
         <Link href="/forgot-password" className="font-medium text-primary underline-offset-4 hover:underline">
           Забыли пароль?
         </Link>
-        <Link href={registerPath(next)} className="font-medium text-primary underline-offset-4 hover:underline">
-          Создать аккаунт
-        </Link>
+        {onCreateAccount ? (
+          <button
+            type="button"
+            onClick={onCreateAccount}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Создать аккаунт
+          </button>
+        ) : (
+          <Link href={registerPath(next)} className="font-medium text-primary underline-offset-4 hover:underline">
+            Создать аккаунт
+          </Link>
+        )}
       </div>
     </form>
   )

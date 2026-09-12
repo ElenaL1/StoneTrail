@@ -1,15 +1,14 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
 import { articleCategories } from "@/lib/mock-data"
 import { useArticles } from "@/lib/article-context"
 import { useAuth } from "@/lib/auth-context"
+import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { ArticleCard } from "@/components/articles/article-card"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
-import { loginPath } from "@/lib/auth/paths"
 
 type SortOption = "newest" | "popular" | "favorites"
 type CategoryFilter = "all" | (typeof articleCategories)[number]
@@ -117,13 +116,14 @@ export default function ArticlesPage() {
             {emptyMessage()}
           </p>
           {sort === "favorites" && !user && (
-            <Button
+            <OpenAuthButton
               variant="link"
-              asChild
+              view="login"
+              next="/articles"
               className="mt-2 text-primary"
             >
-              <Link href={loginPath("/articles")}>Войдите, чтобы собирать избранное</Link>
-            </Button>
+              Войдите, чтобы собирать избранное
+            </OpenAuthButton>
           )}
         </div>
       )}

@@ -16,13 +16,13 @@ export function PasswordInput({ error, className, id, ...props }: PasswordInputP
   return (
     <div className="relative">
       <input
+        {...props}
         id={id}
         type={visible ? "text" : "password"}
         autoComplete={props.autoComplete}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : props["aria-describedby"]}
         className={fieldControlClassName(error, cn("pr-11", className))}
-        {...props}
       />
       <button
         type="button"

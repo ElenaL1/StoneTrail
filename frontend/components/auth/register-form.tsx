@@ -34,9 +34,19 @@ const initialValues = {
   marketingConsent: false,
 }
 
-export function RegisterForm() {
-  const router = useRouter()
+type RegisterFormProps = {
+  next?: string | null
+  autoFocus?: boolean
+  onSignIn?: () => void
+}
+
+export function RegisterFormFromQuery() {
   const searchParams = useSearchParams()
+  return <RegisterForm next={searchParams.get("next")} />
+}
+
+export function RegisterForm({ next = null, autoFocus = false, onSignIn }: RegisterFormProps) {
+  const router = useRouter()
   const { register } = useAuth()
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
@@ -98,6 +108,7 @@ export function RegisterForm() {
             value={values.nickname}
             placeholder="Ваше имя"
             autoComplete="nickname"
+            autoFocus={autoFocus}
             aria-invalid={Boolean(errors.nickname)}
             className={fieldControlClassName(errors.nickname)}
             onChange={(event) => setField("nickname", event.target.value)}
@@ -171,7 +182,7 @@ export function RegisterForm() {
         </FormField>
         {emailTaken ? (
           <p id="email-error" className="text-xs leading-relaxed text-destructive" role="alert">
-            <EmailTakenError next={searchParams.get("next")} />
+            <EmailTakenError next={next} onSignIn={onSignIn} />
           </p>
         ) : null}
 
@@ -319,17 +330,33 @@ export function RegisterForm() {
   )
 }
 
-export function RegisterFooter() {
+export function RegisterFooterFromQuery() {
   const searchParams = useSearchParams()
-  const next = searchParams.get("next")
+  return <RegisterFooter next={searchParams.get("next")} />
+}
+
+export function RegisterFooter({
+  next = null,
+  onSignIn,
+}: {
+  next?: string | null
+  onSignIn?: () => void
+}) {
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login"
+  const actionClassName = "font-medium text-primary underline-offset-4 hover:underline"
 
   return (
     <p className={cn("text-center")}>
       Уже есть аккаунт?{" "}
-      <Link href={loginHref} className="font-medium text-primary underline-offset-4 hover:underline">
-        Войти
-      </Link>
+      {onSignIn ? (
+        <button type="button" onClick={onSignIn} className={actionClassName}>
+          Войти
+        </button>
+      ) : (
+        <Link href={loginHref} className={actionClassName}>
+          Войти
+        </Link>
+      )}
     </p>
   )
 }

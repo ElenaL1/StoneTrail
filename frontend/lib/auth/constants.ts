@@ -46,6 +46,7 @@ export const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60_000
 export const RESET_TOKEN_TTL_MS = 60 * 60_000
 export const SESSION_TTL_MS = 7 * 24 * 60 * 60_000
 export const AVATAR_MAX_BYTES = 1_000_000
+export const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
 export const MOCK_NETWORK_DELAY_MS = 500
 
 export const COUNTRIES = [

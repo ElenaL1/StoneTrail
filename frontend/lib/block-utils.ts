@@ -1,5 +1,6 @@
 import type { BlockStatus, IndividualBlock } from "./mock-data"
 import { stoneTypeGenitive } from "./stone-inventory"
+import { pluralRu } from "./measure-utils"
 
 // ── Русский plural ───────────────────────────────────────────────────────────
 // 1 блок, 2/3/4 блока, 5 блоков, 11–14/21–24 блока, 15/25/31 блока…
@@ -14,24 +15,12 @@ export function getBlockLotSectionTitle(stoneType: string, stoneName: string): s
 }
 
 export function pluralBlocks(n: number): string {
-  if (n === 1) return "блок"
-  const nMod10 = n % 10
-  const nMod100 = n % 100
-  if (nMod10 >= 2 && nMod10 <= 4 && (nMod100 < 10 || nMod100 >= 20)) {
-    return "блока"
-  }
-  return "блоков"
+  return pluralRu(n, ["блок", "блока", "блоков"])
 }
 
 // 1 лот, 2/3/4 лота, 5 лотов, 11–14/21–24 лота, 15/25/31 лота…
 export function pluralLots(n: number): string {
-  if (n === 1) return "лот"
-  const nMod10 = n % 10
-  const nMod100 = n % 100
-  if (nMod10 >= 2 && nMod10 <= 4 && (nMod100 < 10 || nMod100 >= 20)) {
-    return "лота"
-  }
-  return "лотов"
+  return pluralRu(n, ["лот", "лота", "лотов"])
 }
 
 // ── Раскладка блоков по статусам ─────────────────────────────────────────────

@@ -25,17 +25,23 @@ export function BlockCard({ block }: { block: StoneBlock }) {
       aria-label={`Лот: ${block.stoneName}, ${block.stoneType}, ${lotStatus}`}
     >
       <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
-        <Image
-          src={block.image}
-          alt={`Лот: ${block.stoneName} из ${block.stoneType.toLowerCase()}, ${block.country}`}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          unoptimized
-        />
-        <div className="absolute left-3 top-3">
+        <Link
+          href={`/catalog/blocks/${block.slug}`}
+          aria-label={block.stoneName}
+          className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        >
+          <Image
+            src={block.image}
+            alt={`Лот: ${block.stoneName} из ${block.stoneType.toLowerCase()}, ${block.country}`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            unoptimized
+          />
+        </Link>
+        <div className="pointer-events-none absolute left-3 top-3">
           <StatusBadge status={lotStatus} />
         </div>
-        <div className="absolute bottom-3 left-3">
+        <div className="pointer-events-none absolute bottom-3 left-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
             <MapPin className="size-3" />
             {block.quarry}, {block.country}

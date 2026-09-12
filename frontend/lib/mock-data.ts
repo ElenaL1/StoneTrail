@@ -2,231 +2,30 @@ import { finishedProducts } from "@/lib/custom-products-data"
 
 export { finishedProducts }
 
-export type Material = {
-  id: string
-  name: string
-  type: string
-  finish: string
-  thickness: string
-  image: string
-  supplier: string
-  location: string
-  quarry: string
-  country: string
-  status: "В наличии" | "Мало" | "Продано"
-  slabs: number
-  tiles: number
-  updated: string
-  // Если у этого сорта камня есть блок в каталоге «Блоки» — указываем его slug.
-  // Тогда на detail-странице камня показывают CTA-блок «Есть блок этого сорта».
-  blockSlug?: string
-}
-
-// ─── Блоки (сырьё, продажа под раскрой крупным объёмом) ─────────────────────
-// Блок — отдельное товарное понятие, не «Материал» и не «Изделие».
-// `StoneBlock` теперь — «лот» (партия блоков одного сорта), в которой у каждого
-// конкретного блока свои габариты, вес и статус. blockStoneId — явная связь
-// к Material.id (если блок из этого сорта), иначе undefined.
-export type BlockStatus = "В наличии" | "Зарезервирован" | "Под заказ"
-
-export type IndividualBlock = {
-  label: string // "Блок A", "Блок B", ...
-  dimensions: string // "2 800 × 1 450 × 1 250 мм"
-  weight: string // "~27,9 т"
-  status: BlockStatus
-  image?: string // опциональное уникальное фото конкретного блока
-}
-
-export type StoneBlock = {
-  id: string
-  slug: string
-  stoneName: string
-  stoneType: string
-  quarry: string
-  country: string
-  blocks: IndividualBlock[]
-  image: string
-  description: string
-  expertNote: string
-  blockStoneId?: string
-}
-
-// ─── Каталог продукции (слэбы, заготовки, плита, брусчатка, изделия под заказ)
-// Единая модель: категория задаёт направление (slabs / blanks / tiles / paving / custom).
-// Для «Изделия под заказ» группа и подкатегория задаются данными, не разметкой.
-export type ProductCategory = "slabs" | "blanks" | "tiles" | "paving" | "custom"
-
-export type ProductPriceType = "on_request" | "fixed"
-
-export type CatalogAvailability = "В наличии" | "Под заказ"
-
-export type FinishedProductStatus = CatalogAvailability | "Выполнено" | "В работе"
-
-export type Product = {
-  id: string
-  slug: string
-  category: ProductCategory
-  name: string
-  stoneName: string
-  stoneType: string
-  description: string
-  image: string
-  /** Тип изделия / подкатегория: Столешницы, Колонны и т.д. */
-  productType?: string
-  /** Группа внутри «Изделия под заказ»: interior, exterior, facades, architectural, memorial. */
-  customGroup?: string
-  origin?: string
-  quarry?: string
-  purpose?: string
-  price?: string
-  priceType?: ProductPriceType
-  images?: string[]
-  characteristics?: Record<string, string>
-  applications?: string[]
-  height?: string
-  diameter?: string
-  format?: string
-  color?: string
-  thickness?: string
-  /** Поверхность (слэбы/плита) или обработка (брусчатка, изделия). */
-  finish?: string
-  /** Размер слэба / форматы плиты / размер брусчатки. */
-  size?: string
-  /** Наличие или статус изготовления. */
-  availability?: string
-  status?: FinishedProductStatus
-  stoneImage?: string
-  expertNote?: string
-  dimensions?: string
-  /** Конкретные слэбы в партии сорта — как `blocks` у лота блоков. */
-  slabs?: IndividualSlab[]
-  /** Полуслэбы / заготовки в партии сорта. */
-  blanks?: IndividualBlank[]
-  /** Варианты плиты (толщина, формат, поверхность). */
-  tiles?: IndividualTile[]
-  /** Варианты брусчатки (формат, толщина, обработка). */
-  paving?: IndividualPaving[]
-}
-
-export type IndividualSlab = {
-  label: string
-  size: string
-  thickness: string
-  finish: string
-  status: BlockStatus
-  image?: string
-  /** Например «Пара bookmatch». */
-  note?: string
-}
-
-export type IndividualTile = {
-  label: string
-  size: string
-  thickness: string
-  finish: string
-  status: BlockStatus
-  image?: string
-}
-
-export type IndividualBlank = {
-  label: string
-  size: string
-  thickness: string
-  finish: string
-  status: BlockStatus
-  image?: string
-  /** Например «Полуслэб» или «Остаток после раскроя». */
-  note?: string
-}
-
-export type IndividualPaving = {
-  label: string
-  size: string
-  thickness: string
-  finish: string
-  status: BlockStatus
-  image?: string
-}
-
-export type FinishedProduct = Product & {
-  category: "custom"
-  productType: string
-  customGroup: string
-  status: FinishedProductStatus
-  finish: string
-}
-
-export type Promotion = {
-  id: string
-  title: string
-  description: string
-  content: string
-  expiryDate: string
-  createdAt: string // Added for sorting
-  isEnabled: boolean
-  link: string
-  likes: string[]
-}
-
-export type IndustryNews = {
-  id: string
-  title: string
-  excerpt: string
-  content: string
-  date: string
-  status: "Скоро" | "В подготовке" | "Опубликовано"
-  likes: string[]
-}
-
-export type ForumPost = {
-  id: string
-  title: string
-  author: string
-  category: string
-  date: string
-  excerpt: string
-  content: string
-}
-
-export type Comment = {
-  id: string
-  postId: string
-  author: string
-  text: string
-  date: string
-}
-
-export type Article = {
-  id: string
-  title: string
-  category: string
-  date: string
-  excerpt: string
-  content: string
-  imageUrl: string
-  readTime: string
-  likes: string[]
-}
-
-export type ArticleComment = {
-  id: string
-  articleId: string
-  author: string
-  text: string
-  date: string
-  parentId?: string
-}
-
-export type NotificationType = "community" | "catalog" | "article" | "supplier" | "system"
-
-export type Notification = {
-  id: string
-  type: NotificationType
-  title: string
-  message: string
-  time: string
-  isRead: boolean
-}
+export type {
+  Article,
+  ArticleComment,
+  BlockStatus,
+  CatalogAvailability,
+  Comment,
+  FinishedProduct,
+  FinishedProductStatus,
+  ForumPost,
+  IndividualBlank,
+  IndividualBlock,
+  IndividualPaving,
+  IndividualSlab,
+  IndividualTile,
+  IndustryNews,
+  Material,
+  Notification,
+  NotificationType,
+  Product,
+  ProductCategory,
+  ProductPriceType,
+  Promotion,
+  StoneBlock,
+} from "./types"
 
 export const forumCategories = [
   "Технологии",

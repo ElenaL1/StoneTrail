@@ -1,21 +1,19 @@
-"use client"
-
-import { useParams } from "next/navigation"
+import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Clock, Layers } from "lucide-react"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
 import { getStoneById, hasTilesInStock } from "@/lib/stone-inventory"
 
-export default function StoneTilesPage() {
-  const { id } = useParams<{ id: string }>()
-  const material = getStoneById(id ?? "")
+export default async function StoneTilesPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const material = getStoneById(id)
 
   if (!material) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <p className="text-xl text-muted-foreground">Материал не найден</p>
-      </div>
-    )
+    notFound()
   }
 
   const inStock = hasTilesInStock(material)

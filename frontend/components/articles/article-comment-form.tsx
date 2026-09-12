@@ -2,13 +2,12 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { OpenAuthLink } from "@/components/auth/open-auth-link"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import { useArticles } from "@/lib/article-context"
 import { Quote } from "lucide-react"
-import { loginPath } from "@/lib/auth/paths"
 
 interface ArticleCommentFormProps {
   articleId: string
@@ -23,7 +22,6 @@ export function ArticleCommentForm({
 }: ArticleCommentFormProps) {
   const { user } = useAuth()
   const { addComment } = useArticles()
-  const pathname = usePathname()
   const [text, setText] = useState("")
   const canComment = Boolean(user?.emailVerified)
 
@@ -79,9 +77,7 @@ export function ArticleCommentForm({
 
       {!user ? (
         <p className="text-sm text-muted-foreground">
-          <Link href={loginPath(pathname)} className="font-medium text-primary underline-offset-4 hover:underline">
-            Войдите
-          </Link>
+          <OpenAuthLink>Войдите</OpenAuthLink>
           , чтобы оставить комментарий.
         </p>
       ) : !user.emailVerified ? (

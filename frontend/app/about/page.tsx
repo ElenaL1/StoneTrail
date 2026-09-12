@@ -194,12 +194,14 @@ export default function AboutPage() {
             <p className="mt-5 max-w-md text-lg leading-[1.8] text-primary-foreground/75">
               Обсуждайте технологии, делитесь опытом, задавайте вопросы и находите профессиональные контакты.
             </p>
-            <Button
-              asChild
-              className={cn(onPrimaryCtaClass, "mt-8 w-fit rounded-lg px-4 py-2 text-sm font-medium")}
-            >
-              <Link href="/community">Перейти на форум</Link>
-            </Button>
+            <div className="mt-9">
+              <Button asChild className={cn(onPrimaryCtaClass, "h-11 gap-2 px-5 text-sm")}>
+                <Link href="/community">
+                  Перейти на форум
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
           {/* Слот под фото: пока зелёный фон секции */}
           <div className="min-h-48 lg:min-h-0" aria-hidden="true" />

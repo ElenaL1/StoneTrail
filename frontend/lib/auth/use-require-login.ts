@@ -2,16 +2,17 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { loginPath } from "@/lib/auth/paths"
+import { useAuthModal } from "@/lib/auth-modal-context"
 
 export function useRequireLogin() {
   const { user } = useAuth()
+  const { openLogin } = useAuthModal()
   const router = useRouter()
   const pathname = usePathname()
 
   return (options?: { requireVerified?: boolean }) => {
     if (!user) {
-      router.push(loginPath(pathname))
+      openLogin({ next: pathname })
       return false
     }
     if (options?.requireVerified && !user.emailVerified) {

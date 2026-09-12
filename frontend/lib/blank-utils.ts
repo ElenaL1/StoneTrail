@@ -1,5 +1,6 @@
 import type { IndividualBlank, IndividualSlab, Product } from "./mock-data"
 import { stoneTypeGenitive } from "./stone-inventory"
+import { getLotItemContactsHref, pluralRu } from "./measure-utils"
 import {
   EMPTY_SLAB_LOT_FILTERS,
   SLAB_LOT_FILTER_DEFS,
@@ -30,13 +31,7 @@ export function getProductBlanks(product: Product): IndividualBlank[] {
 }
 
 export function pluralBlanks(n: number): string {
-  if (n === 1) return "заготовка"
-  const nMod10 = n % 10
-  const nMod100 = n % 100
-  if (nMod10 >= 2 && nMod10 <= 4 && (nMod100 < 10 || nMod100 >= 20)) {
-    return "заготовки"
-  }
-  return "заготовок"
+  return pluralRu(n, ["заготовка", "заготовки", "заготовок"])
 }
 
 export function getBlankPageTitle(stoneName: string): string {
@@ -62,7 +57,7 @@ export function getBlankFinishSummary(blanks: IndividualBlank[]): string {
 }
 
 export function getBlankContactsHref(product: Product, blank: IndividualBlank): string {
-  return `/contacts?product=${encodeURIComponent(product.slug)}&ref=${encodeURIComponent(blank.label)}`
+  return getLotItemContactsHref(product, blank)
 }
 
 export function getVisibleBlankLotFilterKeys(blanks: IndividualBlank[]): BlankLotFilterKey[] {

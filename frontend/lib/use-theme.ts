@@ -1,15 +1,12 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type Theme = "light" | "dark"
 
 const STORAGE_KEY = "stonetrail-theme"
 
-// The <html> element never explicitly carries .light/.dark on first paint —
-// the browser falls back to prefers-color-scheme. Read the applied class and
-// default to the system preference so the first render matches what's shown.
-function getInitialTheme(): Theme {
+function getAppliedTheme(): Theme {
   if (typeof document === "undefined") return "light"
   if (document.documentElement.classList.contains("dark")) return "dark"
   if (typeof window.matchMedia !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -19,7 +16,11 @@ function getInitialTheme(): Theme {
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [theme, setTheme] = useState<Theme>("light")
+
+  useEffect(() => {
+    setTheme(getAppliedTheme())
+  }, [])
 
   const apply = useCallback((next: Theme) => {
     const root = document.documentElement
@@ -34,8 +35,7 @@ export function useTheme() {
   }, [])
 
   const toggle = useCallback(() => {
-    const current = getInitialTheme()
-    apply(current === "dark" ? "light" : "dark")
+    apply(getAppliedTheme() === "dark" ? "light" : "dark")
   }, [apply])
 
   return { theme, isDark: theme === "dark", toggle }

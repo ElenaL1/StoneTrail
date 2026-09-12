@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { SearchModal } from "@/components/search-modal"
 import { NotificationDropdown } from "@/components/notification-dropdown"
 import { cn } from "@/lib/utils"
@@ -61,12 +62,12 @@ export function SiteHeader() {
     </>
   ) : (
     <>
-      <Button variant="ghost" className="text-foreground" asChild>
-        <Link href="/login">Войти</Link>
-      </Button>
-      <Button className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-        <Link href="/register">Присоединиться</Link>
-      </Button>
+      <OpenAuthButton view="login" variant="ghost" className="text-foreground">
+        Войти
+      </OpenAuthButton>
+      <OpenAuthButton view="register" className="bg-primary text-primary-foreground hover:bg-primary/90">
+        Присоединиться
+      </OpenAuthButton>
     </>
   )
 
@@ -81,12 +82,12 @@ export function SiteHeader() {
     </>
   ) : (
     <>
-      <Button variant="outline" className="w-full" asChild>
-        <Link href="/login">Войти</Link>
-      </Button>
-      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-        <Link href="/register">Присоединиться</Link>
-      </Button>
+      <OpenAuthButton view="login" variant="outline" className="w-full">
+        Войти
+      </OpenAuthButton>
+      <OpenAuthButton view="register" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+        Присоединиться
+      </OpenAuthButton>
     </>
   )
 

@@ -1,5 +1,12 @@
 import type { IndividualSlab, Product } from "./mock-data"
 import { stoneTypeGenitive } from "./stone-inventory"
+import {
+  finishSummary,
+  getLotItemContactsHref,
+  pluralRu,
+  thicknessRange,
+} from "./measure-utils"
+import { createLotFilterKit, type LotFilterDef } from "./lot-filter-utils"
 
 export type SlabLotFilterKey = "thickness" | "finish" | "status"
 
@@ -15,30 +22,25 @@ export const EMPTY_SLAB_LOT_FILTERS: SlabLotFilterState = {
   status: "all",
 }
 
-export const SLAB_LOT_FILTER_DEFS: Record<
-  SlabLotFilterKey,
-  { label: string; allLabel: string }
-> = {
+export const SLAB_LOT_FILTER_DEFS: Record<SlabLotFilterKey, LotFilterDef> = {
   thickness: { label: "Толщина", allLabel: "Любая" },
   finish: { label: "Поверхность", allLabel: "Любая" },
   status: { label: "Статус", allLabel: "Любой" },
 }
 
 const SLAB_LOT_FILTER_KEYS: SlabLotFilterKey[] = ["thickness", "finish", "status"]
-const SLAB_STATUS_ORDER = ["В наличии", "Зарезервирован", "Под заказ"]
+
+const slabKit = createLotFilterKit<IndividualSlab, SlabLotFilterKey>({
+  keys: SLAB_LOT_FILTER_KEYS,
+  empty: EMPTY_SLAB_LOT_FILTERS,
+})
 
 export function getProductSlabs(product: Product): IndividualSlab[] {
   return product.slabs ?? []
 }
 
 export function pluralSlabs(n: number): string {
-  if (n === 1) return "слэб"
-  const nMod10 = n % 10
-  const nMod100 = n % 100
-  if (nMod10 >= 2 && nMod10 <= 4 && (nMod100 < 10 || nMod100 >= 20)) {
-    return "слэба"
-  }
-  return "слэбов"
+  return pluralRu(n, ["слэб", "слэба", "слэбов"])
 }
 
 export function getSlabPageTitle(stoneName: string): string {
@@ -82,88 +84,21 @@ export function getSlabSizeRange(slabs: IndividualSlab[]): string {
   return `${formatRange(widths)} × ${formatRange(heights)} ${unit}`
 }
 
-function parseThickness(value: string): number | null {
-  const match = value.match(/(\d+(?:[.,]\d+)?)/)
-  if (!match) return null
-  const n = Number(match[1].replace(",", "."))
-  return Number.isNaN(n) ? null : n
-}
-
 export function getSlabThicknessRange(slabs: IndividualSlab[]): string {
-  const parsed = slabs
-    .map((slab) => ({ slab, value: parseThickness(slab.thickness) }))
-    .filter((item): item is { slab: IndividualSlab; value: number } => item.value !== null)
-
-  if (parsed.length === 0) return slabs[0]?.thickness ?? ""
-  const values = parsed.map((item) => item.value)
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  if (min === max) return parsed[0].slab.thickness
-  return `${min}–${max} мм`
+  return thicknessRange(slabs)
 }
 
 export function getSlabFinishSummary(slabs: IndividualSlab[]): string {
-  const unique = Array.from(new Set(slabs.map((slab) => slab.finish).filter(Boolean)))
-  return unique.join(" / ")
+  return finishSummary(slabs)
 }
 
 export function getSlabContactsHref(product: Product, slab: IndividualSlab): string {
-  return `/contacts?product=${encodeURIComponent(product.slug)}&ref=${encodeURIComponent(slab.label)}`
+  return getLotItemContactsHref(product, slab)
 }
 
-export function uniqueSlabFieldValues(
-  slabs: IndividualSlab[],
-  key: SlabLotFilterKey,
-): string[] {
-  const values = Array.from(new Set(slabs.map((slab) => slab[key]).filter(Boolean)))
-  if (key === "status") {
-    const ordered = SLAB_STATUS_ORDER.filter((value) => values.includes(value))
-    const rest = values.filter((value) => !SLAB_STATUS_ORDER.includes(value))
-    return [...ordered, ...rest]
-  }
-  if (key === "thickness") {
-    return values.sort((a, b) => (parseThickness(a) ?? 0) - (parseThickness(b) ?? 0))
-  }
-  return values.sort((a, b) => a.localeCompare(b, "ru"))
-}
-
-export function getVisibleSlabLotFilterKeys(slabs: IndividualSlab[]): SlabLotFilterKey[] {
-  return SLAB_LOT_FILTER_KEYS.filter((key) => uniqueSlabFieldValues(slabs, key).length > 1)
-}
-
-export function filterSlabLot(
-  slabs: IndividualSlab[],
-  filters: SlabLotFilterState,
-): IndividualSlab[] {
-  return slabs.filter((slab) => {
-    if (filters.thickness !== "all" && slab.thickness !== filters.thickness) return false
-    if (filters.finish !== "all" && slab.finish !== filters.finish) return false
-    if (filters.status !== "all" && slab.status !== filters.status) return false
-    return true
-  })
-}
-
-export function slabLotFilterOptions(
-  slabs: IndividualSlab[],
-  filters: SlabLotFilterState,
-  key: SlabLotFilterKey,
-): string[] {
-  return uniqueSlabFieldValues(filterSlabLot(slabs, { ...filters, [key]: "all" }), key)
-}
-
-export function hasActiveSlabLotFilters(filters: SlabLotFilterState): boolean {
-  return SLAB_LOT_FILTER_KEYS.some((key) => filters[key] !== EMPTY_SLAB_LOT_FILTERS[key])
-}
-
-export function pruneSlabLotFilters(
-  slabs: IndividualSlab[],
-  filters: SlabLotFilterState,
-): SlabLotFilterState {
-  const next = { ...filters }
-  for (const key of SLAB_LOT_FILTER_KEYS) {
-    if (next[key] === "all") continue
-    const options = uniqueSlabFieldValues(filterSlabLot(slabs, { ...next, [key]: "all" }), key)
-    if (!options.includes(next[key])) next[key] = "all"
-  }
-  return next
-}
+export const uniqueSlabFieldValues = slabKit.uniqueFieldValues
+export const getVisibleSlabLotFilterKeys = slabKit.getVisibleFilterKeys
+export const filterSlabLot = slabKit.filterItems
+export const slabLotFilterOptions = slabKit.filterOptions
+export const hasActiveSlabLotFilters = slabKit.hasActiveFilters
+export const pruneSlabLotFilters = slabKit.pruneFilters

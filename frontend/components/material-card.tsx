@@ -8,13 +8,17 @@ import { stoneOrigin } from "@/lib/stone-inventory"
 export function MaterialCard({ material }: { material: Material }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:shadow-[0_16px_40px_-24px_rgba(35,72,58,0.4)]">
-      <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
+      <Link
+        href={`/catalog/${material.id}`}
+        aria-label={material.name}
+        className="relative block aspect-[5/4] overflow-hidden bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      >
         <img
           src={material.image || "/placeholder.svg"}
           alt={`${material.name}, ${material.type}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2">

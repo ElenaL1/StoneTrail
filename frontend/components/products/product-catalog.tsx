@@ -86,11 +86,11 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const filtered = useMemo(
     () =>
       sortCatalogProducts(
-        filterCatalogProducts(products, category, filters, customGroup),
+        filterCatalogProducts(categoryProducts, category, filters, customGroup),
         sort,
         filters.search,
       ),
-    [products, category, filters, customGroup, sort],
+    [categoryProducts, category, filters, customGroup, sort],
   )
 
   const visible = filtered.slice(0, visibleCount)

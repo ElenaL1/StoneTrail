@@ -1,4 +1,5 @@
 import type { FinishedProduct, Product, ProductCategory } from "@/lib/mock-data"
+import { pluralRu } from "@/lib/measure-utils"
 import {
   CUSTOM_GROUP_ALL,
   FILTER_DEFS,
@@ -204,13 +205,6 @@ export function getProductBreadcrumbTitle(product: Product): string {
   return `${kind} ${name}`
 }
 
-export function uniqueProductValues(products: Product[], key: keyof Product): string[] {
-  const values = products
-    .map((product) => product[key])
-    .filter((value): value is string => typeof value === "string" && value.length > 0)
-  return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b, "ru"))
-}
-
 export function getCatalogFilterKeys(
   category: ProductCategory,
   customGroup: string,
@@ -377,14 +371,6 @@ function relevanceScore(product: Product, query: string): number {
   }, 0)
 }
 
-function pluralRu(count: number, forms: [string, string, string]): string {
-  const abs = Math.abs(count) % 100
-  const last = abs % 10
-  if (abs > 10 && abs < 20) return forms[2]
-  if (last > 1 && last < 5) return forms[1]
-  if (last === 1) return forms[0]
-  return forms[2]
-}
 
 const CATEGORY_COUNT_FORMS: Record<ProductCategory, [string, string, string]> = {
   slabs: ["слэб", "слэба", "слэбов"],

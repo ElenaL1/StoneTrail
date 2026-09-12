@@ -1,5 +1,12 @@
 import type { IndividualTile, Product } from "./mock-data"
 import { stoneTypeGenitive } from "./stone-inventory"
+import {
+  finishSummary,
+  getLotItemContactsHref,
+  sizeSummary,
+  thicknessRange,
+} from "./measure-utils"
+import { createLotFilterKit, type LotFilterDef } from "./lot-filter-utils"
 
 export type TileVariantFilterKey = "size" | "thickness" | "finish" | "status"
 
@@ -17,10 +24,7 @@ export const EMPTY_TILE_VARIANT_FILTERS: TileVariantFilterState = {
   status: "all",
 }
 
-export const TILE_VARIANT_FILTER_DEFS: Record<
-  TileVariantFilterKey,
-  { label: string; allLabel: string }
-> = {
+export const TILE_VARIANT_FILTER_DEFS: Record<TileVariantFilterKey, LotFilterDef> = {
   size: { label: "Формат", allLabel: "Любой" },
   thickness: { label: "Толщина", allLabel: "Любая" },
   finish: { label: "Поверхность", allLabel: "Любая" },
@@ -28,8 +32,13 @@ export const TILE_VARIANT_FILTER_DEFS: Record<
 }
 
 const TILE_VARIANT_FILTER_KEYS: TileVariantFilterKey[] = ["size", "thickness", "finish", "status"]
-const TILE_STATUS_ORDER = ["В наличии", "Зарезервирован", "Под заказ"]
 const TILE_FINISH_ORDER = ["Полированная", "Матовая", "Сатинированная", "Шлифованная"]
+
+const tileKit = createLotFilterKit<IndividualTile, TileVariantFilterKey>({
+  keys: TILE_VARIANT_FILTER_KEYS,
+  empty: EMPTY_TILE_VARIANT_FILTERS,
+  finishOrder: TILE_FINISH_ORDER,
+})
 
 export function getProductTiles(product: Product): IndividualTile[] {
   return product.tiles ?? []
@@ -45,114 +54,25 @@ export function getTileVariantSectionTitle(stoneType: string, stoneName: string)
   return `Плиты ${stoneTypeGenitive(stoneType)} ${stoneName.trim()}`
 }
 
-function parseThickness(value: string): number | null {
-  const match = value.match(/(\d+(?:[.,]\d+)?)/)
-  if (!match) return null
-  const n = Number(match[1].replace(",", "."))
-  return Number.isNaN(n) ? null : n
-}
-
-function parseSizeSortKey(value: string): number {
-  const match = value.match(/(\d[\d\s]*)\s*×\s*(\d[\d\s]*)/)
-  if (!match) return 0
-  const width = Number(match[1].replace(/\s/g, ""))
-  const height = Number(match[2].replace(/\s/g, ""))
-  if (Number.isNaN(width) || Number.isNaN(height)) return 0
-  return width * height
-}
-
 export function getTileSizeSummary(tiles: IndividualTile[]): string {
-  const unique = Array.from(new Set(tiles.map((tile) => tile.size).filter(Boolean)))
-  unique.sort((a, b) => parseSizeSortKey(a) - parseSizeSortKey(b) || a.localeCompare(b, "ru"))
-  return unique.join(" / ")
+  return sizeSummary(tiles)
 }
 
 export function getTileThicknessRange(tiles: IndividualTile[]): string {
-  const parsed = tiles
-    .map((tile) => ({ tile, value: parseThickness(tile.thickness) }))
-    .filter((item): item is { tile: IndividualTile; value: number } => item.value !== null)
-
-  if (parsed.length === 0) return tiles[0]?.thickness ?? ""
-  const values = parsed.map((item) => item.value)
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  if (min === max) return parsed[0].tile.thickness
-  return `${min}–${max} мм`
+  return thicknessRange(tiles)
 }
 
 export function getTileFinishSummary(tiles: IndividualTile[]): string {
-  const unique = Array.from(new Set(tiles.map((tile) => tile.finish).filter(Boolean)))
-  const ordered = TILE_FINISH_ORDER.filter((value) => unique.includes(value))
-  const rest = unique.filter((value) => !TILE_FINISH_ORDER.includes(value))
-  return [...ordered, ...rest].join(" / ")
+  return finishSummary(tiles, TILE_FINISH_ORDER)
 }
 
 export function getTileContactsHref(product: Product, tile: IndividualTile): string {
-  return `/contacts?product=${encodeURIComponent(product.slug)}&ref=${encodeURIComponent(tile.label)}`
+  return getLotItemContactsHref(product, tile)
 }
 
-export function uniqueTileFieldValues(
-  tiles: IndividualTile[],
-  key: TileVariantFilterKey,
-): string[] {
-  const values = Array.from(new Set(tiles.map((tile) => tile[key]).filter(Boolean)))
-  if (key === "status") {
-    const ordered = TILE_STATUS_ORDER.filter((value) => values.includes(value))
-    const rest = values.filter((value) => !TILE_STATUS_ORDER.includes(value))
-    return [...ordered, ...rest]
-  }
-  if (key === "thickness") {
-    return values.sort((a, b) => (parseThickness(a) ?? 0) - (parseThickness(b) ?? 0))
-  }
-  if (key === "finish") {
-    const ordered = TILE_FINISH_ORDER.filter((value) => values.includes(value))
-    const rest = values.filter((value) => !TILE_FINISH_ORDER.includes(value))
-    return [...ordered, ...rest.sort((a, b) => a.localeCompare(b, "ru"))]
-  }
-  if (key === "size") {
-    return values.sort((a, b) => parseSizeSortKey(a) - parseSizeSortKey(b) || a.localeCompare(b, "ru"))
-  }
-  return values.sort((a, b) => a.localeCompare(b, "ru"))
-}
-
-export function getVisibleTileVariantFilterKeys(tiles: IndividualTile[]): TileVariantFilterKey[] {
-  return TILE_VARIANT_FILTER_KEYS.filter((key) => uniqueTileFieldValues(tiles, key).length > 1)
-}
-
-export function filterTileVariants(
-  tiles: IndividualTile[],
-  filters: TileVariantFilterState,
-): IndividualTile[] {
-  return tiles.filter((tile) => {
-    if (filters.size !== "all" && tile.size !== filters.size) return false
-    if (filters.thickness !== "all" && tile.thickness !== filters.thickness) return false
-    if (filters.finish !== "all" && tile.finish !== filters.finish) return false
-    if (filters.status !== "all" && tile.status !== filters.status) return false
-    return true
-  })
-}
-
-export function tileVariantFilterOptions(
-  tiles: IndividualTile[],
-  filters: TileVariantFilterState,
-  key: TileVariantFilterKey,
-): string[] {
-  return uniqueTileFieldValues(filterTileVariants(tiles, { ...filters, [key]: "all" }), key)
-}
-
-export function hasActiveTileVariantFilters(filters: TileVariantFilterState): boolean {
-  return TILE_VARIANT_FILTER_KEYS.some((key) => filters[key] !== EMPTY_TILE_VARIANT_FILTERS[key])
-}
-
-export function pruneTileVariantFilters(
-  tiles: IndividualTile[],
-  filters: TileVariantFilterState,
-): TileVariantFilterState {
-  const next = { ...filters }
-  for (const key of TILE_VARIANT_FILTER_KEYS) {
-    if (next[key] === "all") continue
-    const options = uniqueTileFieldValues(filterTileVariants(tiles, { ...next, [key]: "all" }), key)
-    if (!options.includes(next[key])) next[key] = "all"
-  }
-  return next
-}
+export const uniqueTileFieldValues = tileKit.uniqueFieldValues
+export const getVisibleTileVariantFilterKeys = tileKit.getVisibleFilterKeys
+export const filterTileVariants = tileKit.filterItems
+export const tileVariantFilterOptions = tileKit.filterOptions
+export const hasActiveTileVariantFilters = tileKit.hasActiveFilters
+export const pruneTileVariantFilters = tileKit.pruneFilters

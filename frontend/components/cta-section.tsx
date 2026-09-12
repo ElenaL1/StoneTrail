@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { ArrowRight, Check } from "lucide-react"
+import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { Button } from "@/components/ui/button"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
 import { cn } from "@/lib/utils"
@@ -33,12 +34,10 @@ export function CtaSection() {
             ))}
           </ul>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button asChild className={cn(onPrimaryCtaClass, "h-11 gap-2 px-5 text-sm")}>
-              <Link href="/register">
-                Присоединиться
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+            <OpenAuthButton className={cn(onPrimaryCtaClass, "h-11 gap-2 px-5 text-sm")} view="register">
+              Присоединиться
+              <ArrowRight className="size-4" />
+            </OpenAuthButton>
             <Button
               asChild
               variant="outline"

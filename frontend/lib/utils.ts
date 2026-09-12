@@ -7,12 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPhone(value: string): string {
   if (!value) return ''
-  
-  // Remove non-digits
+
   let digits = value.replace(/\D/g, '')
-  
-  // Ensure starts with 7
-  if (digits.length > 0 && digits[0] !== '7') {
+
+  if (digits.startsWith('8')) {
+    digits = '7' + digits.slice(1)
+  } else if (digits.length > 0 && digits[0] !== '7') {
     digits = '7' + digits
   }
   

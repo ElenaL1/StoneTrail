@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { AuthPageShell } from "@/components/auth/auth-page-shell"
 import { GuestOnly } from "@/components/auth/guest-only"
-import { LoginForm } from "@/components/auth/login-form"
+import { LoginFormFromQuery } from "@/components/auth/login-form"
 
 export const metadata = {
   title: "Войти в аккаунт — StoneTrail",
@@ -12,7 +12,7 @@ function LoginContent() {
   return (
     <GuestOnly>
       <AuthPageShell title="Войти в аккаунт">
-        <LoginForm />
+        <LoginFormFromQuery />
       </AuthPageShell>
     </GuestOnly>
   )

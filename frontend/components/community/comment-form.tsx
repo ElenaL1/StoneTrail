@@ -2,12 +2,11 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { OpenAuthLink } from "@/components/auth/open-auth-link"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import { Send } from "lucide-react"
-import { loginPath } from "@/lib/auth/paths"
 
 interface CommentFormProps {
   postId: string
@@ -16,18 +15,12 @@ interface CommentFormProps {
 
 export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
   const { user } = useAuth()
-  const pathname = usePathname()
   const [text, setText] = useState("")
   const canComment = Boolean(user?.emailVerified)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canComment || !text.trim()) return
-
-    console.log(`Adding comment to ${postId}:`, {
-      author: user?.name || "Guest",
-      text: text,
-    })
 
     setText("")
     onCommentAdded()
@@ -60,9 +53,7 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
       </div>
       {!user ? (
         <p className="text-sm text-muted-foreground">
-          <Link href={loginPath(pathname)} className="font-medium text-primary underline-offset-4 hover:underline">
-            Войдите
-          </Link>
+          <OpenAuthLink>Войдите</OpenAuthLink>
           , чтобы участвовать в обсуждении.
         </p>
       ) : !user.emailVerified ? (
