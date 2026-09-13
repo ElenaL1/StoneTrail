@@ -1,12 +1,22 @@
-# StoneTrail
+# StoneTrail — frontend
 
-Профессиональная платформа для владельца камнеобрабатывающего бизнеса с опытом более 25 лет.
+Next.js-приложение платформы StoneTrail. Описание проекта и инструкции по запуску — в [корневом README](../README.md).
 
-Коммерческая часть показывает и помогает вести **собственный** инвентарь камня (блоки, слэбы, заготовки, плита, брусчатка, изделия). Инвентарь принадлежит только владельцу: это не маркетплейс и не витрина нескольких продавцов.
+Кратко из каталога `frontend/`:
 
-Сообщество — профессиональный хаб: форум и экспертные статьи, где могут участвовать компании и специалисты отрасли.
+```bash
+pnpm install
+pnpm dev
+```
 
-Интерфейс на русском (`lang="ru"`).
+Приложение: [http://localhost:3000](http://localhost:3000). Нужны Node.js 22+ и pnpm.
+
+```bash
+pnpm test
+pnpm lint
+pnpm build
+pnpm start
+```
 
 ## Стек
 
@@ -17,27 +27,7 @@
 - lucide-react
 - Vitest
 
-Данные на фронтенде пока моковые: каталог и контент в [`lib/mock-data.ts`](lib/mock-data.ts), авторизация — [`lib/auth/mock-auth-service.ts`](lib/auth/mock-auth-service.ts) (localStorage).
-
-## Запуск
-
-Нужны Node.js 20+ и npm.
-
-```bash
-npm install
-npm run dev
-```
-
-Приложение откроется на [http://localhost:3000](http://localhost:3000).
-
-Другие команды:
-
-```bash
-npm run build    # production-сборка
-npm run start    # запуск собранного приложения
-npm run test     # Vitest
-npm run lint     # ESLint
-```
+Данные пока моковые: каталог и контент в [`lib/mock-data.ts`](lib/mock-data.ts), авторизация — [`lib/auth/mock-auth-service.ts`](lib/auth/mock-auth-service.ts) (localStorage).
 
 ## Структура
 
@@ -48,4 +38,4 @@ npm run lint     # ESLint
 
 ## Разработка
 
-Иконки — только `lucide-react`. Условные классы — через `cn()` из `@/lib/utils`. Заголовки страниц используют вертикальный отступ `py-24`.
+Иконки — только `lucide-react`. Условные классы — через `cn()` из `@/lib/utils`. 
