@@ -32,7 +32,8 @@ jobs:
       run:
         working-directory: backend
     env:
-      DATABASE_URL: postgresql+asyncpg://stonetrail:stonetrail@localhost:5432/stonetrail
+      DATABASE_URL: postgresql+asyncpg://stonetrail:stonetrail@127.0.0.1:5432/stonetrail
+      AUTH_DEBUG_LINKS: "true"
     services:
       postgres:
         image: postgres:16-alpine
@@ -58,7 +59,7 @@ jobs:
 
       - run: pip install -e ".[dev]"
       - run: alembic upgrade head
-      - run: pytest
+      - run: pytest -ra --tb=short
 
   build:
     runs-on: ubuntu-latest
