@@ -35,6 +35,7 @@ COPY --chown=appuser:appuser services ./services
 COPY --chown=appuser:appuser repositories ./repositories
 COPY --chown=appuser:appuser alembic.ini ./
 COPY --chown=appuser:appuser alembic ./alembic
+COPY --chown=appuser:appuser schema ./schema
 COPY --chown=appuser:appuser scripts ./scripts
 COPY --chown=appuser:appuser seeds ./seeds
 COPY --chown=appuser:appuser docker-entrypoint.sh ./
