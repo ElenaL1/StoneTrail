@@ -17,7 +17,7 @@ from models.enums import (
     ProductCategory,
     ProductItemKind,
 )
-from tests.catalog_fixtures import (
+from catalog_fixtures import (
     add_block_item,
     add_lot,
     add_media,
