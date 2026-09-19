@@ -91,37 +91,22 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/stonetrail-backend:${{ github.sha }}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy infra files
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: infra/docker-compose.yaml,infra/nginx.conf,infra/.env.example
-          target: ~/stonetrail/infra
-          strip_components: 1
-          overwrite: true
-
       - name: Deploy
-        uses: appleboy/ssh-action@v1.2.0
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           BACKEND_IMAGE_TAG: ${{ github.sha }}
           FRONTEND_IMAGE_TAG: ${{ github.sha }}
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,BACKEND_IMAGE_TAG,FRONTEND_IMAGE_TAG
-          script: |
-            set -e
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            cd ~/stonetrail/infra
-            docker compose pull
-            docker compose up -d
+        run: |
+          set -e
+          mkdir -p "$HOME/stonetrail/infra"
+          cp infra/docker-compose.yaml infra/nginx.conf "$HOME/stonetrail/infra/"
+          cd "$HOME/stonetrail/infra"
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker compose pull
+          docker compose up -d
