@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { connection } from "next/server"
 import { catalogApi } from "@/lib/catalog/api-client"
 import { MaterialCard } from "@/components/material-card"
 import { Button } from "@/components/ui/button"
@@ -7,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
 
 export async function InventoryPreview() {
+  await connection()
   const isBannerEnabled = arePromotionsEnabled()
   let materials: Awaited<ReturnType<typeof catalogApi.listStones>> = []
   try {
