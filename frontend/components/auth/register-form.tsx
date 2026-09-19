@@ -10,26 +10,14 @@ import { PasswordInput } from "@/components/auth/password-input"
 import { PasswordStrengthMeter } from "@/components/auth/password-strength"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
-import { ACTIVITY_TYPES } from "@/lib/auth/types"
-import {
-  validateEmailValue,
-  validatePassword,
-  validatePasswordConfirmation,
-  validatePersonName,
-  validateRegisterInput,
-} from "@/lib/auth/validation"
+import { generatePassword, offerStorePassword } from "@/lib/auth/password"
+import { validateEmailValue, validatePassword, validatePersonName, validateRegisterInput } from "@/lib/auth/validation"
 import { cn } from "@/lib/utils"
 
 const initialValues = {
   nickname: "",
-  firstName: "",
-  lastName: "",
   email: "",
   password: "",
-  confirmPassword: "",
-  company: "",
-  position: "",
-  activityType: "",
   termsAccepted: false,
   marketingConsent: false,
 }
@@ -53,6 +41,7 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
   const [formError, setFormError] = useState<string | null>(null)
   const [emailTaken, setEmailTaken] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [passwordVisible, setPasswordVisible] = useState(false)
 
   const setField = (field: keyof typeof initialValues, value: string | boolean) => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -60,11 +49,17 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
 
   const showFieldError = (field: string, message?: string) => {
     setErrors((current) => {
-      const next = { ...current }
-      if (message) next[field] = message
-      else delete next[field]
-      return next
+      const nextErrors = { ...current }
+      if (message) nextErrors[field] = message
+      else delete nextErrors[field]
+      return nextErrors
     })
+  }
+
+  const handleGeneratePassword = () => {
+    setField("password", generatePassword())
+    setPasswordVisible(true)
+    showFieldError("password")
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -87,14 +82,17 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
       return
     }
 
+    await offerStorePassword({
+      email: values.email,
+      password: values.password,
+      nickname: values.nickname,
+    })
     router.push("/verify-email")
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-foreground">Основные данные</h2>
-
         <FormField
           id="nickname"
           label="Ник на сайте"
@@ -116,61 +114,14 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
           />
         </FormField>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            id="firstName"
-            label="Имя"
-            hint="Не отображается на сайте."
-            error={errors.firstName}
-            required
-          >
-            <input
-              id="firstName"
-              name="firstName"
-              value={values.firstName}
-              placeholder="Ваше имя"
-              autoComplete="given-name"
-              aria-invalid={Boolean(errors.firstName)}
-              className={fieldControlClassName(errors.firstName)}
-              onChange={(event) => setField("firstName", event.target.value)}
-              onBlur={() => showFieldError("firstName", validatePersonName(values.firstName, "firstName"))}
-            />
-          </FormField>
-
-          <FormField
-            id="lastName"
-            label="Фамилия"
-            hint="Не отображается на сайте."
-            error={errors.lastName}
-            required
-          >
-            <input
-              id="lastName"
-              name="lastName"
-              value={values.lastName}
-              placeholder="Ваша фамилия"
-              autoComplete="family-name"
-              aria-invalid={Boolean(errors.lastName)}
-              className={fieldControlClassName(errors.lastName)}
-              onChange={(event) => setField("lastName", event.target.value)}
-              onBlur={() => showFieldError("lastName", validatePersonName(values.lastName, "lastName"))}
-            />
-          </FormField>
-        </div>
-
-        <FormField
-          id="email"
-          label="Email"
-          error={emailTaken ? undefined : errors.email}
-          required
-        >
+        <FormField id="email" label="Email" error={emailTaken ? undefined : errors.email} required>
           <input
             id="email"
             name="email"
             type="email"
             value={values.email}
             placeholder="name@company.ru"
-            autoComplete="email"
+            autoComplete="username"
             aria-invalid={Boolean(errors.email) || emailTaken}
             className={fieldControlClassName(errors.email || (emailTaken ? "taken" : undefined))}
             onChange={(event) => {
@@ -186,7 +137,21 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
           </p>
         ) : null}
 
-        <FormField id="password" label="Пароль" error={errors.password} required>
+        <FormField
+          id="password"
+          label="Пароль"
+          error={errors.password}
+          required
+          action={
+            <button
+              type="button"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              onClick={handleGeneratePassword}
+            >
+              Сгенерировать
+            </button>
+          }
+        >
           <PasswordInput
             id="password"
             name="password"
@@ -194,74 +159,13 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
             placeholder="Введите пароль"
             autoComplete="new-password"
             error={errors.password}
+            visible={passwordVisible}
+            onVisibleChange={setPasswordVisible}
             onChange={(event) => setField("password", event.target.value)}
             onBlur={() => showFieldError("password", validatePassword(values.password))}
           />
         </FormField>
         <PasswordStrengthMeter password={values.password} />
-
-        <FormField id="confirmPassword" label="Подтверждение пароля" error={errors.confirmPassword} required>
-          <PasswordInput
-            id="confirmPassword"
-            name="confirmPassword"
-            value={values.confirmPassword}
-            placeholder="Повторите пароль"
-            autoComplete="new-password"
-            error={errors.confirmPassword}
-            onChange={(event) => setField("confirmPassword", event.target.value)}
-            onBlur={() =>
-              showFieldError("confirmPassword", validatePasswordConfirmation(values.password, values.confirmPassword))
-            }
-          />
-        </FormField>
-      </section>
-
-      <section className="space-y-4 border-t border-border pt-6">
-        <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-foreground">Профессиональная информация</h2>
-          <p className="text-xs text-muted-foreground">Можно заполнить позже в профиле.</p>
-        </div>
-
-        <FormField id="company" label="Компания">
-          <input
-            id="company"
-            name="company"
-            value={values.company}
-            placeholder="Название компании"
-            autoComplete="organization"
-            className={fieldControlClassName()}
-            onChange={(event) => setField("company", event.target.value)}
-          />
-        </FormField>
-
-        <FormField id="position" label="Должность / специализация">
-          <input
-            id="position"
-            name="position"
-            value={values.position}
-            placeholder="Например: архитектор, дизайнер, камнеобработчик"
-            autoComplete="organization-title"
-            className={fieldControlClassName()}
-            onChange={(event) => setField("position", event.target.value)}
-          />
-        </FormField>
-
-        <FormField id="activityType" label="Тип деятельности">
-          <select
-            id="activityType"
-            name="activityType"
-            value={values.activityType}
-            className={fieldControlClassName()}
-            onChange={(event) => setField("activityType", event.target.value)}
-          >
-            <option value="">Выберите тип деятельности</option>
-            {ACTIVITY_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </FormField>
       </section>
 
       <section className="space-y-4 border-t border-border pt-6">

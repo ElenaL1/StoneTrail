@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import { Package } from "lucide-react"
 import { FinishedProductCard } from "@/components/products/finished-product-card"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
-import { getFinishedProductsForStone, getStoneById } from "@/lib/stone-inventory"
+import { catalogApi } from "@/lib/catalog/api-client"
+import { getFinishedProductsForStone } from "@/lib/stone-inventory"
 
 export default async function StoneProductsPage({
   params,
@@ -10,13 +11,16 @@ export default async function StoneProductsPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const material = getStoneById(id)
+  const [material, products] = await Promise.all([
+    catalogApi.getStone(id),
+    catalogApi.listProducts({ category: "custom" }),
+  ])
 
   if (!material) {
     notFound()
   }
 
-  const products = getFinishedProductsForStone(material)
+  const finished = getFinishedProductsForStone(material, products)
 
   return (
     <div className="min-h-screen bg-background py-24 px-5 lg:px-8">
@@ -27,9 +31,9 @@ export default async function StoneProductsPage({
           description="Готовые объекты и проекты, выполненные из этого сорта."
         />
 
-        {products.length > 0 ? (
+        {finished.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
+            {finished.map((product) => (
               <FinishedProductCard key={product.id} product={product} />
             ))}
           </div>

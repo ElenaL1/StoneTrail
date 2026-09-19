@@ -1,13 +1,5 @@
-import {
-  Material,
-  ForumPost,
-  Article,
-  Product,
-  featuredMaterials,
-  mockForumPosts,
-  mockArticles,
-  catalogProducts,
-} from "./mock-data"
+import type { Article, ForumPost, Material, Product } from "@/lib/types"
+import { mockArticles, mockForumPosts } from "@/lib/mock-data"
 import { getProductTypeLabel } from "./product-catalog"
 
 export type SearchCategory =
@@ -34,10 +26,16 @@ export const SEARCH_CATEGORIES = [
   { id: "Articles", label: "Статьи" },
 ] as const
 
-export function filterResults(query: string, category: SearchCategory): SearchResult[] {
+export function filterResults(
+  query: string,
+  category: SearchCategory,
+  catalog: { stones?: Material[]; products?: Product[] } = {},
+): SearchResult[] {
   const lowerQuery = query.toLowerCase().trim()
+  const stones = catalog.stones ?? []
+  const catalogProducts = catalog.products ?? []
 
-  const materials: SearchResult[] = featuredMaterials
+  const materials: SearchResult[] = stones
     .filter(
       (m) =>
         m.name.toLowerCase().includes(lowerQuery) ||
@@ -91,7 +89,6 @@ export function filterResults(query: string, category: SearchCategory): SearchRe
     case "Articles":
       return articles
     case "News":
-      // Mock news is not yet in the data layer; return empty until it exists.
       return []
     case "All":
     default:

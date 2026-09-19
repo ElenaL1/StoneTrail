@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 type FormFieldProps = {
@@ -6,23 +7,27 @@ type FormFieldProps = {
   hint?: string
   error?: string
   required?: boolean
-  children: React.ReactNode
+  action?: ReactNode
+  children: ReactNode
 }
 
-export function FormField({ id, label, hint, error, required, children }: FormFieldProps) {
+export function FormField({ id, label, hint, error, required, action, children }: FormFieldProps) {
   const hintId = hint ? `${id}-hint` : undefined
   const errorId = error ? `${id}-error` : undefined
 
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-medium text-foreground">
-        {label}
-        {required ? (
-          <span className="ml-1 text-destructive" aria-hidden="true">
-            *
-          </span>
-        ) : null}
-      </label>
+      <div className="flex items-center justify-between gap-3">
+        <label htmlFor={id} className="block text-sm font-medium text-foreground">
+          {label}
+          {required ? (
+            <span className="ml-1 text-destructive" aria-hidden="true">
+              *
+            </span>
+          ) : null}
+        </label>
+        {action}
+      </div>
       {children}
       {hint && !error ? (
         <p id={hintId} className="text-xs leading-relaxed text-muted-foreground">

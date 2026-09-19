@@ -4,7 +4,10 @@ import React, { useEffect, useRef, useState } from "react"
 import { Search, X, Gem, MessageSquare, ArrowRight, FileText, Hammer } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { catalogApi } from "@/lib/catalog/api-client"
 import { filterResults, getPopularQueries, type SearchCategory, SEARCH_CATEGORIES } from "@/lib/search-utils"
+import { ContentEnter } from "@/components/content-enter"
+import type { Material, Product } from "@/lib/types"
 
 interface SearchModalProps {
   isOpen: boolean
@@ -14,11 +17,33 @@ interface SearchModalProps {
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<SearchCategory>("All")
+  const [stones, setStones] = useState<Material[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const loadedRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || loadedRef.current) return
+    loadedRef.current = true
+    let cancelled = false
+    void Promise.all([catalogApi.listStones(), catalogApi.listProducts()])
+      .then(([nextStones, nextProducts]) => {
+        if (!cancelled) {
+          setStones(nextStones)
+          setProducts(nextProducts)
+        }
+      })
+      .catch(() => {
+        loadedRef.current = false
+      })
+    return () => {
+      cancelled = true
     }
   }, [isOpen])
 
@@ -32,7 +57,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   if (!isOpen) return null
 
-  const results = filterResults(query, category)
+  const results = filterResults(query, category, { stones, products })
 
   const categories: { id: SearchCategory; label: string }[] = [
     { id: "All", label: "Все" },
@@ -89,75 +114,77 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
 
           <div className="max-h-[400px] overflow-y-auto p-4">
-            {query.length === 0 ? (
-              <div>
-                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Популярные запросы</h3>
-                <div className="flex flex-wrap gap-2">
-                  {getPopularQueries().map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setQuery(q)}
-                      className="rounded-lg border border-border px-3 py-1.5 text-sm transition-colors hover:bg-secondary"
-                    >
-                      {q}
-                    </button>
-                  ))}
+            <ContentEnter swapKey={category}>
+              {query.length === 0 ? (
+                <div>
+                  <h3 className="mb-3 text-sm font-medium text-muted-foreground">Популярные запросы</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {getPopularQueries().map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => setQuery(q)}
+                        className="rounded-lg border border-border px-3 py-1.5 text-sm transition-colors hover:bg-secondary"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : results.length > 0 ? (
-              <div className="space-y-1">
-                {results.map((result, idx) => {
-                  const name =
-                    result.type === "Material"
-                      ? result.data.name
-                      : result.type === "FinishedProduct"
+              ) : results.length > 0 ? (
+                <div className="space-y-1">
+                  {results.map((result, idx) => {
+                    const name =
+                      result.type === "Material"
                         ? result.data.name
-                        : result.data.title
-                  const sub =
-                    result.type === "Material"
-                      ? result.data.type
-                      : result.type === "FinishedProduct"
-                        ? `${result.data.productType ?? result.data.stoneType} · ${result.data.stoneName}`
-                        : result.data.category
-                  const href =
-                    result.type === "Material"
-                      ? `/catalog/${result.data.id}`
-                      : result.type === "FinishedProduct"
-                        ? `/catalog/products/${result.data.slug}`
-                        : result.type === "ForumPost"
-                          ? `/community/${result.data.id}`
-                          : `/articles/${result.data.id}`
-                  return (
-                    <div
-                      key={`${result.type}-${idx}`}
-                      onClick={() => {
-                        window.location.href = href
-                        onClose()
-                      }}
-                      className="group flex cursor-pointer items-center justify-between gap-4 rounded-xl p-3 transition-colors hover:bg-secondary"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-muted transition-colors group-hover:bg-background">
-                          {getIcon(result.type)}
+                        : result.type === "FinishedProduct"
+                          ? result.data.name
+                          : result.data.title
+                    const sub =
+                      result.type === "Material"
+                        ? result.data.type
+                        : result.type === "FinishedProduct"
+                          ? `${result.data.productType ?? result.data.stoneType} · ${result.data.stoneName}`
+                          : result.data.category
+                    const href =
+                      result.type === "Material"
+                        ? `/catalog/${result.data.id}`
+                        : result.type === "FinishedProduct"
+                          ? `/catalog/products/${result.data.slug}`
+                          : result.type === "ForumPost"
+                            ? `/community/${result.data.id}`
+                            : `/articles/${result.data.id}`
+                    return (
+                      <div
+                        key={`${result.type}-${idx}`}
+                        onClick={() => {
+                          window.location.href = href
+                          onClose()
+                        }}
+                        className="group flex cursor-pointer items-center justify-between gap-4 rounded-xl p-3 transition-colors hover:bg-secondary"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-8 items-center justify-center rounded-lg bg-muted transition-colors group-hover:bg-background">
+                            {getIcon(result.type)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{name}</div>
+                            <div className="text-xs text-muted-foreground">{sub}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium">{name}</div>
-                          <div className="text-xs text-muted-foreground">{sub}</div>
-                        </div>
+                        <ArrowRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                       </div>
-                      <ArrowRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="py-12 text-center">
-                <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
-                  <Search className="size-6 text-muted-foreground" />
+                    )
+                  })}
                 </div>
-                <p className="text-sm text-muted-foreground">Ничего не найдено по вашему запросу</p>
-              </div>
-            )}
+              ) : (
+                <div className="py-12 text-center">
+                  <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
+                    <Search className="size-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Ничего не найдено по вашему запросу</p>
+                </div>
+              )}
+            </ContentEnter>
           </div>
         </div>
       </div>

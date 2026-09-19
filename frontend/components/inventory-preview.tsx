@@ -1,13 +1,19 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { featuredMaterials } from "@/lib/mock-data"
+import { catalogApi } from "@/lib/catalog/api-client"
 import { MaterialCard } from "@/components/material-card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
 
-export function InventoryPreview() {
-  const isBannerEnabled = arePromotionsEnabled();
+export async function InventoryPreview() {
+  const isBannerEnabled = arePromotionsEnabled()
+  let materials: Awaited<ReturnType<typeof catalogApi.listStones>> = []
+  try {
+    materials = await catalogApi.listStones()
+  } catch {
+    materials = []
+  }
 
   return (
     <section className={cn("border-t border-border", !isBannerEnabled && "bg-muted/30")}>
@@ -28,7 +34,7 @@ export function InventoryPreview() {
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredMaterials.map((material) => (
+          {materials.map((material) => (
             <MaterialCard key={material.id} material={material} />
           ))}
         </div>

@@ -1,25 +1,35 @@
 import { describe, expect, test } from "vitest"
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
-import type { RegisterInput } from "@/lib/auth/types"
+import type { ProfileUpdateInput, RegisterInput } from "@/lib/auth/types"
 import {
   getPasswordStrength,
   validateEmailValue,
   validatePassword,
   validatePasswordConfirmation,
+  validateProfileInput,
   validateRegisterInput,
 } from "@/lib/auth/validation"
 
 const validRegister: RegisterInput = {
   nickname: "StoneMaster",
-  firstName: "Иван",
-  lastName: "Петров",
   email: "ivan@company.ru",
   password: "StoneTrail1",
-  confirmPassword: "StoneTrail1",
+  termsAccepted: true,
+  marketingConsent: false,
+}
+
+const validProfile: ProfileUpdateInput = {
+  nickname: "StoneMaster",
+  firstName: "",
+  lastName: "",
   company: "",
   position: "",
   activityType: "",
-  termsAccepted: true,
+  country: "",
+  city: "",
+  bio: "",
+  website: "",
+  phone: "",
   marketingConsent: false,
 }
 
@@ -58,16 +68,8 @@ describe("getPasswordStrength", () => {
 })
 
 describe("validateRegisterInput", () => {
-  test("принимает заполненную регистрацию с согласием", () => {
+  test("принимает регистрацию без имени, фамилии и подтверждения пароля", () => {
     expect(validateRegisterInput(validRegister)).toEqual({})
-  })
-
-  test("требует совпадения паролей", () => {
-    const errors = validateRegisterInput({
-      ...validRegister,
-      confirmPassword: "OtherPass1",
-    })
-    expect(errors.confirmPassword).toBe(AUTH_MESSAGES.passwordMismatch)
   })
 
   test("требует принятие условий", () => {
@@ -76,6 +78,17 @@ describe("validateRegisterInput", () => {
       termsAccepted: false,
     })
     expect(errors.termsAccepted).toBe(AUTH_MESSAGES.termsRequired)
+  })
+})
+
+describe("validateProfileInput", () => {
+  test("принимает пустые имя и фамилию", () => {
+    expect(validateProfileInput(validProfile)).toEqual({})
+  })
+
+  test("отклоняет имя из одного символа", () => {
+    const errors = validateProfileInput({ ...validProfile, firstName: "И" })
+    expect(errors.firstName).toBe(AUTH_MESSAGES.firstNameMin)
   })
 })
 

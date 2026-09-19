@@ -126,25 +126,31 @@ export function ProfileForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField id="firstName" label="Имя" hint="Не отображается на сайте." error={errors.firstName} required>
+        <FormField id="firstName" label="Имя" hint="Не отображается на сайте." error={errors.firstName}>
           <input
             id="firstName"
             value={values.firstName}
             className={fieldControlClassName(errors.firstName)}
             onChange={(event) => setField("firstName", event.target.value)}
             onBlur={() =>
-              setErrors((current) => ({ ...current, firstName: validatePersonName(values.firstName, "firstName") ?? "" }))
+              setErrors((current) => ({
+                ...current,
+                firstName: validatePersonName(values.firstName, "firstName", false),
+              }))
             }
           />
         </FormField>
-        <FormField id="lastName" label="Фамилия" hint="Не отображается на сайте." error={errors.lastName} required>
+        <FormField id="lastName" label="Фамилия" hint="Не отображается на сайте." error={errors.lastName}>
           <input
             id="lastName"
             value={values.lastName}
             className={fieldControlClassName(errors.lastName)}
             onChange={(event) => setField("lastName", event.target.value)}
             onBlur={() =>
-              setErrors((current) => ({ ...current, lastName: validatePersonName(values.lastName, "lastName") ?? "" }))
+              setErrors((current) => ({
+                ...current,
+                lastName: validatePersonName(values.lastName, "lastName", false),
+              }))
             }
           />
         </FormField>

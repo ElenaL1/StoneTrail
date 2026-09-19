@@ -1,0 +1,3381 @@
+{
+  "materials": [
+    {
+      "id": "calacatta-gold",
+      "name": "Calacatta Gold",
+      "type": "Мрамор",
+      "finish": "Полировка",
+      "thickness": "20 мм",
+      "image": "/stone/calacatta.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Каррара",
+      "country": "Италия",
+      "status": "В наличии",
+      "slabs": 24,
+      "tiles": 48,
+      "updated": "2 ч назад"
+    },
+    {
+      "id": "absolute-black",
+      "name": "Absolute Black",
+      "type": "Гранит",
+      "finish": "Полировка",
+      "thickness": "30 мм",
+      "image": "/stone/black-granite.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Раджастан",
+      "country": "Индия",
+      "status": "В наличии",
+      "slabs": 18,
+      "tiles": 36,
+      "updated": "5 ч назад"
+    },
+    {
+      "id": "white-macaubas",
+      "name": "White Macaúbas",
+      "type": "Кварцит",
+      "finish": "Шлифовка",
+      "thickness": "20 мм",
+      "image": "/stone/white-quartzite.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Баия",
+      "country": "Бразилия",
+      "status": "Мало",
+      "slabs": 3,
+      "tiles": 0,
+      "updated": "1 д назад"
+    },
+    {
+      "id": "verde-alpi",
+      "name": "Verde Alpi",
+      "type": "Мрамор",
+      "finish": "Полировка",
+      "thickness": "20 мм",
+      "image": "/stone/green-marble.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Alpi Apuane",
+      "country": "Италия",
+      "status": "В наличии",
+      "slabs": 11,
+      "tiles": 0,
+      "updated": "3 ч назад",
+      "blockSlug": "block-verde-alpi"
+    },
+    {
+      "id": "classic-travertine",
+      "name": "Classic Travertine",
+      "type": "Травертин",
+      "finish": "Шлифовка",
+      "thickness": "20 мм",
+      "image": "/stone/travertine.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Tivoli",
+      "country": "Италия",
+      "status": "В наличии",
+      "slabs": 32,
+      "tiles": 120,
+      "updated": "6 ч назад",
+      "blockSlug": "block-travertino-classico"
+    },
+    {
+      "id": "carbon-soapstone",
+      "name": "Carbon Soapstone",
+      "type": "Стеатит",
+      "finish": "Шлифовка",
+      "thickness": "30 мм",
+      "image": "/stone/soapstone.png",
+      "supplier": "StoneTrail",
+      "location": "склад",
+      "quarry": "Минас-Жерайс",
+      "country": "Бразилия",
+      "status": "Продано",
+      "slabs": 0,
+      "tiles": 0,
+      "updated": "2 д назад"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "block-calacatta-luxury",
+      "slug": "block-calacatta-luxury",
+      "stoneName": "Calacatta Luxury",
+      "stoneType": "Мрамор",
+      "quarry": "Каррара",
+      "country": "Италия",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "2 800 × 1 450 × 1 250 мм",
+          "weight": "~27,9 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок B",
+          "dimensions": "2 650 × 1 400 × 1 200 мм",
+          "weight": "~26,4 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок C",
+          "dimensions": "2 550 × 1 350 × 1 150 мм",
+          "weight": "~25,1 т",
+          "status": "Зарезервирован"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/calacatta-luxury-block-01.jpg",
+      "description": "Классический премиальный мрамор с чистым белым фоном и крупными контрастными прожилками. Блок из верхнего пласта Каррары — однородной структуры, без сколов по кромкам, готов к резке под bookmatching.",
+      "expertNote": "Для такого блока рекомендуем вертикальный раскрой слэбов шириной 1200–1400 мм: рисунок жилы вытягивается по длинной стороне, а отход на коротком боке минимален. Из одной такой габариты мы уверенно снимаем 8–10 слэбов формата 2400×1200 с 20 мм толщиной."
+    },
+    {
+      "id": "block-nero-marquina",
+      "slug": "block-nero-marquina",
+      "stoneName": "Nero Marquina",
+      "stoneType": "Известняк",
+      "quarry": "Марбелья",
+      "country": "Испания",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "2 600 × 1 300 × 1 150 мм",
+          "weight": "~25,4 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок B",
+          "dimensions": "2 450 × 1 250 × 1 100 мм",
+          "weight": "~23,5 т",
+          "status": "В наличии"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+      "description": "Блок тёмного известняка с резкими золотистыми и белыми прожилками. Плотная структура верхнего пласта Марбелья — стабильный рисунок на любом срезе.",
+      "expertNote": "Nero Marquina из этого блока режется только под заказ по вашему формату: жила ведёт себя непредсказуемо на поперечном срезе, поэтому мы подбираем слэбы на месте. Для фасадов рекомендуем сатин вместо полировки — он глубже читается по тону."
+    },
+    {
+      "id": "block-taj-mahal",
+      "slug": "block-taj-mahal",
+      "stoneName": "Taj Mahal",
+      "stoneType": "Мрамор",
+      "quarry": "Антиквари",
+      "country": "Греция",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "2 900 × 1 500 × 1 300 мм",
+          "weight": "~29,6 т",
+          "status": "Зарезервирован"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg",
+      "description": "Тёплый серо-бежевый мрамор с нежным «взрывным» рисунком. Блок среднего пласта: без видимых микротрещин, проверен простукиванием и просветкой УФ-фонарём.",
+      "expertNote": "Из такого блока получаются идеальные «акцентные» стены: формат 3800×2700 режется из центра пласта, где рисунок наиболее равномерный. На кромках блока мы оставили 80 мм «запасного» камня под корректировку при сборке."
+    },
+    {
+      "id": "block-travertino-classico",
+      "slug": "block-travertino-classico",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "quarry": "Tivoli",
+      "country": "Италия",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "3 100 × 1 600 × 1 400 мм",
+          "weight": "~32,1 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок B",
+          "dimensions": "3 000 × 1 550 × 1 350 мм",
+          "weight": "~30,2 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок C",
+          "dimensions": "2 850 × 1 500 × 1 300 мм",
+          "weight": "~27,9 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок D",
+          "dimensions": "2 700 × 1 450 × 1 200 мм",
+          "weight": "~25,0 т",
+          "status": "Зарезервирован"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+      "description": "Классический тёплый травертин с характерной полосой. Прямой извлечённый блок, без склейки — подходит как для мозаики бассейна, так и для крупного формата облицовки.",
+      "expertNote": "Травертин из Тиволи — один из самых стабильных по структуре в Италии. Из этого блока мы делаем и мозаику 100×100, и плиту 600×300. Рекомендую шлифовать, а не полировать: поверхность лучше держит влагу, не скользит.",
+      "blockStoneId": "classic-travertine"
+    },
+    {
+      "id": "block-verde-alpi",
+      "slug": "block-verde-alpi",
+      "stoneName": "Verde Alpi",
+      "stoneType": "Мрамор",
+      "quarry": "Alpi Apuane",
+      "country": "Италия",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "2 400 × 1 200 × 1 100 мм",
+          "weight": "~22,9 т",
+          "status": "В наличии"
+        },
+        {
+          "label": "Блок B",
+          "dimensions": "2 250 × 1 150 × 1 050 мм",
+          "weight": "~20,6 т",
+          "status": "В наличии"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/verde-alpi-block-01.jpg",
+      "description": "Живой зелёный альпийский мрамор с контрастными тёмными и золотистыми вкраплениями. Каждая грань блока — уникальный рисунок, без точного совпадения.",
+      "expertNote": "Verde Alpi — один из самых «личных» сортов: для обеденного стола, барной стойки и акцентной подставки мы всегда смотрим на 3–4 грани блока, прежде чем отдать на раскрой. Рекомендую выбирать грань, где основные жилы пересекаются близко к центральной оси.",
+      "blockStoneId": "verde-alpi"
+    },
+    {
+      "id": "block-blue-roma",
+      "slug": "block-blue-roma",
+      "stoneName": "Blue Roma",
+      "stoneType": "Кварцит",
+      "quarry": "Sulmona",
+      "country": "Италия",
+      "blocks": [
+        {
+          "label": "Блок A",
+          "dimensions": "2 700 × 1 350 × 1 200 мм",
+          "weight": "~26,5 т",
+          "status": "Под заказ"
+        }
+      ],
+      "image": "/stonetrail_mock_assets/blocks/blue-roma-block-01.jpg",
+      "description": "Редкий синий кварцит с тёплыми медовыми прожилками. Блок находится на этапе подготовки к отправке из карьера — ожидаем паспорт качества и фотосессию граней.",
+      "expertNote": "Blue Roma — самый редкий сорт в нашем каталоге. Для него рекомендуем тонкую нарезку 12–15 мм: синий рисунок «глубоко прорисовывается» только при свете. Подсвечённые панели из такого блока стоят отдельного разговора."
+    }
+  ],
+  "products": [
+    {
+      "id": "slab-01",
+      "slug": "slab-quartzite-patagonia",
+      "category": "slabs",
+      "name": "Кварцит Patagonia",
+      "stoneName": "Patagonia",
+      "stoneType": "Кварцит",
+      "color": "Контрастный",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "3200 × 1800 мм",
+      "availability": "В наличии",
+      "image": "/stone/white-quartzite.png",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Выразительный кварцит с контрастным природным рисунком. Каждый слэб имеет индивидуальный рисунок, поэтому подбор материала рекомендуется выполнять по фотографии конкретной плиты.",
+      "expertNote": "Patagonia не «усредняется» по партии: жила и цветовые пятна гуляют от плиты к плите. Для столешницы или акцентной стены сначала фиксируем конкретный слэб, затем раскладку.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "3280 × 1840 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "3240 × 1810 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png"
+        },
+        {
+          "label": "Слэб 03",
+          "size": "3200 × 1780 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png"
+        },
+        {
+          "label": "Слэб 04",
+          "size": "3160 × 1760 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "Зарезервирован",
+          "image": "/stone/white-quartzite.png"
+        },
+        {
+          "label": "Слэб 05",
+          "size": "3100 × 1720 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png"
+        }
+      ]
+    },
+    {
+      "id": "slab-02",
+      "slug": "slab-marble-calacatta",
+      "category": "slabs",
+      "name": "Мрамор Calacatta",
+      "stoneName": "Calacatta Luxury",
+      "stoneType": "Мрамор",
+      "color": "Белый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "3200 × 1600 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/calacatta-luxury.jpg",
+      "description": "Светлый мрамор с крупной графично-золотистой прожилкой. Подходит для кухонных островов, стеновых панелей и парадных зон, где рисунок камня читается с расстояния.",
+      "expertNote": "Для Calacatta важна раскладка bookmatching: жила должна продолжаться через стык. Смотрим слэбы парой, а не по одной плите.",
+      "slabs": [
+        {
+          "label": "Слэб A",
+          "size": "3220 × 1620 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+          "note": "Пара bookmatch"
+        },
+        {
+          "label": "Слэб B",
+          "size": "3220 × 1620 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/calacatta-luxury.jpg",
+          "note": "Пара bookmatch"
+        },
+        {
+          "label": "Слэб C",
+          "size": "3180 × 1580 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/products/product-countertop-calacatta-luxury.jpg"
+        },
+        {
+          "label": "Слэб D",
+          "size": "3100 × 1540 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "slab-03",
+      "slug": "slab-marble-carrara",
+      "category": "slabs",
+      "name": "Мрамор Carrara",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "color": "Белый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "3000 × 1600 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Классический каррарский мрамор с тонкой серой прожилкой на белом фоне. Спокойный рисунок хорошо работает в лестницах, столешницах и облицовке, где не нужен театральный контраст.",
+      "expertNote": "Carrara — рабочий премиальный мрамор: рисунок ровный, раскрой предсказуемый. Для пола рекомендуем сатин, для столешницы — полировку с гидрофобизацией.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "3040 × 1620 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "3000 × 1600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "Слэб 03",
+          "size": "2980 × 1580 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg"
+        },
+        {
+          "label": "Слэб 04",
+          "size": "2960 × 1560 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg"
+        },
+        {
+          "label": "Слэб 05",
+          "size": "2920 × 1540 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "Слэб 06",
+          "size": "2880 × 1500 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "slab-04",
+      "slug": "slab-granite-black-galaxy",
+      "category": "slabs",
+      "name": "Гранит Black Galaxy",
+      "stoneName": "Black Galaxy",
+      "stoneType": "Гранит",
+      "color": "Чёрный",
+      "thickness": "30 мм",
+      "finish": "Полированная",
+      "size": "3000 × 1900 мм",
+      "availability": "В наличии",
+      "image": "/stone/black-granite.png",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Плотный чёрный гранит с мелкими золотистыми включениями. Выдерживает интенсивную эксплуатацию: кухни, входные группы, коммерческие стойки и наружные подоконники.",
+      "expertNote": "Black Galaxy почти не «гуляет» по тону в партии. Для крупных столешниц берём 30 мм: плита стабильнее на пролёте, кромка выглядит солиднее.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "3040 × 1920 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "3000 × 1900 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Слэб 03",
+          "size": "2960 × 1880 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Слэб 04",
+          "size": "2920 × 1840 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stone/black-granite.png"
+        }
+      ]
+    },
+    {
+      "id": "slab-05",
+      "slug": "slab-granite-verde",
+      "category": "slabs",
+      "name": "Гранит Verde",
+      "stoneName": "Verde Alpi",
+      "stoneType": "Гранит",
+      "color": "Зелёный",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "2800 × 1700 мм",
+      "availability": "Мало",
+      "image": "/stonetrail_mock_assets/slabs/verde-alpi-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/verde-alpi.jpg",
+      "description": "Глубокий зелёный камень с тёмными и золотистыми вкраплениями. Используем как акцентный материал: барные стойки, порталы, отдельные стеновые панели.",
+      "expertNote": "Зелёный камень с живым рисунком лучше не резать «вслепую». Сначала смотрим грань слэба на складе и только потом утверждаем карту раскроя.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "2820 × 1720 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/verde-alpi-slab-01.jpg"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "2760 × 1680 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/stones/verde-alpi.jpg"
+        }
+      ]
+    },
+    {
+      "id": "slab-06",
+      "slug": "slab-onyx-ivory",
+      "category": "slabs",
+      "name": "Оникс Ivory",
+      "stoneName": "Onice Ivory",
+      "stoneType": "Оникс",
+      "color": "Бежевый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "2600 × 1400 мм",
+      "availability": "Мало",
+      "image": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "description": "Светопроницаемый оникс тёплого слонового тона. Раскрывается в подсвеченных панелях, барных фасадах и декоративных нишах — без подсветки камень выглядит плоским.",
+      "expertNote": "Оникс ставим только туда, где есть управляемая подсветка. Толщину 20 мм оставляем для стоек; для панелей часто уходим в 12–15 мм, чтобы усилить просвечивание.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "2620 × 1420 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/onice-honey.jpg"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "2540 × 1380 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg"
+        }
+      ]
+    },
+    {
+      "id": "slab-07",
+      "slug": "slab-quartzite-taj-mahal",
+      "category": "slabs",
+      "name": "Кварцит Taj Mahal",
+      "stoneName": "Taj Mahal",
+      "stoneType": "Кварцит",
+      "color": "Бежевый",
+      "thickness": "20 мм",
+      "finish": "Сатинированная",
+      "size": "3200 × 1800 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/taj-mahal.jpg",
+      "description": "Тёплый серо-бежевый кварцит с мягким «облачным» рисунком. Прочнее мрамора при сходной эстетике — удачный выбор для кухонь и стен в жилых интерьерах.",
+      "expertNote": "Taj Mahal хорошо держит кухню: меньше впитывает, чем мрамор. Сатин снимает лишний блеск и спокойнее работает при дневном свете.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "3240 × 1820 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "3200 × 1800 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/taj-mahal.jpg"
+        },
+        {
+          "label": "Слэб 03",
+          "size": "3160 × 1760 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/products/product-wall-cladding-taj-mahal.jpg"
+        }
+      ]
+    },
+    {
+      "id": "slab-08",
+      "slug": "slab-granite-colonial-white",
+      "category": "slabs",
+      "name": "Гранит Colonial White",
+      "stoneName": "Colonial White",
+      "stoneType": "Гранит",
+      "color": "Белый",
+      "thickness": "30 мм",
+      "finish": "Полированная",
+      "size": "3000 × 1800 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/stones/crystal-white.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/crystal-white.jpg",
+      "description": "Светлый гранит с ровной зернистой структурой. Практичный материал для столешниц, подоконников и облицовки, где нужен светлый тон без капризного мраморного ухода.",
+      "expertNote": "Colonial White заказываем под объём объекта: партия должна быть из одного блока, иначе зерно и фон могут разойтись на соседних плоскостях.",
+      "slabs": [
+        {
+          "label": "Слэб 01",
+          "size": "3000 × 1800 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/crystal-white.jpg"
+        },
+        {
+          "label": "Слэб 02",
+          "size": "2940 × 1760 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/crystal-white.jpg"
+        }
+      ]
+    },
+    {
+      "id": "blank-01",
+      "slug": "blank-quartzite-patagonia",
+      "category": "blanks",
+      "name": "Кварцит Patagonia",
+      "stoneName": "Patagonia",
+      "stoneType": "Кварцит",
+      "color": "Контрастный",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "1800 × 1200 мм",
+      "availability": "В наличии",
+      "image": "/stone/white-quartzite.png",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Полуслэбы Patagonia — обрезки и половины плит после раскроя крупных слэбов. Рисунок жилы сохранён, формат удобен для подоконников, фартуков и небольших столешниц.",
+      "expertNote": "Заготовку из Patagonia смотрим так же, как полный слэб: жила не усредняется. Для фартука или компактной столешницы полуслэб часто выгоднее целой плиты.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1860 × 1240 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png",
+          "note": "Полуслэб"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1720 × 1180 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png"
+        },
+        {
+          "label": "Заготовка 03",
+          "size": "1640 × 980 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/white-quartzite.png",
+          "note": "Остаток после раскроя"
+        },
+        {
+          "label": "Заготовка 04",
+          "size": "1580 × 1120 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "Зарезервирован",
+          "image": "/stone/white-quartzite.png"
+        }
+      ]
+    },
+    {
+      "id": "blank-02",
+      "slug": "blank-marble-calacatta",
+      "category": "blanks",
+      "name": "Мрамор Calacatta",
+      "stoneName": "Calacatta Luxury",
+      "stoneType": "Мрамор",
+      "color": "Белый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "1600 × 1200 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/calacatta-luxury.jpg",
+      "description": "Полуслэбы Calacatta с крупной графично-золотистой прожилкой. Подходят, когда нужна выразительная плоскость без полного слэба: островок компактной кухни, стеновая вставка, барная стойка.",
+      "expertNote": "На заготовке Calacatta важно увидеть, куда уходит жила. Если кусок — половина bookmatch-пары, не режем его «вслепую»: сначала фиксируем ориентацию рисунка.",
+      "blanks": [
+        {
+          "label": "Заготовка A",
+          "size": "1610 × 1220 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+          "note": "Полуслэб bookmatch"
+        },
+        {
+          "label": "Заготовка B",
+          "size": "1580 × 1180 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/calacatta-luxury.jpg",
+          "note": "Полуслэб bookmatch"
+        },
+        {
+          "label": "Заготовка C",
+          "size": "1420 × 960 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/products/product-countertop-calacatta-luxury.jpg"
+        },
+        {
+          "label": "Заготовка D",
+          "size": "1540 × 1100 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "blank-03",
+      "slug": "blank-marble-carrara",
+      "category": "blanks",
+      "name": "Мрамор Carrara",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "color": "Белый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "1500 × 1100 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Полуслэбы каррарского мрамора со спокойной серой прожилкой. Рабочий формат для подоконников, ступеней, фартуков и облицовки, где полный слэб избыточен.",
+      "expertNote": "Carrara на заготовках предсказуема: тон ровный, раскрой спокойный. Для подоконников оставляем 20 мм, для ступеней смотрим 30 мм.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1540 × 1120 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1480 × 1080 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "Заготовка 03",
+          "size": "1620 × 920 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+          "note": "Под ступени"
+        },
+        {
+          "label": "Заготовка 04",
+          "size": "1360 × 1040 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg"
+        },
+        {
+          "label": "Заготовка 05",
+          "size": "1440 × 980 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        }
+      ]
+    },
+    {
+      "id": "blank-04",
+      "slug": "blank-granite-black-galaxy",
+      "category": "blanks",
+      "name": "Гранит Black Galaxy",
+      "stoneName": "Black Galaxy",
+      "stoneType": "Гранит",
+      "color": "Чёрный",
+      "thickness": "30 мм",
+      "finish": "Полированная",
+      "size": "1600 × 1200 мм",
+      "availability": "В наличии",
+      "image": "/stone/black-granite.png",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Полуслэбы плотного чёрного гранита с золотистыми включениями. Подходят для кухонных вставок, подоконников и коммерческих стоек, когда нужен запас прочности без полной плиты.",
+      "expertNote": "Black Galaxy почти не гуляет по тону. На заготовке 30 мм кромка выглядит солиднее, и плита спокойнее работает на пролёте подоконника.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1680 × 1240 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1520 × 1180 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Заготовка 03",
+          "size": "1460 × 960 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stone/black-granite.png"
+        },
+        {
+          "label": "Заготовка 04",
+          "size": "1380 × 1100 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stone/black-granite.png"
+        }
+      ]
+    },
+    {
+      "id": "blank-05",
+      "slug": "blank-quartzite-taj-mahal",
+      "category": "blanks",
+      "name": "Кварцит Taj Mahal",
+      "stoneName": "Taj Mahal",
+      "stoneType": "Кварцит",
+      "color": "Бежевый",
+      "thickness": "20 мм",
+      "finish": "Сатинированная",
+      "size": "1700 × 1100 мм",
+      "availability": "В наличии",
+      "image": "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/taj-mahal.jpg",
+      "description": "Полуслэбы тёплого серо-бежевого кварцита. Формат удобен для кухонных фартуков, компактных столешниц и стеновых панелей, где полный слэб не требуется.",
+      "expertNote": "Taj Mahal на заготовке работает так же надёжно, как на полном слэбе. Сатин снимает лишний блеск — для кухни это обычно лучший выбор.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1740 × 1140 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1680 × 1080 мм",
+          "thickness": "20 мм",
+          "finish": "Сатинированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/taj-mahal.jpg"
+        },
+        {
+          "label": "Заготовка 03",
+          "size": "1520 × 920 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/products/product-wall-cladding-taj-mahal.jpg",
+          "note": "Остаток после раскроя"
+        }
+      ]
+    },
+    {
+      "id": "blank-06",
+      "slug": "blank-marble-verde-alpi",
+      "category": "blanks",
+      "name": "Мрамор Verde Alpi",
+      "stoneName": "Verde Alpi",
+      "stoneType": "Мрамор",
+      "color": "Зелёный",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "1500 × 1000 мм",
+      "availability": "Мало",
+      "image": "/stonetrail_mock_assets/slabs/verde-alpi-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/verde-alpi.jpg",
+      "description": "Полуслэбы глубокого зелёного камня с тёмными и золотистыми вкраплениями. Акцентный материал: барные вставки, порталы, небольшие стеновые панели.",
+      "expertNote": "Verde Alpi на заготовке ещё капризнее, чем на полном слэбе: рисунок обрывается на кромке. Сначала смотрим грань, затем карту раскроя.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1540 × 1020 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/slabs/verde-alpi-slab-01.jpg"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1380 × 940 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/stones/verde-alpi.jpg"
+        }
+      ]
+    },
+    {
+      "id": "blank-07",
+      "slug": "blank-onyx-ivory",
+      "category": "blanks",
+      "name": "Оникс Ivory",
+      "stoneName": "Onice Ivory",
+      "stoneType": "Оникс",
+      "color": "Бежевый",
+      "thickness": "20 мм",
+      "finish": "Полированная",
+      "size": "1400 × 900 мм",
+      "availability": "Мало",
+      "image": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "description": "Полуслэбы светопроницаемого оникса тёплого слонового тона. Компактный формат для подсвеченных ниш, барных фасадов и декоративных вставок.",
+      "expertNote": "Оникс на заготовке удобнее полного слэба: проще вписать в нишу и подсветку. Без управляемого света камень выглядит плоским — это правило не меняется.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1420 × 920 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "В наличии",
+          "image": "/stonetrail_mock_assets/stones/onice-honey.jpg"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1280 × 860 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Зарезервирован",
+          "image": "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg"
+        }
+      ]
+    },
+    {
+      "id": "blank-08",
+      "slug": "blank-granite-colonial-white",
+      "category": "blanks",
+      "name": "Гранит Colonial White",
+      "stoneName": "Colonial White",
+      "stoneType": "Гранит",
+      "color": "Белый",
+      "thickness": "30 мм",
+      "finish": "Полированная",
+      "size": "1600 × 1100 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/stones/crystal-white.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/crystal-white.jpg",
+      "description": "Светлые гранитные заготовки с ровной зернистой структурой. Практичный формат для подоконников, ступеней и облицовки, когда полный слэб не нужен.",
+      "expertNote": "Colonial White заказываем из одной партии: иначе зерно и фон могут разойтись на соседних плоскостях. Для заготовок это так же важно, как для слэбов.",
+      "blanks": [
+        {
+          "label": "Заготовка 01",
+          "size": "1600 × 1100 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/crystal-white.jpg"
+        },
+        {
+          "label": "Заготовка 02",
+          "size": "1480 × 1040 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/crystal-white.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tile-01",
+      "slug": "tile-carrara-bianco",
+      "category": "tiles",
+      "name": "Плита Carrara Bianco",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "300×300 / 600×300 / 600×600 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Светлый мрамор с тонкой серой прожилкой. Подходит для столешниц, стеновых панелей и декоративных элементов интерьера, а также для полов в зонах с умеренной нагрузкой.",
+      "expertNote": "Для влажных зон берём матовую поверхность: полировка красива, но скользит. Швы держим минимальными, рисунок выкладываем в одном направлении.",
+      "tiles": [
+        {
+          "label": "300×300 мм · 20 мм · Полированная",
+          "size": "300×300 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "300×300 мм · 20 мм · Матовая",
+          "size": "300×300 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "300×300 мм · 30 мм · Полированная",
+          "size": "300×300 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "300×300 мм · 30 мм · Матовая",
+          "size": "300×300 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×300 мм · 20 мм · Полированная",
+          "size": "600×300 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×300 мм · 20 мм · Матовая",
+          "size": "600×300 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×300 мм · 30 мм · Полированная",
+          "size": "600×300 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×300 мм · 30 мм · Матовая",
+          "size": "600×300 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tile-02",
+      "slug": "tile-crema-marfil",
+      "category": "tiles",
+      "name": "Плита Crema Marfil",
+      "stoneName": "Crema Marfil",
+      "stoneType": "Мрамор",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "300×300 / 600×300 / 600×600 мм",
+      "availability": "Под заказ",
+      "image": "/stone/calacatta.png",
+      "stoneImage": "/stone/calacatta.png",
+      "description": "Тёплый кремовый мрамор с мягкой жилкой. Классический материал для холлов, ванных и стеновой облицовки, где нужен спокойный светлый фон без резкого контраста.",
+      "expertNote": "Crema Marfil чувствителен к кислотам. Перед сдачей объекта обрабатываем гидрофобизатором и отдельно проговариваем уход с эксплуатацией.",
+      "tiles": [
+        {
+          "label": "300×300 мм · 20 мм · Полированная",
+          "size": "300×300 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "300×300 мм · 20 мм · Матовая",
+          "size": "300×300 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "300×300 мм · 30 мм · Полированная",
+          "size": "300×300 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "300×300 мм · 30 мм · Матовая",
+          "size": "300×300 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×300 мм · 20 мм · Полированная",
+          "size": "600×300 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×300 мм · 20 мм · Матовая",
+          "size": "600×300 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×300 мм · 30 мм · Полированная",
+          "size": "600×300 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×300 мм · 30 мм · Матовая",
+          "size": "600×300 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/calacatta.png"
+        }
+      ]
+    },
+    {
+      "id": "tile-03",
+      "slug": "tile-travertino-classic",
+      "category": "tiles",
+      "name": "Плита Travertino Classic",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "600×600 / 800×800 мм",
+      "availability": "Под заказ",
+      "image": "/stone/travertine.png",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Классический травертин с полосчатой структурой. Хорошо работает на полах, фасадах и в зонах у воды: пористость камня здесь не недостаток, а часть характера материала.",
+      "expertNote": "Травертин на полу чаще берём матовым: поверхность не скользит и спокойнее стареет. Полировку оставляем для стен и сухих зон.",
+      "tiles": [
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "800×800 мм · 20 мм · Полированная",
+          "size": "800×800 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "800×800 мм · 20 мм · Матовая",
+          "size": "800×800 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "800×800 мм · 30 мм · Полированная",
+          "size": "800×800 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        },
+        {
+          "label": "800×800 мм · 30 мм · Матовая",
+          "size": "800×800 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/travertine.png"
+        }
+      ]
+    },
+    {
+      "id": "tile-04",
+      "slug": "tile-black-absolute",
+      "category": "tiles",
+      "name": "Плита Black Absolute",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "300×600 / 600×600 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/nero-marquina.jpg",
+      "description": "Глухой чёрный гранит без выразительной жилы. Даёт ровную плоскость для полов коммерческих зон, лестничных площадок и контрастной стеновой облицовки.",
+      "expertNote": "Absolute Black в полировке собирает отпечатки. Для пола чаще ставим мат или лёгкий сатин — тон остаётся глубоким, уход проще.",
+      "tiles": [
+        {
+          "label": "300×600 мм · 20 мм · Полированная",
+          "size": "300×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "300×600 мм · 20 мм · Матовая",
+          "size": "300×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "300×600 мм · 30 мм · Полированная",
+          "size": "300×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "300×600 мм · 30 мм · Матовая",
+          "size": "300×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tile-05",
+      "slug": "tile-pietra-grey",
+      "category": "tiles",
+      "name": "Плита Pietra Grey",
+      "stoneName": "Pietra Grey",
+      "stoneType": "Известняк",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "300×600 / 600×600 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/pietra-grey.jpg",
+      "description": "Дымчато-серый известняк с тонкой белой прожилкой. Подходит для ванных, спа-зон и стеновых панелей, где нужен спокойный графитовый тон без холодного «технического» серого.",
+      "expertNote": "На пол во влажных зонах — матовая поверхность. Полировка здесь скользкая и визуально «лакирует» камень, чего этот сорт не любит.",
+      "tiles": [
+        {
+          "label": "300×600 мм · 20 мм · Полированная",
+          "size": "300×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "300×600 мм · 20 мм · Матовая",
+          "size": "300×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "300×600 мм · 30 мм · Полированная",
+          "size": "300×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "300×600 мм · 30 мм · Матовая",
+          "size": "300×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tile-06",
+      "slug": "tile-jura-beige",
+      "category": "tiles",
+      "name": "Плита Jura Beige",
+      "stoneName": "Jura Beige",
+      "stoneType": "Известняк",
+      "thickness": "20–30 мм",
+      "finish": "Полированная / матовая",
+      "size": "600×600 / 800×800 мм",
+      "availability": "Под заказ",
+      "image": "/stone/soapstone.png",
+      "stoneImage": "/stone/soapstone.png",
+      "description": "Бежевый юрский известняк с характерными органическими включениями. Материал для полов, лестниц и фасадных цоколей, где важны износостойкость и тёплая природная фактура.",
+      "expertNote": "Jura хорошо держит улицу в нашем климате при правильной толщине и уклоне. Для входных групп берём мат: полировка зимой скользкая.",
+      "tiles": [
+        {
+          "label": "600×600 мм · 20 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "600×600 мм · 20 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Полированная",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "600×600 мм · 30 мм · Матовая",
+          "size": "600×600 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "800×800 мм · 20 мм · Полированная",
+          "size": "800×800 мм",
+          "thickness": "20 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "800×800 мм · 20 мм · Матовая",
+          "size": "800×800 мм",
+          "thickness": "20 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "800×800 мм · 30 мм · Полированная",
+          "size": "800×800 мм",
+          "thickness": "30 мм",
+          "finish": "Полированная",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        },
+        {
+          "label": "800×800 мм · 30 мм · Матовая",
+          "size": "800×800 мм",
+          "thickness": "30 мм",
+          "finish": "Матовая",
+          "status": "Под заказ",
+          "image": "/stone/soapstone.png"
+        }
+      ]
+    },
+    {
+      "id": "paving-01",
+      "slug": "paving-granite-grey",
+      "category": "paving",
+      "name": "Гранитная брусчатка Grey",
+      "stoneName": "Grey Granite",
+      "stoneType": "Гранит",
+      "thickness": "50–80 мм",
+      "finish": "Колотая",
+      "size": "100 × 100 / 100 × 200 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+      "stoneImage": "/stone/travertine.png",
+      "description": "Серая гранитная брусчатка для дорожек, террас и входных групп. Колотая фактура даёт сцепление и спокойный природный рисунок мощения.",
+      "expertNote": "Для частных дорожек достаточно 50–60 мм. На въезде и общественных проходах уходим к 80 мм и более плотному основанию.",
+      "paving": [
+        {
+          "label": "100 × 100 мм · 50 мм",
+          "size": "100 × 100 мм",
+          "thickness": "50 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg"
+        },
+        {
+          "label": "100 × 100 мм · 80 мм",
+          "size": "100 × 100 мм",
+          "thickness": "80 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 50 мм",
+          "size": "100 × 200 мм",
+          "thickness": "50 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 80 мм",
+          "size": "100 × 200 мм",
+          "thickness": "80 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "paving-02",
+      "slug": "paving-granite-black",
+      "category": "paving",
+      "name": "Гранитная брусчатка Black",
+      "stoneName": "Black Granite",
+      "stoneType": "Гранит",
+      "thickness": "50–80 мм",
+      "finish": "Колотая",
+      "size": "100 × 100 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/nero-marquina.jpg",
+      "description": "Тёмная гранитная брусчатка для контрастного мощения. Работает в сочетании со светлым бортом: парадные дворы, входные площадки, общественные пространства.",
+      "expertNote": "Чёрный гранит визуально «собирает» лужи и пыль. Для парадных зон лучше термообработка или колотая фактура, не полировка.",
+      "paving": [
+        {
+          "label": "100 × 100 мм · 50 мм",
+          "size": "100 × 100 мм",
+          "thickness": "50 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg"
+        },
+        {
+          "label": "100 × 100 мм · 80 мм",
+          "size": "100 × 100 мм",
+          "thickness": "80 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "paving-03",
+      "slug": "paving-granite-baltic",
+      "category": "paving",
+      "name": "Гранитная брусчатка Baltic",
+      "stoneName": "Baltic Grey",
+      "stoneType": "Гранит",
+      "thickness": "80–100 мм",
+      "finish": "Пилено-колотая",
+      "size": "100 × 200 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/slabs/emperador-dark-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/emperador-dark.jpg",
+      "description": "Североевропейский гранит с плотной структурой. Рассчитан на интенсивную нагрузку: проезды, площади, архитектурные объекты с регулярным движением.",
+      "expertNote": "Baltic берут, когда нужна однородность партии на большой площади. Пилено-колотая грань даёт ровный модуль при живой фактуре верха.",
+      "paving": [
+        {
+          "label": "100 × 200 мм · 80 мм",
+          "size": "100 × 200 мм",
+          "thickness": "80 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/emperador-dark-slab-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 100 мм",
+          "size": "100 × 200 мм",
+          "thickness": "100 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/emperador-dark-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "paving-04",
+      "slug": "paving-granite-split",
+      "category": "paving",
+      "name": "Пилено-колотая гранитная брусчатка",
+      "stoneName": "Grey Granite",
+      "stoneType": "Гранит",
+      "thickness": "50–80 мм",
+      "finish": "Пилено-колотая",
+      "size": "100 × 100 / 100 × 200 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Модуль с пилеными боковыми гранями и колотой верхней плоскостью. Удобен в раскладке, держит геометрию шва и подходит для террас и аккуратных садовых дорожек.",
+      "expertNote": "Пилено-колотая брусчатка быстрее набирается в ровный ковёр, чем полноколотая. Для частных объектов это обычно оптимальный компромисс.",
+      "paving": [
+        {
+          "label": "100 × 100 мм · 50 мм",
+          "size": "100 × 100 мм",
+          "thickness": "50 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg"
+        },
+        {
+          "label": "100 × 100 мм · 80 мм",
+          "size": "100 × 100 мм",
+          "thickness": "80 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 50 мм",
+          "size": "100 × 200 мм",
+          "thickness": "50 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 80 мм",
+          "size": "100 × 200 мм",
+          "thickness": "80 мм",
+          "finish": "Пилено-колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "paving-05",
+      "slug": "paving-granite-flamed",
+      "category": "paving",
+      "name": "Термообработанная гранитная брусчатка",
+      "stoneName": "Grey Granite",
+      "stoneType": "Гранит",
+      "thickness": "50–80 мм",
+      "finish": "Термообработанная",
+      "size": "100 × 200 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/slabs/blue-roma-slab-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/blue-roma.jpg",
+      "description": "Гранит с термообработанной поверхностью: шероховатая, не скользкая, устойчивая к осадкам. Для входных групп, пандусов и общественных пространств.",
+      "expertNote": "Термообработка обязательна там, где зимой ходят в обуви. Полированный гранит на улице — ошибка, которую потом дорого исправлять.",
+      "paving": [
+        {
+          "label": "100 × 200 мм · 50 мм",
+          "size": "100 × 200 мм",
+          "thickness": "50 мм",
+          "finish": "Термообработанная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/blue-roma-slab-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 80 мм",
+          "size": "100 × 200 мм",
+          "thickness": "80 мм",
+          "finish": "Термообработанная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/slabs/blue-roma-slab-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "paving-06",
+      "slug": "paving-granite-path",
+      "category": "paving",
+      "name": "Гранитная брусчатка для дорожек",
+      "stoneName": "Grey Granite",
+      "stoneType": "Гранит",
+      "thickness": "50 мм",
+      "finish": "Колотая / термообработанная",
+      "size": "100 × 100 / 100 × 200 мм",
+      "availability": "Под заказ",
+      "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg",
+      "stoneImage": "/stonetrail_mock_assets/stones/taj-mahal.jpg",
+      "description": "Облегчённый модуль для пешеходных дорожек и садового благоустройства. Толщина 50 мм достаточна при подготовленном основании и отсутствии проезда техники.",
+      "expertNote": "На дорожках важнее основание, чем толщина камня. 50 мм работают, если песок и уплотнение сделаны правильно; иначе «поплывёт» любой гранит.",
+      "paving": [
+        {
+          "label": "100 × 100 мм · 50 мм · Колотая",
+          "size": "100 × 100 мм",
+          "thickness": "50 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg"
+        },
+        {
+          "label": "100 × 100 мм · 50 мм · Термообработанная",
+          "size": "100 × 100 мм",
+          "thickness": "50 мм",
+          "finish": "Термообработанная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 50 мм · Колотая",
+          "size": "100 × 200 мм",
+          "thickness": "50 мм",
+          "finish": "Колотая",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg"
+        },
+        {
+          "label": "100 × 200 мм · 50 мм · Термообработанная",
+          "size": "100 × 200 мм",
+          "thickness": "50 мм",
+          "finish": "Термообработанная",
+          "status": "Под заказ",
+          "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg"
+        }
+      ]
+    },
+    {
+      "id": "fp-01",
+      "slug": "countertop-calacatta-luxury",
+      "category": "custom",
+      "name": "Кухонный остров с водопадом",
+      "customGroup": "interior",
+      "productType": "Столешницы",
+      "stoneName": "Calacatta Luxury",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/calacatta-luxury.jpg",
+      "description": "Демонстрационный пример: монолитная столешница с вертикальным свесом. Раскладка прожилки под bookmatching на широких плоскостях.",
+      "image": "/stonetrail_mock_assets/products/product-countertop-calacatta-luxury.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-countertop-calacatta-luxury.jpg",
+        "/stonetrail_mock_assets/stones/calacatta-luxury.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "2 400 × 1 200 × 90 мм",
+      "thickness": "30 мм",
+      "purpose": "Кухня",
+      "applications": [
+        "Кухонный остров",
+        "Барная стойка",
+        "Обеденная зона"
+      ],
+      "characteristics": {
+        "Кромка": "Еврозапил",
+        "Раскладка": "Bookmatching"
+      },
+      "expertNote": "При проектировании столешницы слэб подбираем так, чтобы жила читалась на двух торцах симметрично. Для зоны готовки рекомендуем фартук из того же сорта.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-09",
+      "slug": "countertop-taj-mahal-kitchen",
+      "category": "custom",
+      "name": "Столешница с фартуком Taj Mahal",
+      "customGroup": "interior",
+      "productType": "Столешницы",
+      "stoneName": "Taj Mahal",
+      "stoneType": "Кварцит",
+      "origin": "Баия, Бразилия",
+      "quarry": "Баия",
+      "stoneImage": "/stonetrail_mock_assets/stones/taj-mahal.jpg",
+      "description": "Демонстрационный пример кухонной столешницы из кварцита: рабочая плоскость и стеновой фартук из одного сорта.",
+      "image": "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/taj-mahal-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/taj-mahal.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Сатинированная",
+      "dimensions": "3 200 × 650 × 30 мм",
+      "thickness": "30 мм",
+      "purpose": "Кухня",
+      "applications": [
+        "Линейная кухня",
+        "Фартук",
+        "Подоконник-продолжение"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-10",
+      "slug": "windowsill-carrara",
+      "category": "custom",
+      "name": "Подоконник Bianco Carrara",
+      "customGroup": "interior",
+      "productType": "Подоконники",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационный подоконник из каррарского мрамора с капельником и полированной кромкой. Толщина подобрана под стандартный оконный проём.",
+      "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "1 800 × 350 мм",
+      "thickness": "30 мм",
+      "purpose": "Жилой интерьер",
+      "applications": [
+        "Оконный проём",
+        "Ниша",
+        "Радиаторный короб"
+      ],
+      "characteristics": {
+        "Капельник": "Есть",
+        "Свес": "40 мм"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-11",
+      "slug": "windowsill-pietra-grey",
+      "category": "custom",
+      "name": "Подоконник Pietra Grey",
+      "customGroup": "interior",
+      "productType": "Подоконники",
+      "stoneName": "Pietra Grey",
+      "stoneType": "Известняк",
+      "origin": "Иран",
+      "quarry": "Исфахан",
+      "stoneImage": "/stonetrail_mock_assets/stones/pietra-grey.jpg",
+      "description": "Демонстрационный широкий подоконник из дымчатого известняка для панорамного остекления.",
+      "image": "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+        "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Сатинированная",
+      "dimensions": "2 400 × 400 мм",
+      "thickness": "20 мм",
+      "purpose": "Жилой интерьер",
+      "applications": [
+        "Панорамное окно",
+        "Французский балкон"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-04",
+      "slug": "stairs-bianco-carrara",
+      "category": "custom",
+      "name": "Лестничный марш",
+      "customGroup": "interior",
+      "productType": "Лестницы и ступени",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационный лестничный марш из белого каррарского мрамора: ступени 300 мм, полировка, фаска по краю.",
+      "image": "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "14 ступеней, ширина 1 100 мм",
+      "thickness": "30 мм",
+      "purpose": "Жилой интерьер",
+      "applications": [
+        "Внутренняя лестница",
+        "Холл",
+        "Парадное крыльцо"
+      ],
+      "characteristics": {
+        "Фаска": "3 мм",
+        "Количество ступеней": "14"
+      },
+      "expertNote": "Для маршей оставляем фаску 2–3 мм по кромке подъёма. Это снижает риск скола и спокойнее в эксплуатации, чем идеально острые кромки.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-12",
+      "slug": "stairs-granite-absolute",
+      "category": "custom",
+      "name": "Ступени Absolute Black",
+      "customGroup": "interior",
+      "productType": "Лестницы и ступени",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "origin": "Раджастан, Индия",
+      "quarry": "Раджастан",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационные накладные ступени из чёрного гранита для входной группы с интенсивной нагрузкой.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Термообработанная",
+      "dimensions": "1 200 × 350 мм",
+      "thickness": "30 мм",
+      "purpose": "Входная группа",
+      "applications": [
+        "Входная лестница",
+        "Цоколь",
+        "Площадка"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-05",
+      "slug": "fireplace-emperador-dark",
+      "category": "custom",
+      "name": "Каминный портал",
+      "customGroup": "interior",
+      "productType": "Камины",
+      "stoneName": "Emperador Dark",
+      "stoneType": "Известняк",
+      "origin": "Испания",
+      "quarry": "Бюхараго",
+      "stoneImage": "/stonetrail_mock_assets/stones/emperador-dark.jpg",
+      "description": "Демонстрационный портал камина в тёмном известняке с золотисто-серыми жилками. Сатин без агрессивного глянца.",
+      "image": "/stonetrail_mock_assets/products/product-fireplace-emperador-dark.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-fireplace-emperador-dark.jpg",
+        "/stonetrail_mock_assets/stones/emperador-dark.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Сатинированная",
+      "dimensions": "1 800 × 1 200 × 600 мм",
+      "purpose": "Гостиная",
+      "applications": [
+        "Каминный портал",
+        "Облицовка топки",
+        "Каминная полка"
+      ],
+      "expertNote": "Термостойкость известняка достаточна при расстоянии от горелки 150–200 мм. Сатин лучше держит жар, чем полировка.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-02",
+      "slug": "bathroom-pietra-grey",
+      "category": "custom",
+      "name": "Ванная из цельного камня",
+      "customGroup": "interior",
+      "productType": "Мойки и ванны",
+      "stoneName": "Pietra Grey",
+      "stoneType": "Известняк",
+      "origin": "Иран",
+      "quarry": "Исфахан",
+      "stoneImage": "/stonetrail_mock_assets/stones/pietra-grey.jpg",
+      "description": "Демонстрационный санузел: стены, пол и подиум из одного сорта известняка. Шлифованная поверхность безопаснее во влажной зоне.",
+      "image": "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+        "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "dimensions": "площадь облицовки 28 м²",
+      "purpose": "Ванная",
+      "applications": [
+        "Чаша ванны",
+        "Облицовка стен",
+        "Подиум"
+      ],
+      "expertNote": "Известняк хорошо работает при гидрофобизации. На пол ставим шлифованный формат, а не полированный.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-13",
+      "slug": "sink-verde-alpi",
+      "category": "custom",
+      "name": "Накладная мойка Verde Alpi",
+      "customGroup": "interior",
+      "productType": "Мойки и ванны",
+      "stoneName": "Verde Alpi",
+      "stoneType": "Мрамор",
+      "origin": "Апуанские Альпы, Италия",
+      "quarry": "Alpi Apuane",
+      "stoneImage": "/stonetrail_mock_assets/stones/verde-alpi.jpg",
+      "description": "Демонстрационная цельная мойка из зелёного мрамора для кухни или барной зоны.",
+      "image": "/stonetrail_mock_assets/products/product-dining-table-verde-alpi.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-dining-table-verde-alpi.jpg",
+        "/stonetrail_mock_assets/stones/verde-alpi.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "550 × 400 × 200 мм",
+      "thickness": "20 мм",
+      "purpose": "Кухня",
+      "applications": [
+        "Кухонная мойка",
+        "Барная мойка"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-03",
+      "slug": "wall-cladding-taj-mahal",
+      "category": "custom",
+      "name": "Панно-экран из камня",
+      "customGroup": "interior",
+      "productType": "Мозаика",
+      "stoneName": "Taj Mahal",
+      "stoneType": "Кварцит",
+      "origin": "Баия, Бразилия",
+      "quarry": "Баия",
+      "stoneImage": "/stonetrail_mock_assets/stones/taj-mahal.jpg",
+      "description": "Демонстрационная акцентная стена: вертикальная раскладка широких панелей с тёплым серо-бежевым рисунком.",
+      "image": "/stonetrail_mock_assets/products/product-wall-cladding-taj-mahal.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-wall-cladding-taj-mahal.jpg",
+        "/stonetrail_mock_assets/stones/taj-mahal.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Сатинированная",
+      "dimensions": "3 800 × 2 700 мм",
+      "format": "600 × 300 мм",
+      "purpose": "Гостиная",
+      "applications": [
+        "Акцентная стена",
+        "ТВ-зона",
+        "Холл"
+      ],
+      "expertNote": "Для стен со средним рисунком выбираем вертикальный монтаж — рисунок вытягивает пространство.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-07",
+      "slug": "onyx-interior-honey",
+      "category": "custom",
+      "name": "Световая мозаика из оникса",
+      "customGroup": "interior",
+      "productType": "Мозаика",
+      "stoneName": "Onice Honey",
+      "stoneType": "Оникс",
+      "origin": "Иран",
+      "quarry": "Исфахан",
+      "stoneImage": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "description": "Демонстрационные светопрозрачные панели из медового оникса. Тонкая нарезка усиливает опалесценцию при подсветке.",
+      "image": "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg",
+        "/stonetrail_mock_assets/stones/onice-honey.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "1 200 × 600 × 8 мм",
+      "format": "300 × 300 мм",
+      "purpose": "Декор интерьера",
+      "applications": [
+        "Подсвеченная ниша",
+        "Барный фасад",
+        "Перегородка"
+      ],
+      "expertNote": "Оникс ставим только там, где есть гарантированная подсветка. Без неё опалесценция гаснет.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-14",
+      "slug": "carving-portoro",
+      "category": "custom",
+      "name": "Резной фриз Portoro Gold",
+      "customGroup": "interior",
+      "productType": "Художественная резьба",
+      "stoneName": "Portoro Gold",
+      "stoneType": "Мрамор",
+      "origin": "Лигурия, Италия",
+      "quarry": "Портовенере",
+      "stoneImage": "/stonetrail_mock_assets/stones/portoro-gold.jpg",
+      "description": "Демонстрационный резной фриз из чёрного мрамора с золотистой жилкой. Ручная выборка орнамента.",
+      "image": "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/portoro-gold.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "1 800 × 220 мм",
+      "thickness": "40 мм",
+      "purpose": "Парадный интерьер",
+      "applications": [
+        "Карниз",
+        "Портал",
+        "Мебельный фасад"
+      ],
+      "characteristics": {
+        "Техника": "Ручная резьба",
+        "Рельеф": "2–8 мм"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-15",
+      "slug": "relief-carrara",
+      "category": "custom",
+      "name": "Барельеф Bianco Carrara",
+      "customGroup": "interior",
+      "productType": "Барельефы",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационный барельеф для акцентной стены. Глубина рельефа подобрана так, чтобы рисунок читался при боковом свете.",
+      "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Сатинированная",
+      "dimensions": "1 400 × 900 мм",
+      "thickness": "50 мм",
+      "purpose": "Гостиная",
+      "applications": [
+        "Акцентная стена",
+        "Лестничный пролёт",
+        "Каминный фронтон"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-08",
+      "slug": "pool-terrace-travertine",
+      "category": "custom",
+      "name": "Плиты мощения у воды",
+      "customGroup": "exterior",
+      "productType": "Плиты мощения",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационные плиты мощения из травертина для террасы у бассейна. Шлифованная поверхность, тёплый полосчатый рисунок.",
+      "image": "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Шлифованная",
+      "thickness": "30 мм",
+      "format": "600 × 600 мм",
+      "purpose": "Терраса",
+      "applications": [
+        "Терраса у бассейна",
+        "Садовая площадка",
+        "Двор"
+      ],
+      "expertNote": "Травертин для зон у воды: естественная пористость не боится хлора, тёплые тона визуально осветляют площадку.",
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-16",
+      "slug": "paving-slab-jura",
+      "category": "custom",
+      "name": "Плита мощения Jura Beige",
+      "customGroup": "exterior",
+      "productType": "Плиты мощения",
+      "stoneName": "Jura Beige",
+      "stoneType": "Известняк",
+      "origin": "Бавария, Германия",
+      "quarry": "Айхштетт",
+      "stoneImage": "/stone/soapstone.png",
+      "description": "Демонстрационная крупноформатная плита мощения из юрского известняка для входных групп.",
+      "image": "/stone/soapstone.png",
+      "images": [
+        "/stone/soapstone.png",
+        "/stone/soapstone.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Термообработанная",
+      "thickness": "40 мм",
+      "format": "800 × 800 мм",
+      "purpose": "Входная группа",
+      "applications": [
+        "Парадный двор",
+        "Пешеходная зона"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-17",
+      "slug": "custom-paving-karelia",
+      "category": "custom",
+      "name": "Брусчатка габбро-диабаз",
+      "customGroup": "exterior",
+      "productType": "Брусчатка",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная гранитная брусчатка из карельского габбро-диабаза. Колотая фактура для дорожек и дворов.",
+      "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Колотая",
+      "thickness": "60 мм",
+      "format": "100 × 100 мм",
+      "purpose": "Дорожки",
+      "applications": [
+        "Садовая дорожка",
+        "Двор",
+        "Парковка"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-18",
+      "slug": "curb-mansurov",
+      "category": "custom",
+      "name": "Бордюр Мансуровский",
+      "customGroup": "exterior",
+      "productType": "Бордюры",
+      "stoneName": "Мансуровский",
+      "stoneType": "Гранит",
+      "origin": "Башкортостан, Россия",
+      "quarry": "Мансурово",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Демонстрационный гранитный бордюр светлого тона для отделения мощения и газона.",
+      "image": "/stone/white-quartzite.png",
+      "images": [
+        "/stone/white-quartzite.png",
+        "/stone/white-quartzite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Пиленая",
+      "dimensions": "1 000 × 150 × 300 мм",
+      "thickness": "80 мм",
+      "purpose": "Благоустройство",
+      "applications": [
+        "Окантовка дорожек",
+        "Газон",
+        "Площадь"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-19",
+      "slug": "tactile-granite",
+      "category": "custom",
+      "name": "Тактильная плита Absolute Black",
+      "customGroup": "exterior",
+      "productType": "Тактильные плиты",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "origin": "Раджастан, Индия",
+      "quarry": "Раджастан",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная тактильная плита с рифами для входных групп и общественных пространств.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Термообработанная",
+      "thickness": "30 мм",
+      "format": "300 × 300 мм",
+      "purpose": "Общественное пространство",
+      "applications": [
+        "Вход в здание",
+        "Пешеходный переход",
+        "Платформа"
+      ],
+      "characteristics": {
+        "Рисунок": "Конусы",
+        "Норматив": "Демо-образец"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-20",
+      "slug": "channel-granite",
+      "category": "custom",
+      "name": "Водоприемный лоток из гранита",
+      "customGroup": "exterior",
+      "productType": "Водоприемные лотки",
+      "stoneName": "Black Galaxy",
+      "stoneType": "Гранит",
+      "origin": "Андхра-Прадеш, Индия",
+      "quarry": "Чиртоор",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационный гранитный лоток для отвода воды с мощения. Решётка в том же сорте.",
+      "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Пиленая",
+      "dimensions": "1 000 × 150 × 80 мм",
+      "purpose": "Дренаж",
+      "applications": [
+        "Терраса",
+        "Площадка у входа",
+        "Пандус"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-21",
+      "slug": "massive-step-karelia",
+      "category": "custom",
+      "name": "Массивная ступень габбро-диабаз",
+      "customGroup": "exterior",
+      "productType": "Массивные ступени",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная цельная уличная ступень большой толщины. Без накладного слоя — камень работает как несущий элемент.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Термообработанная",
+      "dimensions": "1 500 × 400 × 150 мм",
+      "thickness": "150 мм",
+      "purpose": "Входная группа",
+      "applications": [
+        "Крыльцо",
+        "Садовая лестница",
+        "Терраса"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-22",
+      "slug": "cladding-tile-travertine",
+      "category": "custom",
+      "name": "Облицовочная плитка Classic Travertine",
+      "customGroup": "facades",
+      "productType": "Облицовочная плитка",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационная фасадная плитка из травертина для цоколя и стен малоэтажных зданий.",
+      "image": "/stone/travertine.png",
+      "images": [
+        "/stone/travertine.png",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Шлифованная",
+      "thickness": "20 мм",
+      "format": "600 × 300 мм",
+      "purpose": "Фасад",
+      "applications": [
+        "Цоколь",
+        "Дворовой фасад",
+        "Колоннада"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-23",
+      "slug": "cladding-tile-sandstone",
+      "category": "custom",
+      "name": "Облицовочная плитка из песчаника",
+      "customGroup": "facades",
+      "productType": "Облицовочная плитка",
+      "stoneName": "Дагестанский песчаник",
+      "stoneType": "Песчаник",
+      "origin": "Дагестан, Россия",
+      "quarry": "Акуша",
+      "stoneImage": "/stone/travertine.png",
+      "description": "Демонстрационная облицовочная плитка из дагестанского песчаника. Тёплая фактура для частных фасадов.",
+      "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+        "/stone/travertine.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Пиленая",
+      "thickness": "20 мм",
+      "format": "400 × 200 мм",
+      "purpose": "Фасад",
+      "applications": [
+        "Частный дом",
+        "Забор",
+        "Цоколь"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-24",
+      "slug": "facade-slab-jura",
+      "category": "custom",
+      "name": "Фасадная плита Jura Beige",
+      "customGroup": "facades",
+      "productType": "Фасадные плиты",
+      "stoneName": "Jura Beige",
+      "stoneType": "Известняк",
+      "origin": "Бавария, Германия",
+      "quarry": "Айхштетт",
+      "stoneImage": "/stone/soapstone.png",
+      "description": "Демонстрационная крупноформатная фасадная плита из юрского известняка. Спокойный бежевый тон для сплошной облицовки.",
+      "image": "/stone/soapstone.png",
+      "images": [
+        "/stone/soapstone.png",
+        "/stone/soapstone.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "thickness": "30 мм",
+      "format": "1 200 × 600 мм",
+      "purpose": "Фасад",
+      "applications": [
+        "Навесная облицовка",
+        "Цоколь",
+        "Козырёк"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-25",
+      "slug": "ventilated-granite",
+      "category": "custom",
+      "name": "Плита вентфасада Absolute Black",
+      "customGroup": "facades",
+      "productType": "Плиты для вентфасадов",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "origin": "Раджастан, Индия",
+      "quarry": "Раджастан",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная плита под систему вентилируемого фасада. Калибровка под скрытый крепёж.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "thickness": "30 мм",
+      "format": "1 200 × 600 мм",
+      "purpose": "Вентфасад",
+      "applications": [
+        "Офисный фасад",
+        "Цоколь здания",
+        "Колонны"
+      ],
+      "characteristics": {
+        "Крепёж": "Скрытый",
+        "Калибровка": "±1 мм"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-26",
+      "slug": "split-stone-sandstone",
+      "category": "custom",
+      "name": "Колотый камень дагестанский",
+      "customGroup": "facades",
+      "productType": "Фактурный / колотый камень",
+      "stoneName": "Дагестанский песчаник",
+      "stoneType": "Песчаник",
+      "origin": "Дагестан, Россия",
+      "quarry": "Акуша",
+      "stoneImage": "/stone/travertine.png",
+      "description": "Демонстрационный фактурный камень с колотой лицевой гранью. Для цоколей, заборов и акцентов на фасаде.",
+      "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+        "/stone/travertine.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Колотая",
+      "thickness": "30–50 мм",
+      "purpose": "Фасад",
+      "applications": [
+        "Цоколь",
+        "Забор",
+        "Подпорная стена"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-27",
+      "slug": "column-carrara",
+      "category": "custom",
+      "name": "Колонна Bianco Carrara",
+      "customGroup": "architectural",
+      "productType": "Колонны",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационная круглая колонна из каррарского мрамора с дорической капителью.",
+      "image": "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/bianco-carrara-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "height": "2 800 мм",
+      "diameter": "350 мм",
+      "purpose": "Парадный интерьер",
+      "applications": [
+        "Холл",
+        "Портик",
+        "Галерея"
+      ],
+      "characteristics": {
+        "Капитель": "Дорическая",
+        "Ствол": "Монолитный"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-28",
+      "slug": "column-granite",
+      "category": "custom",
+      "name": "Колонна габбро-диабаз",
+      "customGroup": "architectural",
+      "productType": "Колонны",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная уличная колонна из карельского гранита. Термообработка для эксплуатации на улице.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Термообработанная",
+      "height": "3 200 мм",
+      "diameter": "450 мм",
+      "purpose": "Экстерьер",
+      "applications": [
+        "Портик",
+        "Терраса",
+        "Ограда"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-29",
+      "slug": "balustrade-crystal",
+      "category": "custom",
+      "name": "Балюстрада Crystal White",
+      "customGroup": "architectural",
+      "productType": "Балюстрады",
+      "stoneName": "Crystal White",
+      "stoneType": "Мрамор",
+      "origin": "Греция",
+      "quarry": "Драма",
+      "stoneImage": "/stonetrail_mock_assets/stones/crystal-white.jpg",
+      "description": "Демонстрационный комплект балюстрады: поручень, балясины и основание из одного сорта.",
+      "image": "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/calacatta-luxury-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/crystal-white.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "height": "900 мм",
+      "purpose": "Терраса",
+      "applications": [
+        "Балкон",
+        "Терраса",
+        "Лестница"
+      ],
+      "characteristics": {
+        "Шаг": "180 мм",
+        "Комплект": "Поручень, балясины, цоколь"
+      },
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-30",
+      "slug": "baluster-carrara",
+      "category": "custom",
+      "name": "Балясина Bianco Carrara",
+      "customGroup": "architectural",
+      "productType": "Балясины",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационная точёная балясина классического профиля. Поставляется комплектом под длину марша.",
+      "image": "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "height": "800 мм",
+      "diameter": "140 мм",
+      "purpose": "Лестница",
+      "applications": [
+        "Лестничный марш",
+        "Балюстрада",
+        "Терраса"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-31",
+      "slug": "railing-pietra-grey",
+      "category": "custom",
+      "name": "Перила Pietra Grey",
+      "customGroup": "architectural",
+      "productType": "Перила",
+      "stoneName": "Pietra Grey",
+      "stoneType": "Известняк",
+      "origin": "Иран",
+      "quarry": "Исфахан",
+      "stoneImage": "/stonetrail_mock_assets/stones/pietra-grey.jpg",
+      "description": "Демонстрационный каменный поручень для лестницы. Скрытое крепление к металлическому каркасу.",
+      "image": "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-bathroom-pietra-grey.jpg",
+        "/stonetrail_mock_assets/stones/pietra-grey.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Сатинированная",
+      "dimensions": "длина секции 1 500 мм",
+      "height": "900 мм",
+      "purpose": "Лестница",
+      "applications": [
+        "Внутренняя лестница",
+        "Пандус",
+        "Галерея"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-32",
+      "slug": "fountain-travertine",
+      "category": "custom",
+      "name": "Фонтан Classic Travertine",
+      "customGroup": "architectural",
+      "productType": "Фонтаны",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационная чаша фонтана из травертина для внутреннего двора. Чаша и постамент из одного блока.",
+      "image": "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "height": "1 200 мм",
+      "diameter": "1 400 мм",
+      "purpose": "Двор",
+      "applications": [
+        "Внутренний двор",
+        "Сад",
+        "Холл"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-33",
+      "slug": "planter-sandstone",
+      "category": "custom",
+      "name": "Вазон из песчаника",
+      "customGroup": "architectural",
+      "productType": "Вазоны",
+      "stoneName": "Дагестанский песчаник",
+      "stoneType": "Песчаник",
+      "origin": "Дагестан, Россия",
+      "quarry": "Акуша",
+      "stoneImage": "/stone/travertine.png",
+      "description": "Демонстрационный садовый вазон из дагестанского песчаника. Толстые стенки, дренажное отверстие.",
+      "image": "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/travertino-classico-block-01.jpg",
+        "/stone/travertine.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Пиленая",
+      "height": "650 мм",
+      "diameter": "700 мм",
+      "purpose": "Сад",
+      "applications": [
+        "Сад",
+        "Терраса",
+        "Входная группа"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-34",
+      "slug": "bench-granite",
+      "category": "custom",
+      "name": "Скамья габбро-диабаз",
+      "customGroup": "architectural",
+      "productType": "Скамьи",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная уличная скамья из карельского гранита. Сиденье термообработано, боковины пиленые.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Термообработанная",
+      "dimensions": "1 800 × 450 × 450 мм",
+      "purpose": "Общественное пространство",
+      "applications": [
+        "Парк",
+        "Двор",
+        "Набережная"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-35",
+      "slug": "bench-travertine",
+      "category": "custom",
+      "name": "Садовая скамья из травертина",
+      "customGroup": "architectural",
+      "productType": "Скамьи",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационная садовая скамья тёплого тона. Для частных дворов и террас.",
+      "image": "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/taj-mahal-block-01.jpg",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "dimensions": "1 600 × 400 × 420 мм",
+      "purpose": "Сад",
+      "applications": [
+        "Сад",
+        "Терраса"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-36",
+      "slug": "small-form-sphere",
+      "category": "custom",
+      "name": "Садовая сфера из гранита",
+      "customGroup": "architectural",
+      "productType": "Другие малые архитектурные формы",
+      "stoneName": "Мансуровский",
+      "stoneType": "Гранит",
+      "origin": "Башкортостан, Россия",
+      "quarry": "Мансурово",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Демонстрационная малая форма: гранитная сфера для сада и входной группы.",
+      "image": "/stone/white-quartzite.png",
+      "images": [
+        "/stone/white-quartzite.png",
+        "/stone/white-quartzite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "diameter": "400 мм",
+      "purpose": "Сад",
+      "applications": [
+        "Сад",
+        "Входная группа",
+        "Партер"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-37",
+      "slug": "monument-karelia",
+      "category": "custom",
+      "name": "Памятник габбро-диабаз",
+      "customGroup": "memorial",
+      "productType": "Памятники",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационный вертикальный памятник из карельского габбро-диабаза. Полированный лицевой фасад, торцы термообработаны.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "1 200 × 600 × 80 мм",
+      "purpose": "Мемориал",
+      "applications": [
+        "Одиночный памятник",
+        "Семейный участок"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-38",
+      "slug": "monument-mansurov",
+      "category": "custom",
+      "name": "Памятник Мансуровский",
+      "customGroup": "memorial",
+      "productType": "Памятники",
+      "stoneName": "Мансуровский",
+      "stoneType": "Гранит",
+      "origin": "Башкортостан, Россия",
+      "quarry": "Мансурово",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Демонстрационный светлый гранитный памятник. Спокойный тон для участков, где чёрный камень визуально тяжёл.",
+      "image": "/stone/white-quartzite.png",
+      "images": [
+        "/stone/white-quartzite.png",
+        "/stone/white-quartzite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "1 000 × 500 × 80 мм",
+      "purpose": "Мемориал",
+      "applications": [
+        "Одиночный памятник",
+        "Семейный участок"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-43",
+      "slug": "fireplace-nero-marquina",
+      "category": "custom",
+      "name": "Каминный портал Nero Marquina",
+      "customGroup": "interior",
+      "productType": "Камины",
+      "stoneName": "Nero Marquina",
+      "stoneType": "Мрамор",
+      "origin": "Страна Басков, Испания",
+      "quarry": "Маркина",
+      "stoneImage": "/stonetrail_mock_assets/stones/nero-marquina.jpg",
+      "description": "Демонстрационный каминный портал из чёрного мрамора с белой жилкой. Контрастный акцент для гостиной.",
+      "image": "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/slabs/nero-marquina-slab-01.jpg",
+        "/stonetrail_mock_assets/stones/nero-marquina.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "1 600 × 1 100 × 400 мм",
+      "purpose": "Гостиная",
+      "applications": [
+        "Каминный портал",
+        "Каминная полка"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-44",
+      "slug": "relief-onice",
+      "category": "custom",
+      "name": "Барельеф Onice Honey",
+      "customGroup": "interior",
+      "productType": "Барельефы",
+      "stoneName": "Onice Honey",
+      "stoneType": "Оникс",
+      "origin": "Иран",
+      "quarry": "Исфахан",
+      "stoneImage": "/stonetrail_mock_assets/stones/onice-honey.jpg",
+      "description": "Демонстрационный подсвечиваемый барельеф из оникса. Рельеф читается при контровом свете.",
+      "image": "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-onyx-interior-honey.jpg",
+        "/stonetrail_mock_assets/stones/onice-honey.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "1 000 × 700 мм",
+      "thickness": "40 мм",
+      "purpose": "Декор интерьера",
+      "applications": [
+        "Акцентная стена",
+        "Ниша"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-45",
+      "slug": "curb-karelia",
+      "category": "custom",
+      "name": "Бордюр габбро-диабаз",
+      "customGroup": "exterior",
+      "productType": "Бордюры",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационный тёмный гранитный бордюр для общественных пространств и проездов.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Пиленая",
+      "dimensions": "1 000 × 180 × 300 мм",
+      "thickness": "80 мм",
+      "purpose": "Благоустройство",
+      "applications": [
+        "Площадь",
+        "Проезд",
+        "Дорожка"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-46",
+      "slug": "massive-step-jura",
+      "category": "custom",
+      "name": "Массивная ступень Jura Beige",
+      "customGroup": "exterior",
+      "productType": "Массивные ступени",
+      "stoneName": "Jura Beige",
+      "stoneType": "Известняк",
+      "origin": "Бавария, Германия",
+      "quarry": "Айхштетт",
+      "stoneImage": "/stone/soapstone.png",
+      "description": "Демонстрационная цельная ступень из юрского известняка для садовой лестницы.",
+      "image": "/stone/soapstone.png",
+      "images": [
+        "/stone/soapstone.png",
+        "/stone/soapstone.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "dimensions": "1 400 × 380 × 140 мм",
+      "thickness": "150 мм",
+      "purpose": "Сад",
+      "applications": [
+        "Садовая лестница",
+        "Терраса"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-47",
+      "slug": "facade-slab-travertine",
+      "category": "custom",
+      "name": "Фасадная плита Classic Travertine",
+      "customGroup": "facades",
+      "productType": "Фасадные плиты",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационная фасадная плита из травертина. Тёплый тон для сплошной облицовки малоэтажного фасада.",
+      "image": "/stone/travertine.png",
+      "images": [
+        "/stone/travertine.png",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Шлифованная",
+      "thickness": "30 мм",
+      "format": "1 200 × 600 мм",
+      "purpose": "Фасад",
+      "applications": [
+        "Навесная облицовка",
+        "Цоколь"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-48",
+      "slug": "ventilated-jura",
+      "category": "custom",
+      "name": "Плита вентфасада Jura Beige",
+      "customGroup": "facades",
+      "productType": "Плиты для вентфасадов",
+      "stoneName": "Jura Beige",
+      "stoneType": "Известняк",
+      "origin": "Бавария, Германия",
+      "quarry": "Айхштетт",
+      "stoneImage": "/stone/soapstone.png",
+      "description": "Демонстрационная плита вентфасада из известняка. Калибровка под скрытый крепёж.",
+      "image": "/stone/soapstone.png",
+      "images": [
+        "/stone/soapstone.png",
+        "/stone/soapstone.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "thickness": "30 мм",
+      "format": "800 × 400 мм",
+      "purpose": "Вентфасад",
+      "applications": [
+        "Офисный фасад",
+        "Цоколь здания"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-49",
+      "slug": "railing-carrara",
+      "category": "custom",
+      "name": "Перила Bianco Carrara",
+      "customGroup": "architectural",
+      "productType": "Перила",
+      "stoneName": "Bianco Carrara",
+      "stoneType": "Мрамор",
+      "origin": "Каррара, Италия",
+      "quarry": "Каррара",
+      "stoneImage": "/stonetrail_mock_assets/stones/bianco-carrara.jpg",
+      "description": "Демонстрационный полированный поручень из каррарского мрамора для внутренней лестницы.",
+      "image": "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-stairs-bianco-carrara.jpg",
+        "/stonetrail_mock_assets/stones/bianco-carrara.jpg"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "длина секции 1 200 мм",
+      "height": "900 мм",
+      "purpose": "Лестница",
+      "applications": [
+        "Внутренняя лестница",
+        "Галерея"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-50",
+      "slug": "planter-travertine",
+      "category": "custom",
+      "name": "Вазон Classic Travertine",
+      "customGroup": "architectural",
+      "productType": "Вазоны",
+      "stoneName": "Classic Travertine",
+      "stoneType": "Травертин",
+      "origin": "Тиволи, Италия",
+      "quarry": "Tivoli",
+      "stoneImage": "/stonetrail_mock_assets/stones/travertino-classico.jpg",
+      "description": "Демонстрационный вазон из травертина для террасы и внутреннего двора.",
+      "image": "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+      "images": [
+        "/stonetrail_mock_assets/products/product-pool-cladding-travertino-classico.jpg",
+        "/stonetrail_mock_assets/stones/travertino-classico.jpg"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Шлифованная",
+      "height": "500 мм",
+      "diameter": "600 мм",
+      "purpose": "Терраса",
+      "applications": [
+        "Терраса",
+        "Двор"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-51",
+      "slug": "small-form-bollard",
+      "category": "custom",
+      "name": "Парковочный столбик из гранита",
+      "customGroup": "architectural",
+      "productType": "Другие малые архитектурные формы",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "origin": "Раджастан, Индия",
+      "quarry": "Раджастан",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная малая форма: гранитный столбик для ограничения проезда.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Термообработанная",
+      "height": "600 мм",
+      "diameter": "180 мм",
+      "purpose": "Благоустройство",
+      "applications": [
+        "Двор",
+        "Парковка",
+        "Входная группа"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-52",
+      "slug": "stele-karelia",
+      "category": "custom",
+      "name": "Стела габбро-диабаз",
+      "customGroup": "memorial",
+      "productType": "Стелы",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационная вертикальная стела из карельского гранита. Лицевая плоскость под гравировку.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "В наличии",
+      "availability": "В наличии",
+      "finish": "Полированная",
+      "dimensions": "2 400 × 600 × 120 мм",
+      "height": "2 400 мм",
+      "purpose": "Мемориал",
+      "applications": [
+        "Мемориальный парк",
+        "Сквер"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-40",
+      "slug": "pedestal-absolute-black",
+      "category": "custom",
+      "name": "Постамент Absolute Black",
+      "customGroup": "memorial",
+      "productType": "Постаменты",
+      "stoneName": "Absolute Black",
+      "stoneType": "Гранит",
+      "origin": "Раджастан, Индия",
+      "quarry": "Раджастан",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационный постамент под скульптуру или стелу. Скрытые закладные, калиброванная верхняя плоскость.",
+      "image": "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+      "images": [
+        "/stonetrail_mock_assets/blocks/nero-marquina-block-01.jpg",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "800 × 800 × 600 мм",
+      "height": "600 мм",
+      "purpose": "Мемориал",
+      "applications": [
+        "Памятник",
+        "Скульптура",
+        "Стела"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-41",
+      "slug": "stele-mansurov",
+      "category": "custom",
+      "name": "Стела Мансуровский гранит",
+      "customGroup": "memorial",
+      "productType": "Стелы",
+      "stoneName": "Мансуровский",
+      "stoneType": "Гранит",
+      "origin": "Башкортостан, Россия",
+      "quarry": "Мансурово",
+      "stoneImage": "/stone/white-quartzite.png",
+      "description": "Демонстрационная вертикальная стела. Лицевая плоскость под гравировку, тыльная — шлифовка.",
+      "image": "/stone/white-quartzite.png",
+      "images": [
+        "/stone/white-quartzite.png",
+        "/stone/white-quartzite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная",
+      "dimensions": "2 200 × 700 × 100 мм",
+      "height": "2 200 мм",
+      "purpose": "Мемориал",
+      "applications": [
+        "Мемориальный парк",
+        "Сквер",
+        "Участок"
+      ],
+      "priceType": "on_request"
+    },
+    {
+      "id": "fp-42",
+      "slug": "memorial-complex-karelia",
+      "category": "custom",
+      "name": "Мемориальный комплекс габбро-диабаз",
+      "customGroup": "memorial",
+      "productType": "Мемориальные комплексы",
+      "stoneName": "Габбро-диабаз",
+      "stoneType": "Гранит",
+      "origin": "Карелия, Россия",
+      "quarry": "Карелия",
+      "stoneImage": "/stone/black-granite.png",
+      "description": "Демонстрационный комплекс: стела, цветник и надгробная плита из одного сорта. Единая фактура и тон.",
+      "image": "/stone/black-granite.png",
+      "images": [
+        "/stone/black-granite.png",
+        "/stone/black-granite.png"
+      ],
+      "status": "Под заказ",
+      "availability": "Под заказ",
+      "finish": "Полированная / термообработанная",
+      "purpose": "Мемориал",
+      "applications": [
+        "Семейный участок",
+        "Закрытый мемориал"
+      ],
+      "characteristics": {
+        "Состав": "Стела, цветник, плита",
+        "Цоколь": "Термообработка"
+      },
+      "priceType": "on_request"
+    }
+  ]
+}

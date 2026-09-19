@@ -2,7 +2,8 @@ import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
-import { getStoneBlockLot, getStoneById } from "@/lib/stone-inventory"
+import { catalogApi } from "@/lib/catalog/api-client"
+import { getStoneBlockLot } from "@/lib/stone-inventory"
 
 export default async function StoneBlocksPage({
   params,
@@ -10,13 +11,16 @@ export default async function StoneBlocksPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const material = getStoneById(id)
+  const [material, lots] = await Promise.all([
+    catalogApi.getStone(id),
+    catalogApi.listBlocks(),
+  ])
 
   if (!material) {
     notFound()
   }
 
-  const lot = getStoneBlockLot(material)
+  const lot = getStoneBlockLot(material, lots)
   if (lot) {
     redirect(`/catalog/blocks/${lot.slug}`)
   }

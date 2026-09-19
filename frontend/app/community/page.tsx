@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { LayoutGrid, List } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { ContentEnter } from "@/components/content-enter"
 
 export default function CommunityPage() {
   const [activeCategory, setActiveCategory] = useState("Все")
@@ -90,31 +91,33 @@ export default function CommunityPage() {
         </div>
 
         {/* Topics Grid/List */}
-        {filteredPosts.length > 0 ? (
-          <div className={cn(
-            "grid gap-5",
-            viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-          )}>
-            {filteredPosts.map(post => (
-              <TopicCard 
-                key={post.id} 
-                post={post} 
-                commentCount={getCommentCount(post.id)} 
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-2xl">
-            <div className="mb-4 rounded-full bg-muted p-4">
-              <LayoutGrid className="size-8 text-muted-foreground" />
+        <ContentEnter swapKey={`${activeCategory}-${viewMode}`}>
+          {filteredPosts.length > 0 ? (
+            <div className={cn(
+              "grid gap-5",
+              viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+            )}>
+              {filteredPosts.map(post => (
+                <TopicCard 
+                  key={post.id} 
+                  post={post} 
+                  commentCount={getCommentCount(post.id)} 
+                />
+              ))}
             </div>
-            <h3 className="text-lg font-semibold text-foreground">В этой категории пока нет тем</h3>
-            <p className="text-muted-foreground">Станьте первым, кто начнет обсуждение!</p>
-            <div className="mt-6">
-              <CreateTopicModal />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-2xl">
+              <div className="mb-4 rounded-full bg-muted p-4">
+                <LayoutGrid className="size-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">В этой категории пока нет тем</h3>
+              <p className="text-muted-foreground">Станьте первым, кто начнет обсуждение!</p>
+              <div className="mt-6">
+                <CreateTopicModal />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </ContentEnter>
       </div>
     </div>
   )

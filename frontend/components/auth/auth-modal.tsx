@@ -50,7 +50,7 @@ export function AuthModal() {
         tabIndex={-1}
         className={cn(
           "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_12px_40px_-28px_rgba(35,72,58,0.45)] outline-none",
-          isRegister ? "max-w-xl" : "max-w-md",
+          "max-w-md",
         )}
       >
         <div className="h-1 shrink-0 bg-primary" aria-hidden="true" />
@@ -69,17 +69,6 @@ export function AuthModal() {
             <h2 id={titleId} className="font-display text-3xl font-bold tracking-tight text-foreground">
               {isRegister ? "Создать аккаунт" : "Войти в аккаунт"}
             </h2>
-            {isRegister ? (
-              <>
-                <p className="text-base font-medium leading-relaxed text-foreground/85">
-                  Присоединитесь к профессиональному сообществу StoneTrail
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Получите доступ к профессиональным обсуждениям, экспертным материалам и возможностям
-                  взаимодействия с участниками каменной индустрии.
-                </p>
-              </>
-            ) : null}
           </div>
           {isRegister ? (
             <>

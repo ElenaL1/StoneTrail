@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { Material } from "@/lib/mock-data"
+import type { Material, StoneBlock } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { getStoneInventory, stoneSectionHref, type StoneInventoryKind } from "@/lib/stone-inventory"
 
@@ -16,12 +16,14 @@ const inventoryActions: {
 
 export function StoneInventoryLinks({
   material,
+  lots = [],
   className,
 }: {
   material: Material
+  lots?: StoneBlock[]
   className?: string
 }) {
-  const inventory = getStoneInventory(material)
+  const inventory = getStoneInventory(material, lots)
 
   return (
     <nav

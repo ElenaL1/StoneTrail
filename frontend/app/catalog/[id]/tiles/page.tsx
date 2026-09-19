@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Clock, Layers } from "lucide-react"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
-import { getStoneById, hasTilesInStock } from "@/lib/stone-inventory"
+import { catalogApi } from "@/lib/catalog/api-client"
+import { hasTilesInStock } from "@/lib/stone-inventory"
 
 export default async function StoneTilesPage({
   params,
@@ -10,7 +11,7 @@ export default async function StoneTilesPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const material = getStoneById(id)
+  const material = await catalogApi.getStone(id)
 
   if (!material) {
     notFound()

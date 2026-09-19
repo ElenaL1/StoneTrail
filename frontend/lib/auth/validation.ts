@@ -31,7 +31,11 @@ export function getPasswordStrength(password: string): PasswordStrength {
   return "weak"
 }
 
-export function validatePersonName(value: string, field: "firstName" | "lastName" | "nickname"): string | undefined {
+export function validatePersonName(
+  value: string,
+  field: "firstName" | "lastName" | "nickname",
+  required = true,
+): string | undefined {
   const trimmed = value.trim()
   if (field === "nickname") {
     if (!trimmed) return AUTH_MESSAGES.nicknameRequired
@@ -39,11 +43,11 @@ export function validatePersonName(value: string, field: "firstName" | "lastName
     return undefined
   }
   if (field === "firstName") {
-    if (!trimmed) return AUTH_MESSAGES.firstNameRequired
+    if (!trimmed) return required ? AUTH_MESSAGES.firstNameRequired : undefined
     if (trimmed.length < NAME_MIN_LENGTH) return AUTH_MESSAGES.firstNameMin
     return undefined
   }
-  if (!trimmed) return AUTH_MESSAGES.lastNameRequired
+  if (!trimmed) return required ? AUTH_MESSAGES.lastNameRequired : undefined
   if (trimmed.length < NAME_MIN_LENGTH) return AUTH_MESSAGES.lastNameMin
   return undefined
 }
@@ -90,18 +94,12 @@ export function normalizeWebsite(website: string): string {
 export function validateRegisterInput(input: RegisterInput): AuthFieldErrors {
   const errors: AuthFieldErrors = {}
   const nickname = validatePersonName(input.nickname, "nickname")
-  const firstName = validatePersonName(input.firstName, "firstName")
-  const lastName = validatePersonName(input.lastName, "lastName")
   const email = validateEmailValue(input.email)
   const password = validatePassword(input.password)
-  const confirmPassword = validatePasswordConfirmation(input.password, input.confirmPassword)
 
   if (nickname) errors.nickname = nickname
-  if (firstName) errors.firstName = firstName
-  if (lastName) errors.lastName = lastName
   if (email) errors.email = email
   if (password) errors.password = password
-  if (confirmPassword) errors.confirmPassword = confirmPassword
   if (!input.termsAccepted) errors.termsAccepted = AUTH_MESSAGES.termsRequired
   return errors
 }
@@ -109,8 +107,8 @@ export function validateRegisterInput(input: RegisterInput): AuthFieldErrors {
 export function validateProfileInput(input: ProfileUpdateInput): AuthFieldErrors {
   const errors: AuthFieldErrors = {}
   const nickname = validatePersonName(input.nickname, "nickname")
-  const firstName = validatePersonName(input.firstName, "firstName")
-  const lastName = validatePersonName(input.lastName, "lastName")
+  const firstName = validatePersonName(input.firstName, "firstName", false)
+  const lastName = validatePersonName(input.lastName, "lastName", false)
   const website = validateWebsite(input.website)
 
   if (nickname) errors.nickname = nickname

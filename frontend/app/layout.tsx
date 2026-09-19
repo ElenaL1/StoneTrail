@@ -55,6 +55,7 @@ export default function RootLayout({
     <html
       lang="ru"
       className={`${inter.variable} ${manrope.variable} bg-background`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="font-sans antialiased">

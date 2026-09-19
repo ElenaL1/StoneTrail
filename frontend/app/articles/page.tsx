@@ -9,6 +9,7 @@ import { ArticleCard } from "@/components/articles/article-card"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { ContentEnter } from "@/components/content-enter"
 
 type SortOption = "newest" | "popular" | "favorites"
 type CategoryFilter = "all" | (typeof articleCategories)[number]
@@ -110,33 +111,35 @@ export default function ArticlesPage() {
         </div>
       </div>
 
-      {filteredArticles.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-xl text-muted-foreground">
-            {emptyMessage()}
-          </p>
-          {sort === "favorites" && !user && (
-            <OpenAuthButton
-              variant="link"
-              view="login"
-              next="/articles"
-              className="mt-2 text-primary"
-            >
-              Войдите, чтобы собирать избранное
-            </OpenAuthButton>
-          )}
-        </div>
-      )}
+      <ContentEnter swapKey={`${sort}-${category}`}>
+        {filteredArticles.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-xl text-muted-foreground">
+              {emptyMessage()}
+            </p>
+            {sort === "favorites" && !user && (
+              <OpenAuthButton
+                variant="link"
+                view="login"
+                next="/articles"
+                className="mt-2 text-primary"
+              >
+                Войдите, чтобы собирать избранное
+              </OpenAuthButton>
+            )}
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredArticles.map((article) => (
-          <ArticleCard
-            key={article.id}
-            article={article}
-            isLiked={Boolean(user && article.likes.includes(user.id))}
-          />
-        ))}
-      </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredArticles.map((article) => (
+            <ArticleCard
+              key={article.id}
+              article={article}
+              isLiked={Boolean(user && article.likes.includes(user.id))}
+            />
+          ))}
+        </div>
+      </ContentEnter>
     </div>
     </div>
   )

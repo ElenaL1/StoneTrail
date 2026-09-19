@@ -25,6 +25,7 @@ import { ProductCategoryTabs } from "@/components/products/product-category-tabs
 import { CustomGroupTabs } from "@/components/products/custom-group-tabs"
 import { ProductFilters } from "@/components/products/product-filters"
 import { ProductCard } from "@/components/products/product-card"
+import { ContentEnter } from "@/components/content-enter"
 import { Button } from "@/components/ui/button"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
@@ -195,50 +196,52 @@ export function ProductCatalog({ products }: { products: Product[] }) {
         />
 
         <div id="product-catalog-panel" role="tabpanel" aria-labelledby={`product-category-${category}`}>
-          {filtered.length > 0 ? (
-            <>
-              <p className="mb-5 text-sm text-muted-foreground">
-                {formatProductCount(filtered.length, category)}
-                {summaryParts.length > 0 && <> · {summaryParts.join(" · ")}</>}
-              </p>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {visible.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-              {hasMore && (
-                <div className="mt-10 flex justify-center">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-11 min-h-11 px-6"
-                    onClick={() => setVisibleCount((count) => count + PRODUCT_PAGE_SIZE)}
-                  >
-                    Показать ещё
-                  </Button>
+          <ContentEnter swapKey={`${category}-${customGroup}`}>
+            {filtered.length > 0 ? (
+              <>
+                <p className="mb-5 text-sm text-muted-foreground">
+                  {formatProductCount(filtered.length, category)}
+                  {summaryParts.length > 0 && <> · {summaryParts.join(" · ")}</>}
+                </p>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {visible.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-secondary/10 px-5 py-24 text-center">
-              <div className="mb-4 rounded-full bg-muted p-4">
-                <PencilRuler className="size-8 text-muted-foreground" />
+                {hasMore && (
+                  <div className="mt-10 flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 min-h-11 px-6"
+                      onClick={() => setVisibleCount((count) => count + PRODUCT_PAGE_SIZE)}
+                    >
+                      Показать ещё
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-secondary/10 px-5 py-24 text-center">
+                <div className="mb-4 rounded-full bg-muted p-4">
+                  <PencilRuler className="size-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">
+                  {hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL
+                    ? "Ничего не найдено"
+                    : categoryMeta.emptyTitle}
+                </h3>
+                <p className="mx-auto mt-2 max-w-xs text-muted-foreground">
+                  {categoryMeta.emptyDescription}
+                </p>
+                {(hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL) && (
+                  <Button type="button" variant="outline" className="mt-6 h-11 min-h-11" onClick={resetFilters}>
+                    Сбросить фильтры
+                  </Button>
+                )}
               </div>
-              <h3 className="text-xl font-semibold text-foreground">
-                {hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL
-                  ? "Ничего не найдено"
-                  : categoryMeta.emptyTitle}
-              </h3>
-              <p className="mx-auto mt-2 max-w-xs text-muted-foreground">
-                {categoryMeta.emptyDescription}
-              </p>
-              {(hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL) && (
-                <Button type="button" variant="outline" className="mt-6 h-11 min-h-11" onClick={resetFilters}>
-                  Сбросить фильтры
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+          </ContentEnter>
         </div>
 
         <section className="mt-20" aria-labelledby="how-we-work-heading">

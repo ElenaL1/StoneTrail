@@ -6,7 +6,7 @@
 
 Сообщество — отраслевой хаб: форум, экспертные статьи, новости и услуги (подбор, раскрой, логистика и консультации). Интерфейс на русском.
 
-Данные на фронтенде пока моковые: каталог и контент живут в `frontend/lib/mock-data.ts`, авторизация — в `frontend/lib/auth/mock-auth-service.ts` (localStorage). Отдельного backend-сервиса в репозитории пока нет.
+Каталог камня и изделий читается из FastAPI `/catalog/*`. Новости, форум и статьи на фронтенде пока моковые (`frontend/lib/mock-data.ts`). Авторизация идёт в FastAPI `/auth/*` (см. `backend/`).
 
 ## Стек
 
@@ -21,6 +21,7 @@
 
 ```
 frontend/     Next.js-приложение
+backend/     FastAPI + PostgreSQL
 infra/        docker-compose и nginx
 .github/      CI/CD (тесты, сборка образа, деплой)
 ```
@@ -55,19 +56,28 @@ pnpm start        # запуск собранного приложения
 
 ## Docker
 
-Сборка образа фронтенда:
+Прод собирается в `infra/`: nginx на порту **8080** проксирует `/` на фронт и `/auth`, `/catalog`, `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Образы публикует CI (`:${GITHUB_SHA}` и `:latest`); на сервере compose поднимает SHA-теги.
+
+Один раз на VPS:
+
+```bash
+cd ~/stonetrail/infra
+cp .env.example .env   # или создать .env вручную
+# задать DOCKER_USERNAME и POSTGRES_PASSWORD
+```
+
+CI делает `docker compose pull && docker compose up -d`. После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
+
+```bash
+cd ~/stonetrail/infra
+docker compose exec backend python scripts/seed_catalog.py
+```
+
+Локальная сборка образов:
 
 ```bash
 docker build -t stonetrail-frontend ./frontend
-docker run --rm -p 3000:3000 stonetrail-frontend
+docker build -t stonetrail-backend ./backend
 ```
 
-Прод-схема в `infra/docker-compose.yaml`: контейнер фронтенда за nginx на порту **8080**. Compose рассчитан на уже опубликованный образ `${DOCKER_USERNAME}/stonetrail-frontend:latest` (так его поднимает CI/CD). Для локальной проверки после `docker build`:
-
-```bash
-docker tag stonetrail-frontend "$DOCKER_USERNAME/stonetrail-frontend:latest"
-cd infra
-docker compose up
-```
-
-Сайт будет доступен на [http://localhost:8080](http://localhost:8080).
+Сайт за compose: [http://localhost:8080](http://localhost:8080). Локальная разработка по-прежнему два процесса (`pnpm dev` + `uvicorn`) и `NEXT_PUBLIC_API_URL=http://localhost:8000`.

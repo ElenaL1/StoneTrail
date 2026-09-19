@@ -7,11 +7,28 @@ import { cn } from "@/lib/utils"
 
 type PasswordInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> & {
   error?: string
+  visible?: boolean
+  onVisibleChange?: (visible: boolean) => void
 }
 
-export function PasswordInput({ error, className, id, ...props }: PasswordInputProps) {
-  const [visible, setVisible] = useState(false)
+export function PasswordInput({
+  error,
+  className,
+  id,
+  visible: visibleProp,
+  onVisibleChange,
+  ...props
+}: PasswordInputProps) {
+  const [uncontrolledVisible, setUncontrolledVisible] = useState(false)
+  const isControlled = visibleProp !== undefined
+  const visible = isControlled ? visibleProp : uncontrolledVisible
   const label = visible ? "Скрыть пароль" : "Показать пароль"
+
+  const toggleVisible = () => {
+    const next = !visible
+    if (!isControlled) setUncontrolledVisible(next)
+    onVisibleChange?.(next)
+  }
 
   return (
     <div className="relative">
@@ -26,7 +43,7 @@ export function PasswordInput({ error, className, id, ...props }: PasswordInputP
       />
       <button
         type="button"
-        onClick={() => setVisible((value) => !value)}
+        onClick={toggleVisible}
         className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={label}
         aria-pressed={visible}

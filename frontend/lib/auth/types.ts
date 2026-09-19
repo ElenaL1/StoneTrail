@@ -1,4 +1,4 @@
-export type UserRole = "user" | "moderator" | "admin"
+export type UserRole = "user" | "professional" | "moderator" | "editor" | "admin"
 
 export const ACTIVITY_TYPES = [
   "Архитектор",
@@ -41,14 +41,8 @@ export type PublicUser = {
 
 export type RegisterInput = {
   nickname: string
-  firstName: string
-  lastName: string
   email: string
   password: string
-  confirmPassword: string
-  company: string
-  position: string
-  activityType: string
   termsAccepted: boolean
   marketingConsent: boolean
 }
@@ -76,6 +70,7 @@ export type ProfileUpdateInput = {
 
 export type AuthErrorCode =
   | "email_taken"
+  | "nickname_taken"
   | "invalid_credentials"
   | "rate_limited"
   | "unverified"
@@ -104,11 +99,12 @@ export type AuthResult<T = PublicUser> = AuthSuccess<T> | AuthFailure
 
 export type ResendResult = {
   resendAvailableAt: number
-  demoVerificationPath: string
+  demoVerificationPath?: string | null
 }
 
 export type PasswordResetRequestResult = {
   submitted: true
+  demoResetPath?: string | null
 }
 
 export type PasswordResetResult = {

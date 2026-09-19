@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { catalogProducts } from "@/lib/mock-data"
+import { catalogApi } from "@/lib/catalog/api-client"
 import { ProductCatalog } from "@/components/products/product-catalog"
 import { cn } from "@/lib/utils"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
@@ -32,10 +32,11 @@ function ProductCatalogFallback() {
   )
 }
 
-export default function ProductsCatalogPage() {
+export default async function ProductsCatalogPage() {
+  const products = await catalogApi.listProducts()
   return (
     <Suspense fallback={<ProductCatalogFallback />}>
-      <ProductCatalog products={catalogProducts} />
+      <ProductCatalog products={products} />
     </Suspense>
   )
 }

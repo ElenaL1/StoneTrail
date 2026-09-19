@@ -6,8 +6,11 @@ Next.js-приложение платформы StoneTrail. Описание п�
 
 ```bash
 pnpm install
+cp .env.example .env.local
 pnpm dev
 ```
+
+Нужны **два процесса**: этот фронт и FastAPI (`uvicorn` из `backend/`). Локально cookie `st_session` ставит API на `http://localhost:8000` (`NEXT_PUBLIC_API_URL`). В production браузер ходит same-origin через nginx; RSC — в `API_URL` (server-only).
 
 Приложение: [http://localhost:3000](http://localhost:3000). Нужны Node.js 22+ и pnpm.
 
@@ -18,6 +21,8 @@ pnpm build
 pnpm start
 ```
 
+При `AUTH_DEBUG_LINKS=true` на бэкенде ответы register / resend / change-email / forgot содержат `demoVerificationPath` или `demoResetPath` — локальные ссылки для разработки. В production письма уходят через SMTP, флаг выключают.
+
 ## Стек
 
 - Next.js 16 (App Router) и React 19
@@ -27,7 +32,7 @@ pnpm start
 - lucide-react
 - Vitest
 
-Данные пока моковые: каталог и контент в [`lib/mock-data.ts`](lib/mock-data.ts), авторизация — [`lib/auth/mock-auth-service.ts`](lib/auth/mock-auth-service.ts) (localStorage).
+Авторизация — [`lib/auth/api-client.ts`](lib/auth/api-client.ts) → FastAPI `/auth/*`. Каталог — [`lib/catalog/api-client.ts`](lib/catalog/api-client.ts) → `/catalog/*`. Новости, форум и статьи пока в [`lib/mock-data.ts`](lib/mock-data.ts).
 
 ## Структура
 
@@ -38,4 +43,4 @@ pnpm start
 
 ## Разработка
 
-Иконки — только `lucide-react`. Условные классы — через `cn()` из `@/lib/utils`. 
+Иконки — только `lucide-react`. Условные классы — через `cn()` из `@/lib/utils`.

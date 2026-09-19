@@ -35,19 +35,8 @@ export const AUTH_MESSAGES = {
 
 export const PASSWORD_MIN_LENGTH = 8
 export const NAME_MIN_LENGTH = 2
-export const RESEND_COOLDOWN_MS = 60_000
-export const LOGIN_MAX_ATTEMPTS = 5
-export const LOGIN_WINDOW_MS = 15 * 60_000
-export const REGISTER_MAX_ATTEMPTS = 3
-export const REGISTER_WINDOW_MS = 15 * 60_000
-export const FORGOT_MAX_ATTEMPTS = 5
-export const FORGOT_WINDOW_MS = 15 * 60_000
-export const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60_000
-export const RESET_TOKEN_TTL_MS = 60 * 60_000
-export const SESSION_TTL_MS = 7 * 24 * 60 * 60_000
 export const AVATAR_MAX_BYTES = 1_000_000
 export const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
-export const MOCK_NETWORK_DELAY_MS = 500
 
 export const COUNTRIES = [
   "Россия",
@@ -61,11 +50,3 @@ export const COUNTRIES = [
   "Таджикистан",
   "Другая",
 ] as const
-
-export const STORAGE_KEYS = {
-  users: "st_auth_users",
-  session: "st_auth_session",
-  tokens: "st_auth_tokens",
-  rate: "st_auth_rate",
-  inbox: "st_auth_inbox",
-} as const

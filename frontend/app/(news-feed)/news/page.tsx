@@ -11,6 +11,7 @@ import { NewsCard } from "@/components/news/news-card"
 import { NewsListItem } from "@/components/news/news-list-item"
 import { arePromotionsEnabled, isPromotionActive } from "@/lib/promo-utils"
 import { useNews } from "@/lib/news-context"
+import { ContentEnter } from "@/components/content-enter"
 
 type FilterType = "all" | "active-promotion" | "news"
 type ViewMode = "grid" | "list"
@@ -124,33 +125,35 @@ export default function NewsPage() {
         </div>
       </div>
 
-      {filteredFeed.length > 0 ? (
-        viewMode === "grid" ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredFeed.map((item) => (
-              item.type === 'promotion' 
-                ? <PromotionCard key={item.data.id} promotion={item.data as Promotion} />
-                : <NewsCard key={item.data.id} news={item.data as IndustryNews} />
-            ))}
-          </div>
+      <ContentEnter swapKey={`${activeFilter}-${viewMode}`}>
+        {filteredFeed.length > 0 ? (
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredFeed.map((item) => (
+                item.type === 'promotion' 
+                  ? <PromotionCard key={item.data.id} promotion={item.data as Promotion} />
+                  : <NewsCard key={item.data.id} news={item.data as IndustryNews} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col border border-border rounded-2xl bg-card overflow-hidden">
+              {filteredFeed.map((item) => (
+                <NewsListItem key={item.data.id} item={item as any} />
+              ))}
+            </div>
+          )
         ) : (
-          <div className="flex flex-col border border-border rounded-2xl bg-card overflow-hidden">
-            {filteredFeed.map((item) => (
-              <NewsListItem key={item.data.id} item={item as any} />
-            ))}
+          <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-border rounded-3xl bg-secondary/10">
+            <div className="mb-4 rounded-full bg-muted p-4">
+              <List className="size-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground">Ничего не найдено</h3>
+            <p className="text-muted-foreground max-w-xs mx-auto mt-2">
+              В этой категории пока нет записей. Попробуйте сменить фильтр.
+            </p>
           </div>
-        )
-      ) : (
-        <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-border rounded-3xl bg-secondary/10">
-          <div className="mb-4 rounded-full bg-muted p-4">
-            <List className="size-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-semibold text-foreground">Ничего не найдено</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto mt-2">
-            В этой категории пока нет записей. Попробуйте сменить фильтр.
-          </p>
-        </div>
-      )}
+        )}
+      </ContentEnter>
 
       <div className="mt-24 flex justify-center sm:justify-start">
         <Button variant="ghost" asChild>

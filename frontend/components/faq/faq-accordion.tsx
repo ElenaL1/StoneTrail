@@ -30,7 +30,7 @@ export function FaqAccordions({ items }: { items: FaqItem[] }) {
               />
             </button>
             {active && (
-              <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
+              <p className="content-enter px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
             )}
           </div>
         )

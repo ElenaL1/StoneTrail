@@ -46,7 +46,7 @@ export function SiteHeader() {
   }
 
   const handleLogout = () => {
-    logout()
+    void logout()
     setOpen(false)
     router.push("/")
   }

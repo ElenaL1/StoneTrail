@@ -5,20 +5,13 @@ import { RegisterFooterFromQuery, RegisterFormFromQuery } from "@/components/aut
 
 export const metadata = {
   title: "Создать аккаунт — StoneTrail",
-  description:
-    "Присоединитесь к профессиональному сообществу StoneTrail: обсуждения, экспертные материалы и взаимодействие специалистов каменной индустрии.",
+  description: "Создайте аккаунт StoneTrail, чтобы участвовать в обсуждениях и пользоваться материалами сообщества.",
 }
 
 function RegisterContent() {
   return (
     <GuestOnly>
-      <AuthPageShell
-        wide
-        title="Создать аккаунт"
-        subtitle="Присоединитесь к профессиональному сообществу StoneTrail"
-        description="Получите доступ к профессиональным обсуждениям, экспертным материалам и возможностям взаимодействия с участниками каменной индустрии."
-        footer={<RegisterFooterFromQuery />}
-      >
+      <AuthPageShell title="Создать аккаунт" footer={<RegisterFooterFromQuery />}>
         <RegisterFormFromQuery />
       </AuthPageShell>
     </GuestOnly>
