@@ -48,12 +48,12 @@ export function isNotFound(error: unknown): boolean {
 
 export const catalogApi = {
   listStones(): Promise<Material[]> {
-    return request<Material[]>("/catalog/stones")
+    return request<Material[]>("/api/catalog/stones")
   },
 
   async getStone(slug: string): Promise<Material | null> {
     try {
-      return await request<Material>(`/catalog/stones/${encodeURIComponent(slug)}`)
+      return await request<Material>(`/api/catalog/stones/${encodeURIComponent(slug)}`)
     } catch (error) {
       if (isNotFound(error)) return null
       throw error
@@ -61,12 +61,12 @@ export const catalogApi = {
   },
 
   listBlocks(): Promise<StoneBlock[]> {
-    return request<StoneBlock[]>("/catalog/blocks")
+    return request<StoneBlock[]>("/api/catalog/blocks")
   },
 
   async getBlock(slug: string): Promise<StoneBlock | null> {
     try {
-      return await request<StoneBlock>(`/catalog/blocks/${encodeURIComponent(slug)}`)
+      return await request<StoneBlock>(`/api/catalog/blocks/${encodeURIComponent(slug)}`)
     } catch (error) {
       if (isNotFound(error)) return null
       throw error
@@ -78,12 +78,12 @@ export const catalogApi = {
     if (params?.category) search.set("category", params.category)
     if (params?.group) search.set("group", params.group)
     const query = search.toString()
-    return request<Product[]>(`/catalog/products${query ? `?${query}` : ""}`)
+    return request<Product[]>(`/api/catalog/products${query ? `?${query}` : ""}`)
   },
 
   async getProduct(slug: string): Promise<Product | null> {
     try {
-      return await request<Product>(`/catalog/products/${encodeURIComponent(slug)}`)
+      return await request<Product>(`/api/catalog/products/${encodeURIComponent(slug)}`)
     } catch (error) {
       if (isNotFound(error)) return null
       throw error

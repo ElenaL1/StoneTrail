@@ -32,7 +32,7 @@ pnpm start
 - lucide-react
 - Vitest
 
-Авторизация — [`lib/auth/api-client.ts`](lib/auth/api-client.ts) → FastAPI `/auth/*`. Каталог — [`lib/catalog/api-client.ts`](lib/catalog/api-client.ts) → `/catalog/*`. Новости, форум и статьи пока в [`lib/mock-data.ts`](lib/mock-data.ts).
+Авторизация — [`lib/auth/api-client.ts`](lib/auth/api-client.ts) → FastAPI `/auth/*`. Каталог — [`lib/catalog/api-client.ts`](lib/catalog/api-client.ts) → `/api/catalog/*`. Новости, форум и статьи пока в [`lib/mock-data.ts`](lib/mock-data.ts).
 
 ## Структура
 

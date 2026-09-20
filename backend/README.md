@@ -2,7 +2,7 @@
 
 Каркас FastAPI по слоям из `frontend/AI_RULES.md`. Источник схемы — SQLAlchemy-модели и Alembic. Ручной DDL шага 1 (`schema/001_initial.sql`) — эталон, его больше не меняем.
 
-Локально фронтенд ходит в FastAPI напрямую (`NEXT_PUBLIC_API_URL=http://localhost:8000`). В Docker браузер бьёт в same-origin `/auth` и `/catalog` через nginx; RSC использует server-only `API_URL=http://backend:8000`. Cookie `st_session` нужна только для auth.
+Локально фронтенд ходит в FastAPI напрямую (`NEXT_PUBLIC_API_URL=http://localhost:8000`). В Docker браузер бьёт в same-origin `/auth` и `/api/catalog` через nginx; RSC использует server-only `API_URL=http://backend:8000`. Cookie `st_session` нужна только для auth.
 
 ## Требования
 
@@ -35,9 +35,9 @@ python scripts/seed_catalog.py
 
 | Метод | Путь |
 | --- | --- |
-| GET | `/catalog/stones` и `/catalog/stones/{slug}` |
-| GET | `/catalog/blocks` и `/catalog/blocks/{slug}` |
-| GET | `/catalog/products` (`?category=` `?group=` optional, unknown → `[]`) и `/catalog/products/{slug}` |
+| GET | `/api/catalog/stones` и `/api/catalog/stones/{slug}` |
+| GET | `/api/catalog/blocks` и `/api/catalog/blocks/{slug}` |
+| GET | `/api/catalog/products` (`?category=` `?group=` optional, unknown → `[]`) и `/api/catalog/products/{slug}` |
 
 Публичный `id` в JSON — slug, не UUID. Soft-delete неотличим от 404 `not_found`.
 

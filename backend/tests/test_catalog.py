@@ -105,7 +105,7 @@ async def test_list_and_get_stone_camel_case(client: AsyncClient) -> None:
         )
         await session.commit()
 
-    listing = await client.get("/catalog/stones")
+    listing = await client.get("/api/catalog/stones")
     assert listing.status_code == 200, listing.text
     rows = listing.json()
     assert len(rows) == 1
@@ -126,14 +126,14 @@ async def test_list_and_get_stone_camel_case(client: AsyncClient) -> None:
     assert "updated" in row
     assert_no_uuid(row)
 
-    detail = await client.get("/catalog/stones/calacatta-gold")
+    detail = await client.get("/api/catalog/stones/calacatta-gold")
     assert detail.status_code == 200
     assert detail.json()["id"] == "calacatta-gold"
 
 
 @pytest.mark.asyncio
 async def test_stone_not_found_and_soft_delete(client: AsyncClient) -> None:
-    missing = await client.get("/catalog/stones/missing")
+    missing = await client.get("/api/catalog/stones/missing")
     assert missing.status_code == 404
     assert missing.json() == {
         "message": "Не найдено.",
@@ -147,7 +147,7 @@ async def test_stone_not_found_and_soft_delete(client: AsyncClient) -> None:
         await session.commit()
         stone_id = stone.id
 
-    found = await client.get("/catalog/stones/hidden-stone")
+    found = await client.get("/api/catalog/stones/hidden-stone")
     assert found.status_code == 200
 
     async with SessionLocal() as session:
@@ -156,10 +156,10 @@ async def test_stone_not_found_and_soft_delete(client: AsyncClient) -> None:
         row.deleted_at = datetime.now(UTC)
         await session.commit()
 
-    deleted = await client.get("/catalog/stones/hidden-stone")
+    deleted = await client.get("/api/catalog/stones/hidden-stone")
     assert deleted.status_code == 404
     assert deleted.json()["code"] == "not_found"
-    listing = await client.get("/catalog/stones")
+    listing = await client.get("/api/catalog/stones")
     assert listing.json() == []
 
 
@@ -197,7 +197,7 @@ async def test_cover_fallback_and_low_stock(client: AsyncClient) -> None:
         )
         await session.commit()
 
-    data = (await client.get("/catalog/stones/white-macaubas")).json()
+    data = (await client.get("/api/catalog/stones/white-macaubas")).json()
     assert data["image"] == "/stone/first.png"
     assert data["status"] == "Мало"
     assert data["slabs"] == 1
@@ -209,7 +209,7 @@ async def test_sold_status_without_units(client: AsyncClient) -> None:
         await add_stone(session, slug="carbon-soapstone", name="Carbon Soapstone")
         await session.commit()
 
-    data = (await client.get("/catalog/stones/carbon-soapstone")).json()
+    data = (await client.get("/api/catalog/stones/carbon-soapstone")).json()
     assert data["status"] == "Продано"
     assert data["slabs"] == 0
     assert data["tiles"] == 0
@@ -259,7 +259,7 @@ async def test_blocks_and_products_filters(client: AsyncClient) -> None:
         )
         await session.commit()
 
-    blocks = await client.get("/catalog/blocks")
+    blocks = await client.get("/api/catalog/blocks")
     assert blocks.status_code == 200
     block = blocks.json()[0]
     assert block["id"] == "block-verde-alpi"
@@ -273,45 +273,45 @@ async def test_blocks_and_products_filters(client: AsyncClient) -> None:
     )
     assert_no_uuid(block)
 
-    missing_block = await client.get("/catalog/blocks/missing")
+    missing_block = await client.get("/api/catalog/blocks/missing")
     assert missing_block.status_code == 404
 
-    products = await client.get("/catalog/products")
+    products = await client.get("/api/catalog/products")
     assert {row["slug"] for row in products.json()} == {
         "slab-verde-alpi",
         "countertop-verde-alpi",
     }
 
-    slabs = await client.get("/catalog/products", params={"category": "slabs"})
+    slabs = await client.get("/api/catalog/products", params={"category": "slabs"})
     assert [row["id"] for row in slabs.json()] == ["slab-verde-alpi"]
     assert slabs.json()[0]["slabs"][0]["thickness"] == "20 мм"
 
-    unknown = await client.get("/catalog/products", params={"category": "nope"})
+    unknown = await client.get("/api/catalog/products", params={"category": "nope"})
     assert unknown.status_code == 200
     assert unknown.json() == []
 
     both = await client.get(
-        "/catalog/products", params={"category": "slabs", "group": "interior"}
+        "/api/catalog/products", params={"category": "slabs", "group": "interior"}
     )
     assert both.json() == []
 
     grouped = await client.get(
-        "/catalog/products", params={"category": "custom", "group": "interior"}
+        "/api/catalog/products", params={"category": "custom", "group": "interior"}
     )
     assert [row["slug"] for row in grouped.json()] == ["countertop-verde-alpi"]
     assert grouped.json()[0]["customGroup"] == "interior"
     assert grouped.json()[0]["status"] == "В наличии"
 
     unknown_group = await client.get(
-        "/catalog/products", params={"group": "not-a-group"}
+        "/api/catalog/products", params={"group": "not-a-group"}
     )
     assert unknown_group.json() == []
 
-    detail = await client.get("/catalog/products/slab-verde-alpi")
+    detail = await client.get("/api/catalog/products/slab-verde-alpi")
     assert detail.status_code == 200
     assert_no_uuid(detail.json())
 
-    gone = await client.get("/catalog/products/missing")
+    gone = await client.get("/api/catalog/products/missing")
     assert gone.status_code == 404
 
 
@@ -329,7 +329,7 @@ async def test_soft_deleted_product_hidden(client: AsyncClient) -> None:
         await session.commit()
         product_id = product.id
 
-    assert (await client.get("/catalog/products/slab-taj-mahal")).status_code == 200
+    assert (await client.get("/api/catalog/products/slab-taj-mahal")).status_code == 200
 
     async with SessionLocal() as session:
         row = await session.get(Product, product_id)
@@ -337,9 +337,9 @@ async def test_soft_deleted_product_hidden(client: AsyncClient) -> None:
         row.deleted_at = datetime.now(UTC)
         await session.commit()
 
-    hidden = await client.get("/catalog/products/slab-taj-mahal")
+    hidden = await client.get("/api/catalog/products/slab-taj-mahal")
     assert hidden.status_code == 404
-    listing = await client.get("/catalog/products")
+    listing = await client.get("/api/catalog/products")
     assert listing.json() == []
 
 

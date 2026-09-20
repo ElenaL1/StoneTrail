@@ -24,8 +24,8 @@ describe("catalogApi", () => {
     await catalogApi.listStones()
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
-    expect(url).toBe(`${getApiBaseUrl()}/catalog/stones`)
-    expect(url.endsWith("/catalog/stones")).toBe(true)
+    expect(url).toBe(`${getApiBaseUrl()}/api/catalog/stones`)
+    expect(url.endsWith("/api/catalog/stones")).toBe(true)
     expect(init.credentials).not.toBe("include")
   })
 
@@ -52,7 +52,7 @@ describe("catalogApi", () => {
     await catalogApi.listProducts({ category: "paving", group: "interior" })
 
     const [url] = fetchMock.mock.calls[0] as [string]
-    expect(url).toContain("/catalog/products?")
+    expect(url).toContain("/api/catalog/products?")
     expect(url).toContain("category=paving")
     expect(url).toContain("group=interior")
   })

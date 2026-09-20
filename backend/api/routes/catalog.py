@@ -6,7 +6,7 @@ from core.deps import get_catalog_service
 from schemas.catalog import MaterialOut, ProductOut, StoneBlockOut
 from services.catalog import CatalogService
 
-router = APIRouter(prefix="/catalog", tags=["catalog"])
+router = APIRouter(prefix="/api/catalog", tags=["catalog"])
 
 
 @router.get(
