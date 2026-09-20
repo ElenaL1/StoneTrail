@@ -21,7 +21,7 @@ services:
 
   backend:
     container_name: backend
-    image: ${DOCKER_USERNAME}/stonetrail-backend:${BACKEND_IMAGE_TAG:-latest}
+    image: ghcr.io/${GHCR_OWNER:-elenal1}/stonetrail-backend:${BACKEND_IMAGE_TAG:-latest}
     restart: always
     expose:
       - "8000"
@@ -44,7 +44,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: ${DOCKER_USERNAME}/stonetrail-frontend:${FRONTEND_IMAGE_TAG:-latest}
+    image: ghcr.io/${GHCR_OWNER:-elenal1}/stonetrail-frontend:${FRONTEND_IMAGE_TAG:-latest}
     restart: always
     expose:
       - "3000"

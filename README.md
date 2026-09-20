@@ -56,17 +56,17 @@ pnpm start        # запуск собранного приложения
 
 ## Docker
 
-Прод собирается в `infra/`: nginx на порту **8080** проксирует `/` на фронт и `/auth`, `/api`, `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Образы публикует CI (`:${GITHUB_SHA}` и `:latest`); на сервере compose поднимает SHA-теги.
+Прод собирается в `infra/`: nginx на порту **8080** проксирует `/` на фронт и `/auth`, `/api`, `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Образы публикует CI в GitHub Container Registry (`ghcr.io`, теги `:${GITHUB_SHA}` и `:latest`); на сервере compose поднимает SHA-теги.
 
 Один раз на VPS:
 
 ```bash
 cd ~/stonetrail/infra
 cp .env.example .env   # или создать .env вручную
-# задать DOCKER_USERNAME и POSTGRES_PASSWORD
+# задать POSTGRES_PASSWORD
 ```
 
-CI делает `docker compose pull frontend backend && docker compose up -d` (nginx и Postgres не перекачиваются, если уже есть локально). После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
+CI логинится в `ghcr.io`, делает `docker compose pull frontend backend && docker compose up -d` (nginx и Postgres не перекачиваются, если уже есть локально). После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
 
 ```bash
 cd ~/stonetrail/infra

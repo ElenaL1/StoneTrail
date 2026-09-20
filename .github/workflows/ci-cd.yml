@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   frontend-tests:
     runs-on: ubuntu-latest
@@ -67,10 +71,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lowercase GHCR owner
+        run: echo "GHCR_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
       - uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: docker/build-push-action@v6
         with:
@@ -78,8 +86,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/stonetrail-frontend:latest
-            ${{ secrets.DOCKER_USERNAME }}/stonetrail-frontend:${{ github.sha }}
+            ghcr.io/${{ env.GHCR_OWNER }}/stonetrail-frontend:latest
+            ghcr.io/${{ env.GHCR_OWNER }}/stonetrail-frontend:${{ github.sha }}
 
       - uses: docker/build-push-action@v6
         with:
@@ -87,8 +95,8 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/stonetrail-backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/stonetrail-backend:${{ github.sha }}
+            ghcr.io/${{ env.GHCR_OWNER }}/stonetrail-backend:latest
+            ghcr.io/${{ env.GHCR_OWNER }}/stonetrail-backend:${{ github.sha }}
 
   deploy:
     runs-on: self-hosted
@@ -98,15 +106,17 @@ jobs:
 
       - name: Deploy
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GHCR_OWNER: ${{ github.repository_owner }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BACKEND_IMAGE_TAG: ${{ github.sha }}
           FRONTEND_IMAGE_TAG: ${{ github.sha }}
         run: |
           set -e
+          export GHCR_OWNER=$(echo "$GHCR_OWNER" | tr '[:upper:]' '[:lower:]')
           mkdir -p "$HOME/stonetrail/infra"
           cp infra/docker-compose.yaml infra/nginx.conf "$HOME/stonetrail/infra/"
           cd "$HOME/stonetrail/infra"
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
           docker compose pull frontend backend
           docker compose up -d
