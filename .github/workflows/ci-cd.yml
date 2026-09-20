@@ -113,10 +113,31 @@ jobs:
           FRONTEND_IMAGE_TAG: ${{ github.sha }}
         run: |
           set -e
+          retry() {
+            local attempt=1
+            local max=5
+            local delay=20
+            while true; do
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -ge "$max" ]; then
+                echo "failed after ${max} attempts: $*"
+                return 1
+              fi
+              echo "attempt ${attempt} failed, retrying in ${delay}s: $*"
+              sleep "$delay"
+              attempt=$((attempt + 1))
+            done
+          }
+          login_ghcr() {
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+          }
           export GHCR_OWNER=$(echo "$GHCR_OWNER" | tr '[:upper:]' '[:lower:]')
           mkdir -p "$HOME/stonetrail/infra"
           cp infra/docker-compose.yaml infra/nginx.conf "$HOME/stonetrail/infra/"
           cd "$HOME/stonetrail/infra"
-          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-          docker compose pull frontend backend
+          retry login_ghcr
+          retry docker compose pull frontend
+          retry docker compose pull backend
           docker compose up -d
