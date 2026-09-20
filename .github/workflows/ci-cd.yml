@@ -108,5 +108,5 @@ jobs:
           cp infra/docker-compose.yaml infra/nginx.conf "$HOME/stonetrail/infra/"
           cd "$HOME/stonetrail/infra"
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker compose pull
+          docker compose pull frontend backend
           docker compose up -d

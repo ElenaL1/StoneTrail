@@ -66,7 +66,7 @@ cp .env.example .env   # или создать .env вручную
 # задать DOCKER_USERNAME и POSTGRES_PASSWORD
 ```
 
-CI делает `docker compose pull && docker compose up -d`. После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
+CI делает `docker compose pull frontend backend && docker compose up -d` (nginx и Postgres не перекачиваются, если уже есть локально). После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
 
 ```bash
 cd ~/stonetrail/infra
