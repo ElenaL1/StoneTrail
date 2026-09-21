@@ -1,4 +1,4 @@
-import { Comment } from "@/lib/mock-data"
+import { Comment } from "@/lib/types"
 import { User, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 

@@ -6,42 +6,42 @@ import { OpenAuthLink } from "@/components/auth/open-auth-link"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
-import { useArticles } from "@/lib/article-context"
+import { articlesApi } from "@/lib/articles/api-client"
+import { ContentRequestError } from "@/lib/content-request"
 import { Quote } from "lucide-react"
 
 interface ArticleCommentFormProps {
-  articleId: string
+  slug: string
   quote?: string
   onCommentAdded: () => void
 }
 
 export function ArticleCommentForm({
-  articleId,
+  slug,
   quote,
   onCommentAdded,
 }: ArticleCommentFormProps) {
   const { user } = useAuth()
-  const { addComment } = useArticles()
   const [text, setText] = useState("")
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
   const canComment = Boolean(user?.emailVerified)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canComment || !text.trim()) return
-
-    const finalContent = quote
-      ? `\n\n> ${quote}\n\n${text}`
-      : text
-
-    addComment({
-      articleId,
-      author: user!.name,
-      text: finalContent,
-      parentId: undefined,
-    })
-
-    setText("")
-    onCommentAdded()
+    const finalContent = quote ? `> ${quote}\n\n${text}` : text
+    setSubmitting(true)
+    setError("")
+    try {
+      await articlesApi.addComment(slug, finalContent)
+      setText("")
+      onCommentAdded()
+    } catch (err) {
+      setError(err instanceof ContentRequestError ? err.message : "Не удалось отправить комментарий.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -64,10 +64,12 @@ export function ArticleCommentForm({
           />
         </div>
 
+        {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={!canComment || !text.trim()}
+            disabled={!canComment || !text.trim() || submitting}
             className="px-8"
           >
             Отправить

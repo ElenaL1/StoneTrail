@@ -62,6 +62,7 @@ async def test_register_then_me(client: AsyncClient) -> None:
     assert data["lastName"] == ""
     assert data["activityType"] == ""
     assert data["emailVerified"] is False
+    assert data["canPublishArticles"] is False
     assert data["role"] == "user"
     assert data["avatar"] == ""
     assert "demoVerificationPath" in data

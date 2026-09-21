@@ -5,9 +5,11 @@ import { Search, X, Gem, MessageSquare, ArrowRight, FileText, Hammer } from "luc
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { catalogApi } from "@/lib/catalog/api-client"
+import { articlesApi } from "@/lib/articles/api-client"
+import { forumApi } from "@/lib/forum/api-client"
 import { filterResults, getPopularQueries, type SearchCategory, SEARCH_CATEGORIES } from "@/lib/search-utils"
 import { ContentEnter } from "@/components/content-enter"
-import type { Material, Product } from "@/lib/types"
+import type { Article, ForumPost, Material, Product } from "@/lib/types"
 
 interface SearchModalProps {
   isOpen: boolean
@@ -19,6 +21,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [category, setCategory] = useState<SearchCategory>("All")
   const [stones, setStones] = useState<Material[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [posts, setPosts] = useState<ForumPost[]>([])
+  const [articles, setArticles] = useState<Article[]>([])
   const loadedRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -32,11 +36,18 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     if (!isOpen || loadedRef.current) return
     loadedRef.current = true
     let cancelled = false
-    void Promise.all([catalogApi.listStones(), catalogApi.listProducts()])
-      .then(([nextStones, nextProducts]) => {
+    void Promise.all([
+      catalogApi.listStones(),
+      catalogApi.listProducts(),
+      forumApi.listPosts(),
+      articlesApi.listPublished(),
+    ])
+      .then(([nextStones, nextProducts, nextPosts, nextArticles]) => {
         if (!cancelled) {
           setStones(nextStones)
           setProducts(nextProducts)
+          setPosts(nextPosts)
+          setArticles(nextArticles)
         }
       })
       .catch(() => {
@@ -57,7 +68,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   if (!isOpen) return null
 
-  const results = filterResults(query, category, { stones, products })
+  const results = filterResults(query, category, { stones, products, posts, articles })
 
   const categories: { id: SearchCategory; label: string }[] = [
     { id: "All", label: "Все" },
@@ -151,8 +162,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         : result.type === "FinishedProduct"
                           ? `/catalog/products/${result.data.slug}`
                           : result.type === "ForumPost"
-                            ? `/community/${result.data.id}`
-                            : `/articles/${result.data.id}`
+                            ? `/community/${result.data.slug}`
+                            : `/articles/${result.data.slug}`
                     return (
                       <div
                         key={`${result.type}-${idx}`}

@@ -50,6 +50,7 @@ class PublicUser(CamelModel):
     website: str
     phone: str
     email_verified: bool
+    can_publish_articles: bool = False
     role: UserRole
     marketing_consent: bool
     created_at: datetime

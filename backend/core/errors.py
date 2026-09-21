@@ -86,6 +86,14 @@ class AuthError(ApiError):
         )
 
     @classmethod
+    def unverified(cls) -> AuthError:
+        return cls(403, "unverified", messages.EMAIL_UNVERIFIED)
+
+    @classmethod
+    def forbidden(cls) -> AuthError:
+        return cls(403, "forbidden", messages.FORBIDDEN)
+
+    @classmethod
     def token(cls, code: str, *, verify: bool) -> AuthError:
         if code == "token_used":
             message = messages.VERIFY_USED if verify else messages.RESET_USED

@@ -85,6 +85,9 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     email_verified: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
+    can_publish_articles: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
     role: Mapped[UserRole] = mapped_column(
         pg_enum(UserRole, "user_role"),
         nullable=False,

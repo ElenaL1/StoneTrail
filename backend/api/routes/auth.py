@@ -47,6 +47,7 @@ def _public_user(user: User) -> dict[str, object]:
         website=user.website,
         phone=user.phone,
         email_verified=user.email_verified,
+        can_publish_articles=user.can_publish_articles,
         role=user.role,
         marketing_consent=user.marketing_consent,
         created_at=user.created_at,

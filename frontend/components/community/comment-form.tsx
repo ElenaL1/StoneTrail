@@ -6,25 +6,36 @@ import { OpenAuthLink } from "@/components/auth/open-auth-link"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
+import { forumApi } from "@/lib/forum/api-client"
+import { ContentRequestError } from "@/lib/content-request"
 import { Send } from "lucide-react"
 
 interface CommentFormProps {
-  postId: string
+  slug: string
   onCommentAdded: () => void
 }
 
-export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
+export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
   const { user } = useAuth()
   const [text, setText] = useState("")
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
   const canComment = Boolean(user?.emailVerified)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canComment || !text.trim()) return
-
-    setText("")
-    onCommentAdded()
-    alert("Комментарий добавлен (имитация)!")
+    setSubmitting(true)
+    setError("")
+    try {
+      await forumApi.addComment(slug, text.trim())
+      setText("")
+      onCommentAdded()
+    } catch (err) {
+      setError(err instanceof ContentRequestError ? err.message : "Не удалось отправить комментарий.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -44,13 +55,14 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
           <Button
             size="icon"
             type="submit"
-            disabled={!canComment || !text.trim()}
+            disabled={!canComment || !text.trim() || submitting}
             className="size-8"
           >
             <Send className="size-4" />
           </Button>
         </div>
       </div>
+      {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
       {!user ? (
         <p className="text-sm text-muted-foreground">
           <OpenAuthLink>Войдите</OpenAuthLink>

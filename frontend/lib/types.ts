@@ -156,37 +156,64 @@ export type IndustryNews = {
 
 export type ForumPost = {
   id: string
+  slug: string
   title: string
   author: string
   category: string
+  categoryId: string
   date: string
   excerpt: string
   content: string
+  commentCount: number
+  comments: Comment[]
 }
 
 export type Comment = {
   id: string
-  postId: string
+  postId?: string
   author: string
   text: string
   date: string
 }
 
+export type ContentCategory = {
+  id: string
+  code: string
+  label: string
+}
+
+export type ArticleStatus =
+  | "draft"
+  | "pending_review"
+  | "needs_revision"
+  | "rejected"
+  | "published"
+  | "archived"
+
 export type Article = {
   id: string
+  slug: string
   title: string
   category: string
+  categoryId: string
   date: string
   excerpt: string
   content: string
   imageUrl: string
   readTime: string
-  likes: string[]
+  likesCount: number
+  liked: boolean
+  author: string
+  authorId: string | null
+  publicationStatus: ArticleStatus
+  moderationNote: string
+  commentCount: number
+  comments: ArticleComment[]
 }
 
 export type ArticleComment = {
   id: string
-  articleId: string
+  articleId?: string
   author: string
   text: string
   date: string

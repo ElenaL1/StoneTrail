@@ -51,6 +51,7 @@ function verifiedUser(overrides: Partial<PublicUser> = {}): PublicUser {
     website: "",
     phone: "",
     emailVerified: true,
+    canPublishArticles: false,
     role: "user",
     marketingConsent: false,
     createdAt: "2026-01-01T00:00:00.000Z",

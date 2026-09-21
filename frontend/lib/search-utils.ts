@@ -1,5 +1,4 @@
 import type { Article, ForumPost, Material, Product } from "@/lib/types"
-import { mockArticles, mockForumPosts } from "@/lib/mock-data"
 import { getProductTypeLabel } from "./product-catalog"
 
 export type SearchCategory =
@@ -29,11 +28,18 @@ export const SEARCH_CATEGORIES = [
 export function filterResults(
   query: string,
   category: SearchCategory,
-  catalog: { stones?: Material[]; products?: Product[] } = {},
+  catalog: {
+    stones?: Material[]
+    products?: Product[]
+    posts?: ForumPost[]
+    articles?: Article[]
+  } = {},
 ): SearchResult[] {
   const lowerQuery = query.toLowerCase().trim()
   const stones = catalog.stones ?? []
   const catalogProducts = catalog.products ?? []
+  const forumPosts = catalog.posts ?? []
+  const articlesFeed = catalog.articles ?? []
 
   const materials: SearchResult[] = stones
     .filter(
@@ -59,7 +65,7 @@ export function filterResults(
     )
     .map((p) => ({ type: "FinishedProduct", data: p }))
 
-  const posts: SearchResult[] = mockForumPosts
+  const posts: SearchResult[] = forumPosts
     .filter(
       (p) =>
         p.title.toLowerCase().includes(lowerQuery) ||
@@ -68,7 +74,7 @@ export function filterResults(
     )
     .map((p) => ({ type: "ForumPost", data: p }))
 
-  const articles: SearchResult[] = mockArticles
+  const articles: SearchResult[] = articlesFeed
     .filter(
       (a) =>
         a.title.toLowerCase().includes(lowerQuery) ||

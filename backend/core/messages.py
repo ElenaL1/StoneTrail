@@ -24,6 +24,19 @@ RESET_EXPIRED = "Ссылка для восстановления пароля �
 RESET_USED = "Эта ссылка уже использована. Запросите новую."
 WEBSITE_INVALID = "Укажите корректный адрес сайта."
 ACTIVITY_INVALID = "Укажите вид деятельности из списка."
+EMAIL_UNVERIFIED = "Подтвердите email, чтобы публиковать материалы."
+FORBIDDEN = "Недостаточно прав для этого действия."
+TITLE_REQUIRED = "Укажите заголовок."
+CONTENT_REQUIRED = "Добавьте текст материала."
+CATEGORY_REQUIRED = "Выберите категорию."
+CATEGORY_INVALID = "Категория недоступна."
+COVER_URL_INVALID = "Укажите корректный адрес обложки."
+MODERATION_NOTE_REQUIRED = "Укажите комментарий для автора."
+ARTICLE_NOT_EDITABLE = "Эту статью сейчас нельзя редактировать."
+ARTICLE_CANNOT_SUBMIT = "Статью нельзя отправить на модерацию."
+ARTICLE_CANNOT_PUBLISH = "Прямая публикация доступна после одобрения первой статьи."
+ARTICLE_CANNOT_MODERATE = "Эту статью нельзя модерировать."
+COMMENT_REQUIRED = "Напишите комментарий."
 
 
 def resend_wait(seconds: int) -> str:

@@ -29,6 +29,7 @@ type AuthContextType = {
   requestPasswordReset: (email: string) => Promise<AuthResult<PasswordResetRequestResult>>
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<AuthResult<PasswordResetResult>>
   getResendAvailableAt: () => number
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -144,6 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getResendAvailableAt = useCallback(() => resendAvailableAt, [resendAvailableAt])
 
+  const refreshUser = useCallback(async () => {
+    const result = await authApi.me()
+    if (result.ok) {
+      setUser(result.data)
+    }
+  }, [])
+
   const value = useMemo<AuthContextType>(
     () => ({
       isReady,
@@ -160,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       requestPasswordReset,
       resetPassword,
       getResendAvailableAt,
+      refreshUser,
     }),
     [
       isReady,
@@ -175,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       requestPasswordReset,
       resetPassword,
       getResendAvailableAt,
+      refreshUser,
     ],
   )
 

@@ -32,6 +32,7 @@ export type PublicUser = {
   website: string
   phone: string
   emailVerified: boolean
+  canPublishArticles: boolean
   role: UserRole
   marketingConsent: boolean
   createdAt: string

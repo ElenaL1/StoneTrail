@@ -160,6 +160,9 @@ class Article(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
         server_default=text("'draft'::publication_status"),
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    moderation_note: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''")
+    )
     updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )

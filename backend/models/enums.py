@@ -65,6 +65,9 @@ class FinishedStatus(StrEnum):
 
 class PublicationStatus(StrEnum):
     DRAFT = "draft"
+    PENDING_REVIEW = "pending_review"
+    NEEDS_REVISION = "needs_revision"
+    REJECTED = "rejected"
     PUBLISHED = "published"
     ARCHIVED = "archived"
 

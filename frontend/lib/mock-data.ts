@@ -1110,7 +1110,7 @@ export const stoneBlocks: StoneBlock[] = [
   },
 ]
 
-export const mockForumPosts: ForumPost[] = [
+export const mockForumPosts = [
   {
     id: "post-1",
     title: "Лучшие методы полировки кварцита",
@@ -1187,7 +1187,7 @@ export const mockForumComments: Comment[] = [
   },
 ]
 
-export const mockArticles: Article[] = [
+export const mockArticles = [
   {
     id: "art-1",
     title: "Гид по выбору мрамора для ванной комнаты",

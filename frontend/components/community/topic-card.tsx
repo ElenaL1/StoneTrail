@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ForumPost } from "@/lib/mock-data"
+import { ForumPost } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, User, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -23,7 +23,7 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
           </span>
         </div>
         
-        <Link href={`/community/${post.id}`} className="mb-2 block">
+        <Link href={`/community/${post.slug}`} className="mb-2 block">
           <h3 className="text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
             {post.title}
           </h3>

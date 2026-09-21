@@ -69,6 +69,7 @@ function normalizeUser(data: PublicUser): PublicUser {
     ...data,
     name: data.name || data.nickname,
     avatar: data.avatar ?? "",
+    canPublishArticles: Boolean(data.canPublishArticles),
   }
 }
 

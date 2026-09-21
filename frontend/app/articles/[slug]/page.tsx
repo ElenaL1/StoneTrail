@@ -1,27 +1,45 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
-import { Heart, MessageSquare, Clock, Calendar, ArrowLeft } from "lucide-react"
+import { Heart, MessageSquare, Clock, Calendar, ArrowLeft, User } from "lucide-react"
 import Link from "next/link"
-import { useArticles } from "@/lib/article-context"
 import { useAuth } from "@/lib/auth-context"
 import { ArticleCommentForm } from "@/components/articles/article-comment-form"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useRequireLogin } from "@/lib/auth/use-require-login"
+import { articlesApi } from "@/lib/articles/api-client"
+import { MarkdownContent } from "@/lib/markdown"
+import { ARTICLE_STATUS_LABELS } from "@/lib/content-utils"
+import type { Article } from "@/lib/types"
 
 export default function ArticleDetailPage() {
-  const { id } = useParams()
-  const { articles, comments, toggleLike } = useArticles()
+  const params = useParams()
+  const slug = String(params.slug ?? "")
   const { user } = useAuth()
   const requireLogin = useRequireLogin()
+  const [article, setArticle] = useState<Article | null | undefined>(undefined)
   const [replyTo, setReplyTo] = useState<string | null>(null)
 
-  const article = articles.find((a) => a.id === id)
-  const articleComments = comments.filter((c) => c.articleId === id)
+  const load = useCallback(() => {
+    if (!slug) return
+    void articlesApi.get(slug).then(setArticle)
+  }, [slug])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  if (article === undefined) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <p className="text-sm text-muted-foreground">Загрузка…</p>
+      </div>
+    )
+  }
 
   if (!article) {
     return (
@@ -31,17 +49,19 @@ export default function ArticleDetailPage() {
     )
   }
 
-  const isLiked = user && article.likes.includes(user.id)
-
-  const handleLike = () => {
-    if (!requireLogin()) return
-    toggleLike(article.id, user!.id)
+  const handleLike = async () => {
+    if (!requireLogin({ requireVerified: true })) return
+    const result = await articlesApi.toggleLike(article.slug)
+    setArticle((current) =>
+      current ? { ...current, liked: result.liked, likesCount: result.likesCount } : current,
+    )
   }
 
-  const activeComment = comments.find((c) => c.id === replyTo)
+  const comments = article.comments
+  const activeComment = comments.find((comment) => comment.id === replyTo)
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-12 lg:px-8">
+    <div className="mx-auto max-w-4xl px-5 py-24 lg:px-8">
       <Link 
         href="/articles" 
         className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -50,16 +70,32 @@ export default function ArticleDetailPage() {
         Назад к статьям
       </Link>
 
+      {article.publicationStatus !== "published" ? (
+        <p className="mb-6 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+          {ARTICLE_STATUS_LABELS[article.publicationStatus]}
+          {user && (user.id === article.authorId || user.role === "moderator" || user.role === "editor" || user.role === "admin") ? (
+            <>
+              {" · "}
+              <Link href={`/articles/${article.slug}/edit`} className="text-primary underline-offset-4 hover:underline">
+                Редактировать
+              </Link>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+
       <article className="space-y-8">
-        <div className="relative aspect-video w-full overflow-hidden rounded-3xl border border-border">
-          <Image
-            src={article.imageUrl}
-            alt={article.title}
-            fill
-            className="object-cover"
-            unoptimized
-          />
-        </div>
+        {article.imageUrl ? (
+          <div className="relative aspect-video w-full overflow-hidden rounded-3xl border border-border">
+            <Image
+              src={article.imageUrl}
+              alt={article.title}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-4">
           <Badge variant="secondary" className="w-fit px-3 py-1 text-sm">
@@ -68,8 +104,15 @@ export default function ArticleDetailPage() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
             {article.title}
           </h1>
+          {article.excerpt ? (
+            <p className="text-lg text-muted-foreground">{article.excerpt}</p>
+          ) : null}
           
           <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <User className="size-4" />
+              {article.author}
+            </span>
             <span className="flex items-center gap-2">
               <Calendar className="size-4" />
               {article.date}
@@ -82,24 +125,20 @@ export default function ArticleDetailPage() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={handleLike}
+                onClick={() => void handleLike()}
                 className={cn(
                   "gap-2 rounded-full",
-                  isLiked && "text-primary hover:text-primary hover:bg-primary/10"
+                  article.liked && "text-primary hover:text-primary hover:bg-primary/10"
                 )}
               >
-                <Heart className={cn("size-4", isLiked && "fill-primary")} />
-                {article.likes.length}
+                <Heart className={cn("size-4", article.liked && "fill-primary")} />
+                {article.likesCount}
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="prose prose-stone max-w-none text-lg leading-relaxed text-muted-foreground space-y-6">
-          {article.content.split('\\n').map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
-        </div>
+        <MarkdownContent value={article.content} />
       </article>
 
       <div className="mt-20 space-y-12 border-t border-border pt-12">
@@ -107,24 +146,27 @@ export default function ArticleDetailPage() {
           <MessageSquare className="size-6 text-primary" />
           <h2 className="text-2xl font-bold">Обсуждение</h2>
           <Badge variant="outline" className="ml-2">
-            {articleComments.length}
+            {comments.length}
           </Badge>
         </div>
 
         <div className="space-y-8">
           <ArticleCommentForm 
-            articleId={article.id} 
+            slug={article.slug}
             quote={activeComment ? activeComment.text : undefined}
-            onCommentAdded={() => setReplyTo(null)}
+            onCommentAdded={() => {
+              setReplyTo(null)
+              load()
+            }}
           />
 
           <div className="space-y-6">
-            {articleComments.length === 0 ? (
+            {comments.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 Будьте первым, кто оставит комментарий к этой статье
               </p>
             ) : (
-              articleComments.map((comment) => (
+              comments.map((comment) => (
                 <div 
                   key={comment.id} 
                   className={cn(
@@ -144,10 +186,7 @@ export default function ArticleDetailPage() {
                       variant="ghost" 
                       size="sm" 
                       className="h-8 text-xs text-muted-foreground hover:text-primary"
-                      onClick={() => {
-                        setReplyTo(comment.id)
-                        window.scrollTo({ top: 0, behavior: 'smooth' }) // Or jump to form
-                      }}
+                      onClick={() => setReplyTo(comment.id)}
                     >
                       Ответить
                     </Button>

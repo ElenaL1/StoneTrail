@@ -1,45 +1,42 @@
 "use client"
 
-import React, { useState } from "react"
-import { articleCategories } from "@/lib/mock-data"
-import { useArticles } from "@/lib/article-context"
+import React, { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { ArticleCard } from "@/components/articles/article-card"
+import { WriteArticleButton } from "@/components/articles/write-article-button"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { arePromotionsEnabled } from "@/lib/promo-utils"
 import { ContentEnter } from "@/components/content-enter"
+import { articlesApi } from "@/lib/articles/api-client"
+import type { Article, ContentCategory } from "@/lib/types"
 
 type SortOption = "newest" | "popular" | "favorites"
-type CategoryFilter = "all" | (typeof articleCategories)[number]
 
 export default function ArticlesPage() {
-  const { articles } = useArticles()
   const { user } = useAuth()
   const [sort, setSort] = useState<SortOption>("newest")
-  const [category, setCategory] = useState<CategoryFilter>("all")
-  const isBannerEnabled = arePromotionsEnabled();
+  const [category, setCategory] = useState("all")
+  const [categories, setCategories] = useState<ContentCategory[]>([])
+  const [articles, setArticles] = useState<Article[]>([])
+  const [loading, setLoading] = useState(true)
+  const isBannerEnabled = arePromotionsEnabled()
 
-  const sortedArticles = [...articles].sort((a, b) => {
-    if (sort === "popular") {
-      return b.likes.length - a.likes.length
-    }
-    if (sort === "newest") {
-      return new Date(b.date).getTime() - new Date(a.date).getTime()
-    }
-    return 0
-  })
+  useEffect(() => {
+    void articlesApi.listCategories().then(setCategories)
+  }, [])
 
-  const filteredArticles = sortedArticles.filter((art) => {
-    if (sort === "favorites" && !(user && art.likes.includes(user.id))) {
-      return false
-    }
-    if (category !== "all" && art.category !== category) {
-      return false
-    }
-    return true
-  })
+  useEffect(() => {
+    setLoading(true)
+    void articlesApi.listPublished({
+      category,
+      sort: sort === "favorites" ? "newest" : sort,
+      favorites: sort === "favorites",
+    })
+      .then(setArticles)
+      .finally(() => setLoading(false))
+  }, [category, sort])
 
   const emptyMessage = () => {
     if (sort === "favorites") {
@@ -48,19 +45,22 @@ export default function ArticlesPage() {
     if (category !== "all") {
       return "В этой категории пока нет статей"
     }
-    return "Статьи временно недоступны"
+    return "Пока нет опубликованных статей. Станьте первым автором."
   }
 
   return (
     <div className={cn("min-h-screen py-24 px-5 lg:px-8", !isBannerEnabled ? "bg-muted/30" : "bg-background")}>
     <div className="mx-auto max-w-7xl">
-      <div className="mb-12 text-left">
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Статьи
-        </h1>
-        <p className="max-w-2xl text-lg text-muted-foreground">
-          Глубокие разборы технологий обработки камня, аналитика рынка и гиды по выбору материалов от ведущих экспертов отрасли.
-        </p>
+      <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="text-left">
+          <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            Статьи
+          </h1>
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            Практический опыт камнеобработки: технологии, оборудование, производство и бизнес.
+          </p>
+        </div>
+        <WriteArticleButton />
       </div>
 
       <div className="mb-8 flex flex-col gap-4">
@@ -95,24 +95,26 @@ export default function ArticlesPage() {
           >
             Все
           </Button>
-          {articleCategories.map((tag) => (
+          {categories.map((tag) => (
             <Button
-              key={tag}
-              variant={category === tag ? "default" : "outline"}
-              onClick={() => setCategory(tag)}
+              key={tag.id}
+              variant={category === tag.code ? "default" : "outline"}
+              onClick={() => setCategory(tag.code)}
               className={cn(
                 "rounded-full px-6",
-                category === tag && "bg-primary text-primary-foreground"
+                category === tag.code && "bg-primary text-primary-foreground"
               )}
             >
-              {tag}
+              {tag.label}
             </Button>
           ))}
         </div>
       </div>
 
-      <ContentEnter swapKey={`${sort}-${category}`}>
-        {filteredArticles.length === 0 && (
+      <ContentEnter swapKey={`${sort}-${category}-${loading}`}>
+        {loading ? (
+          <p className="py-20 text-center text-sm text-muted-foreground">Загрузка…</p>
+        ) : articles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-xl text-muted-foreground">
               {emptyMessage()}
@@ -128,17 +130,17 @@ export default function ArticlesPage() {
               </OpenAuthButton>
             )}
           </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article) => (
+              <ArticleCard
+                key={article.id}
+                article={article}
+                isLiked={article.liked}
+              />
+            ))}
+          </div>
         )}
-
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredArticles.map((article) => (
-            <ArticleCard
-              key={article.id}
-              article={article}
-              isLiked={Boolean(user && article.likes.includes(user.id))}
-            />
-          ))}
-        </div>
       </ContentEnter>
     </div>
     </div>

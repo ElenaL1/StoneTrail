@@ -1,5 +1,5 @@
-import { ArticleProvider } from "@/lib/article-context"
+import type { ReactNode } from "react"
 
-export default function ArticlesLayout({ children }: { children: React.ReactNode }) {
-  return <ArticleProvider>{children}</ArticleProvider>
+export default function ArticlesLayout({ children }: { children: ReactNode }) {
+  return children
 }
