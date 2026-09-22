@@ -29,6 +29,7 @@ from schemas.content import (
 RESERVED_SLUGS = {"categories", "mine", "moderation", "new"}
 EDITABLE_STATUSES = {
     PublicationStatus.DRAFT,
+    PublicationStatus.PENDING_REVIEW,
     PublicationStatus.NEEDS_REVISION,
     PublicationStatus.REJECTED,
 }
@@ -151,6 +152,12 @@ class ArticleService:
             article.category_id = category.id
         if payload.cover_url is not None:
             await self._repo.set_cover(article.id, payload.cover_url or None)
+        if (
+            article.publication_status == PublicationStatus.PENDING_REVIEW
+            and article.author_id == actor.id
+            and not is_staff(actor.role)
+        ):
+            article.publication_status = PublicationStatus.DRAFT
         article.updated_by = actor.id
         await self._session.commit()
         loaded = await self._repo.get_by_id(article.id)

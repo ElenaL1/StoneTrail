@@ -12,7 +12,7 @@ import { articlesApi } from "@/lib/articles/api-client"
 import { ContentRequestError } from "@/lib/content-request"
 import { useAuth } from "@/lib/auth-context"
 import { isStaff } from "@/lib/content-utils"
-import type { Article, ContentCategory } from "@/lib/types"
+import type { Article, ArticleStatus, ContentCategory } from "@/lib/types"
 
 type ArticleEditorFormProps = {
   article?: Article
@@ -28,6 +28,9 @@ export function ArticleEditorForm({ article }: ArticleEditorFormProps) {
   const [coverUrl, setCoverUrl] = useState(article?.imageUrl ?? "")
   const [content, setContent] = useState(article?.content ?? "")
   const [slug, setSlug] = useState(article?.slug ?? "")
+  const [publicationStatus, setPublicationStatus] = useState<ArticleStatus | undefined>(
+    article?.publicationStatus,
+  )
   const [error, setError] = useState("")
   const [busy, setBusy] = useState<"save" | "submit" | "publish" | null>(null)
   const canPublishDirectly = Boolean(user?.canPublishArticles || isStaff(user?.role))
@@ -64,6 +67,8 @@ export function ArticleEditorForm({ article }: ArticleEditorFormProps) {
       let next = saved
       if (mode === "submit") next = await articlesApi.submit(saved.slug)
       if (mode === "publish") next = await articlesApi.publish(saved.slug)
+      setSlug(next.slug)
+      setPublicationStatus(next.publicationStatus)
       await refreshUser()
       if (mode === "save") {
         router.replace(`/articles/${next.slug}/edit`)
@@ -134,6 +139,12 @@ export function ArticleEditorForm({ article }: ArticleEditorFormProps) {
           {article?.moderationNote ? (
             <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
               Комментарий модератора: {article.moderationNote}
+            </p>
+          ) : null}
+          {publicationStatus === "pending_review" && !isStaff(user?.role) ? (
+            <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+              Статья на модерации. «Сохранить черновик» снимет её с очереди. «Отправить на
+              модерацию» сохранит правки и отправит заново.
             </p>
           ) : null}
           {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}

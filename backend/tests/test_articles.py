@@ -136,3 +136,45 @@ async def test_moderator_can_return_and_author_resubmits(
     assert returned.status_code == 200
     assert returned.json()["publicationStatus"] == "needs_revision"
     assert "фото" in returned.json()["moderationNote"]
+
+
+@pytest.mark.asyncio
+async def test_author_edit_withdraws_article_from_moderation(
+    client: AsyncClient,
+) -> None:
+    author = await register_verified(client)
+    category_id = await first_category_id(client)
+    created = await client.post("/api/articles", json=article_body(category_id))
+    slug = created.json()["slug"]
+    submitted = await client.post(f"/api/articles/{slug}/submit")
+    assert submitted.json()["publicationStatus"] == "pending_review"
+    await logout(client)
+
+    moderator = await register_verified(client)
+    await set_role(str(moderator["email"]), UserRole.MODERATOR)
+    queued = await client.get("/api/articles/moderation")
+    assert queued.status_code == 200
+    assert any(item["slug"] == slug for item in queued.json())
+    await logout(client)
+
+    await login(client, str(author["email"]))
+    updated = await client.patch(
+        f"/api/articles/{slug}",
+        json={"content": "Обновлённый текст после отправки на модерацию."},
+    )
+    assert updated.status_code == 200, updated.text
+    body = updated.json()
+    assert body["publicationStatus"] == "draft"
+    assert "Обновлённый" in body["content"]
+    await logout(client)
+
+    await login(client, str(moderator["email"]))
+    queue = await client.get("/api/articles/moderation")
+    assert queue.status_code == 200
+    assert all(item["slug"] != slug for item in queue.json())
+    await logout(client)
+
+    await login(client, str(author["email"]))
+    resubmitted = await client.post(f"/api/articles/{slug}/submit")
+    assert resubmitted.status_code == 200
+    assert resubmitted.json()["publicationStatus"] == "pending_review"
