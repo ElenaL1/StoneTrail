@@ -8,6 +8,9 @@ interface SelectContextType {
   onValueChange: (value: string) => void
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  labels: Record<string, string>
+  registerLabel: (value: string, label: string) => void
+  unregisterLabel: (value: string) => void
 }
 
 const SelectContext = React.createContext<SelectContextType | null>(null)
@@ -20,6 +23,19 @@ function useSelectContext() {
   return context
 }
 
+function labelFromChildren(children: React.ReactNode): string {
+  if (typeof children === "string" || typeof children === "number") {
+    return String(children)
+  }
+  if (Array.isArray(children)) {
+    return children.map(labelFromChildren).join("")
+  }
+  if (React.isValidElement<{ children?: React.ReactNode }>(children)) {
+    return labelFromChildren(children.props.children)
+  }
+  return ""
+}
+
 interface SelectProps {
   value: string
   onValueChange: (value: string) => void
@@ -28,7 +44,21 @@ interface SelectProps {
 
 export function Select({ value, onValueChange, children }: SelectProps) {
   const [isOpen, setIsOpen] = React.useState(false)
+  const [labels, setLabels] = React.useState<Record<string, string>>({})
   const rootRef = React.useRef<HTMLDivElement>(null)
+
+  const registerLabel = React.useCallback((itemValue: string, label: string) => {
+    setLabels((prev) => (prev[itemValue] === label ? prev : { ...prev, [itemValue]: label }))
+  }, [])
+
+  const unregisterLabel = React.useCallback((itemValue: string) => {
+    setLabels((prev) => {
+      if (!(itemValue in prev)) return prev
+      const next = { ...prev }
+      delete next[itemValue]
+      return next
+    })
+  }, [])
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -49,7 +79,9 @@ export function Select({ value, onValueChange, children }: SelectProps) {
   }, [isOpen])
 
   return (
-    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen }}>
+    <SelectContext.Provider
+      value={{ value, onValueChange, isOpen, setIsOpen, labels, registerLabel, unregisterLabel }}
+    >
       <div ref={rootRef} className="relative inline-block w-full">
         {children}
       </div>
@@ -74,9 +106,8 @@ export function SelectTrigger({ children, className }: { children: React.ReactNo
 }
 
 export function SelectValue({ placeholder }: { placeholder: string }) {
-  const { value } = useSelectContext()
-  // Конвенция: специальное значение "all" → показываем placeholder.
-  const displayValue = value && value !== "all" ? value : undefined
+  const { value, labels } = useSelectContext()
+  const displayValue = value ? labels[value] : undefined
   return (
     <span className={cn("truncate", displayValue ? "text-foreground" : "text-muted-foreground")}>
       {displayValue || placeholder}
@@ -86,16 +117,29 @@ export function SelectValue({ placeholder }: { placeholder: string }) {
 
 export function SelectContent({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSelectContext()
-  if (!isOpen) return null
   return (
-    <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card p-1 shadow-md" role="listbox">
+    <div
+      className={cn(
+        "absolute z-50 mt-1 w-full rounded-md border border-border bg-card p-1 shadow-md",
+        !isOpen && "hidden",
+      )}
+      role="listbox"
+      hidden={!isOpen}
+    >
       {children}
     </div>
   )
 }
 
 export function SelectItem({ value, children }: { value: string, children: React.ReactNode }) {
-  const { onValueChange, setIsOpen } = useSelectContext()
+  const { onValueChange, setIsOpen, registerLabel, unregisterLabel } = useSelectContext()
+  const label = labelFromChildren(children)
+
+  React.useLayoutEffect(() => {
+    registerLabel(value, label)
+    return () => unregisterLabel(value)
+  }, [value, label, registerLabel, unregisterLabel])
+
   return (
     <div
       role="option"
