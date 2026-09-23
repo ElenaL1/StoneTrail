@@ -1,6 +1,21 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+type DialogContextValue = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+const DialogContext = React.createContext<DialogContextValue | null>(null)
+
+function useDialog() {
+  const context = React.useContext(DialogContext)
+  if (!context) {
+    throw new Error("Dialog components must be wrapped in a <Dialog>")
+  }
+  return context
+}
+
 interface DialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -8,22 +23,25 @@ interface DialogProps {
 }
 
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
-  if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm" 
-        onClick={() => onOpenChange(false)} 
-      />
+    <DialogContext.Provider value={{ open, onOpenChange }}>
       {children}
-    </div>
+    </DialogContext.Provider>
   )
 }
 
 export function DialogContent({ children, className }: { children: React.ReactNode, className?: string }) {
+  const { open, onOpenChange } = useDialog()
+  if (!open) return null
   return (
-    <div className={cn("relative z-50 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg", className)}>
-      {children}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+        onClick={() => onOpenChange(false)}
+      />
+      <div className={cn("relative z-50 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg", className)}>
+        {children}
+      </div>
     </div>
   )
 }
@@ -37,8 +55,21 @@ export function DialogTitle({ children, className }: { children: React.ReactNode
 }
 
 export function DialogTrigger({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) {
-  // In this simplified implementation, `asChild` is accepted for API compatibility
-  // but only `children` is rendered.
-  void asChild
-  return <>{children}</>
+  const { onOpenChange } = useDialog()
+  const open = () => onOpenChange(true)
+
+  if (asChild && React.isValidElement<{ onClick?: React.MouseEventHandler }>(children)) {
+    return React.cloneElement(children, {
+      onClick: (event: React.MouseEvent) => {
+        children.props.onClick?.(event)
+        if (!event.defaultPrevented) open()
+      },
+    })
+  }
+
+  return (
+    <button type="button" onClick={open}>
+      {children}
+    </button>
+  )
 }

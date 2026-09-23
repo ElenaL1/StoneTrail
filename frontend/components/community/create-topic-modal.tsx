@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { useAuth } from "@/lib/auth-context"
 import { forumApi } from "@/lib/forum/api-client"
 import { ContentRequestError } from "@/lib/content-request"
@@ -33,11 +32,20 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
   useEffect(() => {
     if (!user?.emailVerified) return
     let cancelled = false
-    void forumApi.listCategories().then((rows) => {
-      if (cancelled) return
-      setCategories(rows)
-      setCategoryId((current) => current || rows[0]?.id || "")
-    })
+    void forumApi
+      .listCategories()
+      .then((rows) => {
+        if (cancelled) return
+        setCategories(rows)
+        setCategoryId((current) => current || rows[0]?.id || "")
+        if (rows.length === 0) {
+          setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
+        }
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
+      })
     return () => {
       cancelled = true
     }
@@ -45,7 +53,11 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user?.emailVerified || !categoryId) return
+    if (!user?.emailVerified) return
+    if (!categoryId) {
+      setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
+      return
+    }
     setSubmitting(true)
     setError("")
     try {
@@ -62,22 +74,8 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
     }
   }
 
-  if (!isReady) {
-    return (
-      <Button className="gap-2" disabled>
-        <PlusCircle className="size-4" />
-        Создать тему
-      </Button>
-    )
-  }
-
-  if (!user) {
-    return (
-      <OpenAuthButton view="login" next="/community" className="gap-2">
-        <PlusCircle className="size-4" />
-        Войти, чтобы создать тему
-      </OpenAuthButton>
-    )
+  if (!isReady || !user) {
+    return null
   }
 
   if (!user.emailVerified) {
