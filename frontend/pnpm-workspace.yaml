@@ -350,6 +350,7 @@ allowBuilds:
   ttf2woff2: true
   typemoq: true
   unix-dgram: true
+  unrs-resolver: true
   ursa-optional: true
   usb: true
   utf-8-validate: true
