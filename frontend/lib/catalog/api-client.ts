@@ -1,12 +1,15 @@
 import { getApiBaseUrl } from "@/lib/auth/api-client"
 import type { Material, Product, StoneBlock } from "@/lib/types"
 
+const CATALOG_MESSAGE = "Не удалось загрузить каталог. Попробуйте обновить страницу."
+
 class CatalogRequestError extends Error {
   constructor(
     readonly status: number,
     readonly code?: string,
+    message = CATALOG_MESSAGE,
   ) {
-    super("Catalog request failed")
+    super(message)
     this.name = "CatalogRequestError"
   }
 }
@@ -19,7 +22,7 @@ async function request<T>(path: string): Promise<T> {
       cache: "no-store",
     })
   } catch {
-    throw new CatalogRequestError(0, "network")
+    throw new CatalogRequestError(0, "network", CATALOG_MESSAGE)
   }
 
   if (response.status === 404) {
@@ -28,17 +31,17 @@ async function request<T>(path: string): Promise<T> {
 
   const text = await response.text()
   if (!response.ok) {
-    throw new CatalogRequestError(response.status)
+    throw new CatalogRequestError(response.status, undefined, CATALOG_MESSAGE)
   }
 
   if (!text) {
-    throw new CatalogRequestError(response.status, "network")
+    throw new CatalogRequestError(response.status, "network", CATALOG_MESSAGE)
   }
 
   try {
     return JSON.parse(text) as T
   } catch {
-    throw new CatalogRequestError(response.status, "network")
+    throw new CatalogRequestError(response.status, "network", CATALOG_MESSAGE)
   }
 }
 

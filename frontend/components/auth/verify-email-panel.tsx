@@ -35,7 +35,7 @@ export function VerifyEmailPanel() {
   const [emailError, setEmailError] = useState<string | undefined>()
   const [emailTaken, setEmailTaken] = useState(false)
   const [resendBusy, setResendBusy] = useState(false)
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
     setEmailValue(user?.email ?? "")

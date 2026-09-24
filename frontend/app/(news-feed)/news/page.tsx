@@ -138,7 +138,7 @@ export default function NewsPage() {
           ) : (
             <div className="flex flex-col border border-border rounded-2xl bg-card overflow-hidden">
               {filteredFeed.map((item) => (
-                <NewsListItem key={item.data.id} item={item as any} />
+                <NewsListItem key={item.data.id} item={item} />
               ))}
             </div>
           )

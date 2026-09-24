@@ -1,4 +1,5 @@
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
+import { withRequestId } from "@/lib/content-request"
 import type {
   AuthErrorCode,
   AuthFailure,
@@ -53,14 +54,16 @@ function toAuthFailure(body: unknown): AuthFailure {
   if (typeof data.message !== "string") {
     return networkFailure()
   }
+  const requestId = typeof data.requestId === "string" ? data.requestId : undefined
   return fail({
-    message: data.message,
+    message: withRequestId(data.message, requestId),
     code: asErrorCode(data.code),
     fieldErrors:
       typeof data.fieldErrors === "object" && data.fieldErrors !== null
         ? (data.fieldErrors as Record<string, string>)
         : undefined,
     retryAfterSeconds: typeof data.retryAfterSeconds === "number" ? data.retryAfterSeconds : undefined,
+    requestId,
   })
 }
 

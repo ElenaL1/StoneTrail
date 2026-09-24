@@ -83,6 +83,7 @@ async def send_auth_email(kind: AuthEmailKind, to: str, path: str) -> bool:
             timeout=15,
         )
     except Exception:
-        logger.exception("Failed to send %s email to %s", kind, to)
+        domain = to.rsplit("@", 1)[-1] if "@" in to else "unknown"
+        logger.exception("Failed to send %s email to domain %s", kind, domain)
         return False
     return True

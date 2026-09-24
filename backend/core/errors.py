@@ -16,6 +16,7 @@ class ErrorBody(BaseModel):
     code: str
     field_errors: dict[str, str] | None = None
     retry_after_seconds: int | None = None
+    request_id: str | None = None
 
 
 class ApiError(Exception):

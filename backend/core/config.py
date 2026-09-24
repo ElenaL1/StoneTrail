@@ -38,6 +38,16 @@ class Settings(BaseSettings):
     verify_token_ttl_seconds: int = 24 * 60 * 60
     reset_token_ttl_seconds: int = 60 * 60
     session_ttl_seconds: int = 7 * 24 * 60 * 60
+    log_level: Literal["debug", "info", "warning", "error"] = "info"
+
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def normalize_log_level(cls, value: object) -> object:
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"debug", "info", "warning", "error", "warn"}:
+                return "warning" if normalized == "warn" else normalized
+        return "info"
 
     @field_validator("smtp_security", mode="before")
     @classmethod

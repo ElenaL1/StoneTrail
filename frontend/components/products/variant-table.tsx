@@ -6,7 +6,8 @@ import { Layers, RotateCcw, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { ColumnHeaderFilter } from "@/components/products/column-header-filter"
-import type { Product } from "@/lib/mock-data"
+import type { BlockStatus, Product } from "@/lib/mock-data"
+import type { LotStatus } from "@/lib/block-utils"
 import type { LotFilterDef } from "@/lib/lot-filter-utils"
 
 export type VariantRow = {
@@ -14,7 +15,7 @@ export type VariantRow = {
   size: string
   thickness: string
   finish: string
-  status: string
+  status: BlockStatus | LotStatus
 }
 
 type VariantFilterKey = "size" | "thickness" | "finish" | "status"

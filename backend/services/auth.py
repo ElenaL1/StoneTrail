@@ -387,6 +387,8 @@ class AuthService:
         return path
 
     def _log_link(self, kind: str, email: str, path: str) -> None:
+        if not self._settings.auth_debug_links:
+            return
         base = self._settings.frontend_base_url.rstrip("/")
         logger.info("auth %s link for %s: %s%s", kind, email, base, path)
 

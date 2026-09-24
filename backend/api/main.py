@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.error_handlers import register_error_handlers
+from api.middleware import RequestContextMiddleware
 from api.routes.articles import router as articles_router
 from api.routes.auth import router as auth_router
 from api.routes.catalog import router as catalog_router
@@ -12,6 +13,7 @@ from api.routes.forum import router as forum_router
 from api.routes.health import router as health_router
 from core.config import get_settings
 from core.db import engine
+from core.logging import configure_logging
 
 
 @asynccontextmanager
@@ -22,10 +24,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configure_logging(settings.log_level)
     application = FastAPI(
         title="StoneTrail API",
         lifespan=lifespan,
     )
+    application.add_middleware(RequestContextMiddleware)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,

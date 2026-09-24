@@ -135,12 +135,13 @@ async def test_list_and_get_stone_camel_case(client: AsyncClient) -> None:
 async def test_stone_not_found_and_soft_delete(client: AsyncClient) -> None:
     missing = await client.get("/api/catalog/stones/missing")
     assert missing.status_code == 404
-    assert missing.json() == {
-        "message": "Не найдено.",
-        "code": "not_found",
-        "fieldErrors": None,
-        "retryAfterSeconds": None,
-    }
+    body = missing.json()
+    assert body["message"] == "Не найдено."
+    assert body["code"] == "not_found"
+    assert body["fieldErrors"] is None
+    assert body["retryAfterSeconds"] is None
+    assert body["requestId"]
+    assert missing.headers["x-request-id"] == body["requestId"]
 
     async with SessionLocal() as session:
         stone = await add_stone(session, slug="hidden-stone", name="Hidden")

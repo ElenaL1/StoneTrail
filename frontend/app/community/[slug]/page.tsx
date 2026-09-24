@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { ContentRequestError } from "@/lib/content-request"
 import { forumApi } from "@/lib/forum/api-client"
 import { CommentForm } from "@/components/community/comment-form"
 import { CommentThread } from "@/components/community/comment-thread"
@@ -15,6 +16,10 @@ import { ArrowLeft, User, Calendar, MessageSquare, Eye, Heart } from "lucide-rea
 import Link from "next/link"
 import type { Comment, ForumPost } from "@/lib/types"
 
+function failureText(error: unknown, fallback: string) {
+  return error instanceof ContentRequestError ? error.message : fallback
+}
+
 export default function TopicDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -22,6 +27,8 @@ export default function TopicDetailPage() {
   const [confirm, setConfirm] = useState<"hide" | "permanent" | null>(null)
   const slug = String(params.slug ?? "")
   const [post, setPost] = useState<ForumPost | null | undefined>(undefined)
+  const [loadError, setLoadError] = useState("")
+  const [actionError, setActionError] = useState("")
   const [scrollToId, setScrollToId] = useState<string | null>(null)
   const canInteract = Boolean(user?.emailVerified)
   const staff = Boolean(user && isStaff(user.role))
@@ -32,7 +39,12 @@ export default function TopicDetailPage() {
 
   const load = useCallback(() => {
     if (!slug) return
-    void forumApi.getPost(slug).then(setPost)
+    setLoadError("")
+    setPost(undefined)
+    void forumApi.getPost(slug).then(setPost).catch((error: unknown) => {
+      setPost(null)
+      setLoadError(failureText(error, "Не удалось загрузить тему. Попробуйте обновить страницу."))
+    })
   }, [slug])
 
   useEffect(() => {
@@ -46,6 +58,16 @@ export default function TopicDetailPage() {
     node.scrollIntoView({ block: "center", behavior: "smooth" })
     setScrollToId(null)
   }, [scrollToId, post])
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-5 py-24 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-foreground">Не удалось загрузить тему</h1>
+        <p className="mb-8 text-muted-foreground">{loadError}</p>
+        <Button type="button" onClick={load}>Попробовать ещё раз</Button>
+      </div>
+    )
+  }
 
   if (post === undefined) {
     return (
@@ -221,10 +243,14 @@ export default function TopicDetailPage() {
                       void forumApi.hidePost(post.slug).then(() => {
                         if (staff) load()
                         else router.push("/community")
+                      }).catch((error: unknown) => {
+                        setActionError(failureText(error, "Не удалось удалить тему. Попробуйте ещё раз."))
                       })
                     }
                     if (action === "permanent") {
-                      void forumApi.destroyPost(post.slug).then(() => router.push("/community"))
+                      void forumApi.destroyPost(post.slug).then(() => router.push("/community")).catch((error: unknown) => {
+                        setActionError(failureText(error, "Не удалось удалить тему. Попробуйте ещё раз."))
+                      })
                     }
                   }}
                 >
@@ -234,6 +260,10 @@ export default function TopicDetailPage() {
             </DialogContent>
           </Dialog>
         </article>
+
+        {actionError ? (
+          <p className="text-sm text-destructive" role="alert">{actionError}</p>
+        ) : null}
 
         <section className="space-y-8">
           <div className="flex items-center justify-between border-b border-border pb-4">
@@ -253,15 +283,30 @@ export default function TopicDetailPage() {
                 currentUserId={user?.id}
                 isStaff={staff}
                 onDelete={async (commentId) => {
-                  await forumApi.hideComment(post.slug, commentId)
-                  load()
+                  try {
+                    await forumApi.hideComment(post.slug, commentId)
+                    setActionError("")
+                    load()
+                  } catch (error) {
+                    setActionError(failureText(error, "Не удалось удалить комментарий. Попробуйте ещё раз."))
+                  }
                 }}
                 onRestore={async (commentId) => {
-                  setPost(await forumApi.restoreComment(post.slug, commentId))
+                  try {
+                    setPost(await forumApi.restoreComment(post.slug, commentId))
+                    setActionError("")
+                  } catch (error) {
+                    setActionError(failureText(error, "Не удалось восстановить комментарий. Попробуйте ещё раз."))
+                  }
                 }}
                 onPermanentDelete={async (commentId) => {
-                  await forumApi.destroyComment(post.slug, commentId)
-                  load()
+                  try {
+                    await forumApi.destroyComment(post.slug, commentId)
+                    setActionError("")
+                    load()
+                  } catch (error) {
+                    setActionError(failureText(error, "Не удалось удалить комментарий. Попробуйте ещё раз."))
+                  }
                 }}
                 onReply={async (parentId, body) => {
                   appendComment(await forumApi.addComment(post.slug, body, parentId))

@@ -32,7 +32,9 @@ export function createLotFilterKit<T extends Record<K, string>, K extends string
   const finishOrder = config.finishOrder
 
   function uniqueFieldValues(items: T[], key: K): string[] {
-    const values = Array.from(new Set(items.map((item) => item[key]).filter(Boolean)))
+    const values: string[] = Array.from(
+      new Set(items.map((item) => item[key]).filter(Boolean)),
+    )
     if (key === "status") {
       const ordered = statusOrder.filter((value) => values.includes(value))
       const rest = values.filter((value) => !statusOrder.includes(value))

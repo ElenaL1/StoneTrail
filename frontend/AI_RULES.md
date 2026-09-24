@@ -68,7 +68,7 @@ No server-side Python templating (Jinja2) is part of the rendering pipeline.
 - **Imports:** Path aliases — `@/components/...`, `@/lib/...` (see `tsconfig.json` `paths`).
 - **Classes:** Always go through `cn(...)`.
 - **Spacing Rule:** Page titles, headers, and hero sections MUST use `py-24` (vertical padding) to ensure sufficient distance from the site header. Avoid `py-12`.
-- **Config:** `next.config.mjs` ignores TS build errors and disables image optimisation — preserve unless explicitly asked.
+- **Config:** `next.config.mjs` disables image optimisation — preserve unless explicitly asked. TypeScript errors fail the production build.
 
 ### Backend (Python)
 - **Style:** PEP 8.

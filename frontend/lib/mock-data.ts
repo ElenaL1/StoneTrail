@@ -1,4 +1,28 @@
 import { finishedProducts } from "@/lib/custom-products-data"
+import type {
+  Article,
+  ArticleComment,
+  BlockStatus,
+  CatalogAvailability,
+  Comment,
+  FinishedProduct,
+  FinishedProductStatus,
+  ForumPost,
+  IndividualBlank,
+  IndividualBlock,
+  IndividualPaving,
+  IndividualSlab,
+  IndividualTile,
+  IndustryNews,
+  Material,
+  Notification,
+  NotificationType,
+  Product,
+  ProductCategory,
+  ProductPriceType,
+  Promotion,
+  StoneBlock,
+} from "./types"
 
 export { finishedProducts }
 
@@ -25,7 +49,7 @@ export type {
   ProductPriceType,
   Promotion,
   StoneBlock,
-} from "./types"
+}
 
 export const forumCategories = [
   "Технологии",
@@ -619,12 +643,13 @@ function parseTileFormats(size: string): string[] {
 }
 
 function parseTileFinishes(finish: string | readonly string[]): string[] {
-  const parts = Array.isArray(finish)
-    ? finish.map((part) => part.trim()).filter(Boolean)
-    : finish
-        .split("/")
-        .map((part) => part.trim())
-        .filter(Boolean)
+  const parts =
+    typeof finish === "string"
+      ? finish
+          .split("/")
+          .map((part) => part.trim())
+          .filter(Boolean)
+      : finish.map((part) => part.trim()).filter(Boolean)
   return parts.map((part) => {
     const lower = part.toLocaleLowerCase("ru")
     if (lower === "матовая") return "Матовая"
@@ -804,12 +829,13 @@ function parsePavingThicknesses(thickness: string): string[] {
 }
 
 function parsePavingFinishes(finish: string | readonly string[]): string[] {
-  const parts = Array.isArray(finish)
-    ? finish.map((part) => part.trim()).filter(Boolean)
-    : finish
-        .split("/")
-        .map((part) => part.trim())
-        .filter(Boolean)
+  const parts =
+    typeof finish === "string"
+      ? finish
+          .split("/")
+          .map((part) => part.trim())
+          .filter(Boolean)
+      : finish.map((part) => part.trim()).filter(Boolean)
   return parts.map((part) => {
     const lower = part.toLocaleLowerCase("ru")
     if (lower === "колотая") return "Колотая"

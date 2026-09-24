@@ -42,7 +42,10 @@ async def get_optional_session(
     raw = request.cookies.get(SESSION_COOKIE_NAME)
     if not raw:
         return None
-    return await service.resolve_session(raw)
+    resolved = await service.resolve_session(raw)
+    if resolved is not None:
+        request.state.user_id = str(resolved.user.id)
+    return resolved
 
 
 async def get_current_user(

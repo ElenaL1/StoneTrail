@@ -38,6 +38,7 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-StoneTrail}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       db:
         condition: service_healthy

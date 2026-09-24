@@ -89,6 +89,7 @@ export type AuthFailure = {
   fieldErrors?: AuthFieldErrors
   code?: AuthErrorCode
   retryAfterSeconds?: number
+  requestId?: string
 }
 
 export type AuthSuccess<T> = {
