@@ -23,7 +23,7 @@ alembic upgrade head
 uvicorn api.main:app --reload
 ```
 
-Проверка: [http://localhost:8000/health](http://localhost:8000/health) → `{"status":"ok"}`.
+Проверка: [http://localhost:8000/health](http://localhost:8000/health) → `{"status":"ok"}`. OpenAPI: [http://localhost:8000/docs](http://localhost:8000/docs).
 
 Каталог (read-only, без cookie):
 
