@@ -352,3 +352,160 @@ async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
     await login(client, str(moderator["email"]))
     assert (await client.delete(f"/api/forum/posts/{slug}/permanent")).status_code == 204
     assert (await client.get(f"/api/forum/posts/{slug}")).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_author_restores_own_topic_stranger_and_staff(
+    client: AsyncClient,
+) -> None:
+    author = await register_verified(
+        client, nickname="author-two", email="author-two@example.com"
+    )
+    slug = await _topic(client, "Скрытие темы")
+    hidden = await client.delete(f"/api/forum/posts/{slug}")
+    assert hidden.status_code == 204
+    await logout(client)
+
+    await register_verified(
+        client, nickname="stranger-two", email="stranger-two@example.com"
+    )
+    denied = await client.post(f"/api/forum/posts/{slug}/restore")
+    assert denied.status_code == 403
+    assert denied.json()["code"] == "forbidden"
+    await logout(client)
+
+    await login(client, str(author["email"]))
+    restored = await client.post(f"/api/forum/posts/{slug}/restore")
+    assert restored.status_code == 200, restored.text
+    assert restored.json()["deleted"] is False
+    assert restored.json()["content"] == "Текст темы."
+    again = await client.post(f"/api/forum/posts/{slug}/restore")
+    assert again.status_code == 404
+    missing = await client.post("/api/forum/posts/missing-topic/restore")
+    assert missing.status_code == 404
+    await logout(client)
+
+    moderator = await register_verified(
+        client, nickname="mod-two", email="mod-two@example.com"
+    )
+    await set_role(str(moderator["email"]), UserRole.MODERATOR)
+    await login(client, str(moderator["email"]))
+    await client.delete(f"/api/forum/posts/{slug}")
+    await logout(client)
+
+    await login(client, str(author["email"]))
+    staff_hide = await client.post(f"/api/forum/posts/{slug}/restore")
+    assert staff_hide.status_code == 403
+    await logout(client)
+
+    await login(client, str(moderator["email"]))
+    staff_restored = await client.post(f"/api/forum/posts/{slug}/restore")
+    assert staff_restored.status_code == 200, staff_restored.text
+    assert staff_restored.json()["deleted"] is False
+
+
+@pytest.mark.asyncio
+async def test_stranger_cannot_delete_topic_or_comment(client: AsyncClient) -> None:
+    await register_verified(client)
+    slug = await _topic(client, "Чужая тема")
+    comment = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Мой ответ"}
+    )
+    comment_id = comment.json()["id"]
+    await logout(client)
+
+    await register_verified(client)
+    topic = await client.delete(f"/api/forum/posts/{slug}")
+    assert topic.status_code == 403
+    reply = await client.delete(f"/api/forum/posts/{slug}/comments/{comment_id}")
+    assert reply.status_code == 403
+    detail = await client.get(f"/api/forum/posts/{slug}")
+    assert detail.status_code == 200
+    assert detail.json()["comments"][0]["id"] == comment_id
+
+
+@pytest.mark.asyncio
+async def test_list_posts_filters_by_category(client: AsyncClient) -> None:
+    categories = (await client.get("/api/forum/categories")).json()
+    assert len(categories) >= 2
+    await register_verified(client)
+    created = await client.post(
+        "/api/forum/posts",
+        json={
+            "title": "Фильтр категории",
+            "categoryId": categories[0]["id"],
+            "content": "Текст темы.",
+        },
+    )
+    slug = created.json()["slug"]
+    matched = await client.get(
+        "/api/forum/posts", params={"category": categories[0]["code"]}
+    )
+    assert matched.status_code == 200
+    assert [item["slug"] for item in matched.json()] == [slug]
+    other = await client.get(
+        "/api/forum/posts", params={"category": categories[1]["code"]}
+    )
+    assert other.json() == []
+    unknown = await client.get("/api/forum/posts", params={"category": "missing"})
+    assert unknown.status_code == 404
+    assert unknown.json()["code"] == "not_found"
+
+
+@pytest.mark.asyncio
+async def test_forum_rejects_empty_fields_and_bad_comment_id(
+    client: AsyncClient,
+) -> None:
+    await register_verified(client)
+    category_id = await first_category_id(client)
+    empty_title = await client.post(
+        "/api/forum/posts",
+        json={"title": "  ", "categoryId": category_id, "content": "Текст"},
+    )
+    assert empty_title.status_code == 422
+    assert empty_title.json()["fieldErrors"]["title"]
+    empty_content = await client.post(
+        "/api/forum/posts",
+        json={"title": "Заголовок", "categoryId": category_id, "content": "  "},
+    )
+    assert empty_content.status_code == 422
+    assert "content" in empty_content.json()["fieldErrors"]
+
+    slug = await _topic(client, "Проверка ответа")
+    empty_body = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "  "}
+    )
+    assert empty_body.status_code == 422
+    assert "body" in empty_body.json()["fieldErrors"]
+    bad_id = await client.patch(
+        f"/api/forum/posts/{slug}/comments/not-a-uuid", json={"body": "Текст"}
+    )
+    assert bad_id.status_code == 422
+    assert bad_id.json()["code"] == "validation"
+
+
+@pytest.mark.asyncio
+async def test_comment_rejects_hidden_topic_and_foreign_parent(
+    client: AsyncClient,
+) -> None:
+    await register_verified(client)
+    hidden = await _topic(client, "Скрытая тема")
+    assert (await client.delete(f"/api/forum/posts/{hidden}")).status_code == 204
+    denied = await client.post(
+        f"/api/forum/posts/{hidden}/comments", json={"body": "На скрытую"}
+    )
+    assert denied.status_code == 404
+
+    first = await _topic(client, "Первая тема")
+    second = await _topic(client, "Вторая тема")
+    parent = await client.post(
+        f"/api/forum/posts/{first}/comments", json={"body": "Корень"}
+    )
+    foreign = await client.post(
+        f"/api/forum/posts/{second}/comments",
+        json={"body": "Чужой родитель", "parentId": parent.json()["id"]},
+    )
+    assert foreign.status_code == 400
+    assert foreign.json()["code"] == "validation"
+    detail = await client.get(f"/api/forum/posts/{second}")
+    assert detail.json()["comments"] == []

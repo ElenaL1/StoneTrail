@@ -232,6 +232,15 @@ class ArticleService:
         article = await self._require_article(slug)
         if article.publication_status != PublicationStatus.PUBLISHED:
             raise ApiError.not_found()
+        if payload.parent_id is not None:
+            parent = await self._repo.get_comment(payload.parent_id)
+            if parent is None or parent.article_id != article.id:
+                raise ApiError(
+                    400,
+                    "validation",
+                    messages.COMMENT_PARENT_INVALID,
+                    {"parentId": messages.COMMENT_PARENT_INVALID},
+                )
         comment = ArticleComment(
             article_id=article.id,
             author_id=author.id,

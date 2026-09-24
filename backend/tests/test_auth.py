@@ -453,6 +453,23 @@ async def test_profile_allows_empty_names(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_profile_ignores_role_and_email_verified(client: AsyncClient) -> None:
+    body = register_body()
+    await client.post("/auth/register", json=body)
+    saved = await client.patch(
+        "/auth/profile",
+        json={
+            "nickname": body["nickname"],
+            "role": "admin",
+            "emailVerified": True,
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["role"] == "user"
+    assert saved.json()["emailVerified"] is False
+
+
+@pytest.mark.asyncio
 async def test_smtp_timeout_does_not_fail_register(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,

@@ -155,6 +155,14 @@ class ArticleRepository:
         result = await self._session.execute(stmt)
         return set(result.scalars().all())
 
+    async def get_comment(self, comment_id: uuid.UUID) -> ArticleComment | None:
+        stmt = select(ArticleComment).where(
+            ArticleComment.id == comment_id,
+            ArticleComment.deleted_at.is_(None),
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def list_comments(self, article_id: uuid.UUID) -> list[ArticleComment]:
         stmt = (
             select(ArticleComment)
