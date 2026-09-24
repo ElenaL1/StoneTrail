@@ -264,4 +264,26 @@ describe("CommentThread", () => {
     await events.keyboard("{Enter}")
     expect(onReply).toHaveBeenCalledWith("root", "первая\nвторая")
   })
+
+  test("Enter в середине текста вставляет строку и не отправляет", async () => {
+    const events = userEvent.setup()
+    const onReply = vi.fn().mockResolvedValue(undefined)
+    render(
+      <CommentThread
+        comments={[comment()]}
+        canInteract
+        onReply={onReply}
+        onLike={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    )
+
+    await events.click(screen.getByRole("button", { name: "Ответить" }))
+    const field = screen.getByPlaceholderText("Напишите ответ...")
+    await events.type(field, "первая вторая")
+    ;(field as HTMLTextAreaElement).setSelectionRange(6, 6)
+    await events.keyboard("{Enter}")
+    expect(onReply).not.toHaveBeenCalled()
+    expect(field).toHaveValue("первая\n вторая")
+  })
 })

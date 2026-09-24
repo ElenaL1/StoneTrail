@@ -5,6 +5,7 @@ import { Heart, User, Calendar, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { shouldSubmitOnEnter } from "@/lib/forum/submit-on-enter"
 import { cn } from "@/lib/utils"
 import type { Comment } from "@/lib/types"
 
@@ -423,7 +424,7 @@ function CommentNodeView({
                 value={replyText}
                 onChange={(event) => setReplyText(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                  if (shouldSubmitOnEnter(event)) {
                     event.preventDefault()
                     void send()
                   }
@@ -432,7 +433,7 @@ function CommentNodeView({
                 className="min-h-[80px] max-h-60 resize-y overflow-y-auto [field-sizing:content]"
               />
               <p className="text-xs text-muted-foreground">
-                Выделите фрагмент и нажмите «Цитировать». Enter — отправить, Shift+Enter — новая строка.
+                Выделите фрагмент и нажмите «Цитировать». Enter в конце — отправить, в середине и Shift+Enter — новая строка.
               </p>
               <Button type="button" size="sm" disabled={sending || !replyText.trim()} onClick={() => void send()}>
                 {sending ? "Отправка…" : "Отправить"}

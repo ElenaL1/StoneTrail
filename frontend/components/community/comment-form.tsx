@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import { forumApi } from "@/lib/forum/api-client"
+import { shouldSubmitOnEnter } from "@/lib/forum/submit-on-enter"
 import { ContentRequestError } from "@/lib/content-request"
 import type { Comment } from "@/lib/types"
 import { Send } from "lucide-react"
@@ -50,7 +51,7 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+            if (shouldSubmitOnEnter(event)) {
               event.preventDefault()
               event.currentTarget.form?.requestSubmit()
             }
@@ -71,7 +72,7 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
       </div>
       {canComment ? (
         <p className="text-xs text-muted-foreground">
-          Выделите фрагмент и нажмите «Цитировать». Enter — отправить, Shift+Enter — новая строка.
+          Выделите фрагмент и нажмите «Цитировать». Enter в конце — отправить, в середине и Shift+Enter — новая строка.
         </p>
       ) : null}
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
