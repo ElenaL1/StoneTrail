@@ -16,11 +16,17 @@ import { Pencil, PlusCircle } from "lucide-react"
 
 type CreateTopicModalProps = {
   post?: ForumPost
+  categoryCode?: string
   onCreated?: () => void
   onUpdated?: (post: ForumPost) => void
 }
 
-export function CreateTopicModal({ post, onCreated, onUpdated }: CreateTopicModalProps) {
+function categoryIdForCode(rows: ContentCategory[], code?: string): string {
+  if (!code) return ""
+  return rows.find((row) => row.code === code)?.id ?? ""
+}
+
+export function CreateTopicModal({ post, categoryCode, onCreated, onUpdated }: CreateTopicModalProps) {
   const { isReady, user } = useAuth()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -39,7 +45,6 @@ export function CreateTopicModal({ post, onCreated, onUpdated }: CreateTopicModa
       .then((rows) => {
         if (cancelled) return
         setCategories(rows)
-        setCategoryId((current) => current || post?.categoryId || rows[0]?.id || "")
         if (rows.length === 0) {
           setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
         }
@@ -54,17 +59,32 @@ export function CreateTopicModal({ post, onCreated, onUpdated }: CreateTopicModa
   }, [post?.categoryId, user?.emailVerified])
 
   useEffect(() => {
-    if (!open || !post) return
-    setTitle(post.title)
-    setCategoryId(post.categoryId)
-    setContent(post.content)
+    if (!open || post) return
+    setTitle("")
+    setContent("")
+    setError("")
   }, [open, post])
+
+  useEffect(() => {
+    if (!open) return
+    if (post) {
+      setTitle(post.title)
+      setCategoryId(post.categoryId)
+      setContent(post.content)
+      return
+    }
+    setCategoryId(categoryIdForCode(categories, categoryCode))
+  }, [open, post, categoryCode, categories])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user?.emailVerified) return
     if (!categoryId) {
-      setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
+      setError(
+        categories.length === 0
+          ? "Не удалось загрузить категории. Попробуйте обновить страницу."
+          : "Выберите категорию.",
+      )
       return
     }
     setSubmitting(true)
@@ -131,7 +151,7 @@ export function CreateTopicModal({ post, onCreated, onUpdated }: CreateTopicModa
             <label className="text-sm font-medium text-foreground">Категория</label>
             <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger>
-                <SelectValue placeholder="Выберите категорию" />
+                <SelectValue placeholder="Выбрать категорию" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (

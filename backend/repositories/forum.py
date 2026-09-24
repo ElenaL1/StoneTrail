@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from models.content import ForumComment, ForumCommentLike, ForumPost, ForumPostLike
 from models.lookups import ForumCategory
+from models.user import User
 
 
 class ForumRepository:
@@ -63,12 +64,12 @@ class ForumRepository:
         result = await self._session.execute(stmt)
         return list(result.scalars().unique().all())
 
-    async def get_post_by_slug(self, slug: str) -> ForumPost | None:
-        stmt = (
-            select(ForumPost)
-            .where(ForumPost.slug == slug, ForumPost.deleted_at.is_(None))
-            .options(*self._post_options())
-        )
+    async def get_post_by_slug(
+        self, slug: str, *, include_deleted: bool = False
+    ) -> ForumPost | None:
+        stmt = select(ForumPost).where(ForumPost.slug == slug).options(*self._post_options())
+        if not include_deleted:
+            stmt = stmt.where(ForumPost.deleted_at.is_(None))
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -88,16 +89,17 @@ class ForumRepository:
         result = await self._session.execute(stmt)
         return {post_id: count for post_id, count in result.all()}
 
-    async def list_comments(self, post_id: uuid.UUID) -> list[ForumComment]:
+    async def list_comments(
+        self, post_id: uuid.UUID, *, include_deleted: bool = False
+    ) -> list[ForumComment]:
         stmt = (
             select(ForumComment)
-            .where(
-                ForumComment.post_id == post_id,
-                ForumComment.deleted_at.is_(None),
-            )
+            .where(ForumComment.post_id == post_id)
             .options(selectinload(ForumComment.author))
             .order_by(ForumComment.created_at.asc())
         )
+        if not include_deleted:
+            stmt = stmt.where(ForumComment.deleted_at.is_(None))
         result = await self._session.execute(stmt)
         return list(result.scalars().unique().all())
 
@@ -107,13 +109,35 @@ class ForumRepository:
     def add_comment(self, comment: ForumComment) -> None:
         self._session.add(comment)
 
-    async def get_comment(self, comment_id: uuid.UUID) -> ForumComment | None:
-        stmt = select(ForumComment).where(
-            ForumComment.id == comment_id,
+    async def get_comment(
+        self, comment_id: uuid.UUID, *, include_deleted: bool = False
+    ) -> ForumComment | None:
+        stmt = select(ForumComment).where(ForumComment.id == comment_id)
+        if not include_deleted:
+            stmt = stmt.where(ForumComment.deleted_at.is_(None))
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def living_reply_count(self, comment_id: uuid.UUID) -> int:
+        stmt = select(func.count(ForumComment.id)).where(
+            ForumComment.parent_id == comment_id,
             ForumComment.deleted_at.is_(None),
         )
         result = await self._session.execute(stmt)
-        return result.scalar_one_or_none()
+        return int(result.scalar_one())
+
+    async def reparent_children(self, comment: ForumComment) -> None:
+        stmt = select(ForumComment).where(ForumComment.parent_id == comment.id)
+        result = await self._session.execute(stmt)
+        for child in result.scalars().all():
+            child.parent_id = comment.parent_id
+
+    async def nicknames(self, user_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, str]:
+        if not user_ids:
+            return {}
+        stmt = select(User.id, User.nickname).where(User.id.in_(list(user_ids)))
+        result = await self._session.execute(stmt)
+        return {user_id: nickname for user_id, nickname in result.all()}
 
     async def post_like_counts(
         self, post_ids: Sequence[uuid.UUID]

@@ -18,6 +18,8 @@ type CommentDto = {
   parentId?: string | null
   likesCount: number
   liked: boolean
+  deleted?: boolean
+  deletedBy?: string | null
 }
 
 type LikeDto = {
@@ -41,6 +43,8 @@ type PostDto = {
   viewCount: number
   likesCount: number
   liked: boolean
+  deleted?: boolean
+  deletedBy?: string | null
   comments?: CommentDto[]
 }
 
@@ -56,6 +60,8 @@ function mapComment(dto: CommentDto, postId?: string): Comment {
     parentId: dto.parentId ?? undefined,
     likesCount: dto.likesCount,
     liked: dto.liked,
+    deleted: dto.deleted,
+    deletedBy: dto.deletedBy ?? undefined,
   }
 }
 
@@ -77,6 +83,8 @@ function mapPost(dto: PostDto): ForumPost {
     viewCount: dto.viewCount,
     likesCount: dto.likesCount,
     liked: dto.liked,
+    deleted: dto.deleted,
+    deletedBy: dto.deletedBy ?? undefined,
     comments: (dto.comments ?? []).map((comment) => mapComment(comment, dto.id)),
   }
 }
@@ -150,6 +158,43 @@ export const forumApi = {
     return contentRequest<LikeDto>(
       `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}/like`,
       { method: "POST" },
+    )
+  },
+
+  hidePost(slug: string): Promise<void> {
+    return contentRequest<void>(`/api/forum/posts/${encodeURIComponent(slug)}`, { method: "DELETE" })
+  },
+
+  restorePost(slug: string): Promise<ForumPost> {
+    return contentRequest<PostDto>(`/api/forum/posts/${encodeURIComponent(slug)}/restore`, {
+      method: "POST",
+    }).then(mapPost)
+  },
+
+  destroyPost(slug: string): Promise<void> {
+    return contentRequest<void>(`/api/forum/posts/${encodeURIComponent(slug)}/permanent`, {
+      method: "DELETE",
+    })
+  },
+
+  hideComment(slug: string, commentId: string): Promise<void> {
+    return contentRequest<void>(
+      `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`,
+      { method: "DELETE" },
+    )
+  },
+
+  restoreComment(slug: string, commentId: string): Promise<ForumPost> {
+    return contentRequest<PostDto>(
+      `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}/restore`,
+      { method: "POST" },
+    ).then(mapPost)
+  },
+
+  destroyComment(slug: string, commentId: string): Promise<void> {
+    return contentRequest<void>(
+      `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}/permanent`,
+      { method: "DELETE" },
     )
   },
 }

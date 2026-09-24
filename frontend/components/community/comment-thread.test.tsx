@@ -81,6 +81,46 @@ describe("CommentThread", () => {
     expect(screen.getByTestId("replies-e").className).not.toContain("ml-4")
   })
 
+  test("плита без ответа и цитаты", () => {
+    render(
+      <CommentThread
+        comments={[
+          comment({ deleted: true, text: "" }),
+          comment({ id: "child", parentId: "root", text: "Живой ответ", authorId: "other" }),
+        ]}
+        canInteract
+        currentUserId="other"
+        onReply={vi.fn()}
+        onLike={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText("Сообщение удалено")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Ответить" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Цитировать" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Удалить навсегда" })).not.toBeInTheDocument()
+  })
+
+  test("сотрудник на плите может удалить навсегда", () => {
+    render(
+      <CommentThread
+        comments={[comment({ deleted: true, text: "Скрытый текст" })]}
+        canInteract
+        isStaff
+        currentUserId="mod"
+        onReply={vi.fn()}
+        onLike={vi.fn()}
+        onEdit={vi.fn()}
+        onPermanentDelete={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText("Скрытый текст")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Удалить навсегда" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Восстановить" })).toBeInTheDocument()
+  })
+
   test("у правленного ответа видна пометка со временем", () => {
     render(
       <CommentThread

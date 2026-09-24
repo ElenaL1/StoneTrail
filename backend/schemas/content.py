@@ -52,6 +52,8 @@ class ForumCommentOut(CamelModel):
     parent_id: uuid.UUID | None = None
     likes_count: int = 0
     liked: bool = False
+    deleted: bool = False
+    deleted_by: str | None = None
 
 
 class ForumPostCreate(CamelModel):
@@ -111,6 +113,8 @@ class ForumPostOut(CamelModel):
     view_count: int = 0
     likes_count: int = 0
     liked: bool = False
+    deleted: bool = False
+    deleted_by: str | None = None
     comments: list[ForumCommentOut] = Field(default_factory=list)
 
 

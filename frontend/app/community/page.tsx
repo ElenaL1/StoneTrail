@@ -233,7 +233,10 @@ export default function CommunityPage() {
               <h3 className="text-lg font-semibold text-foreground">В этой категории пока нет тем</h3>
               <p className="text-muted-foreground">Станьте первым, кто начнет обсуждение!</p>
               <div className="mt-6">
-                <CreateTopicModal onCreated={load} />
+                <CreateTopicModal
+                  onCreated={load}
+                  categoryCode={activeCategory === "all" ? undefined : activeCategory}
+                />
               </div>
             </div>
           )}

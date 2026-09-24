@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import pytest
-from community_helpers import login, logout, register_user, register_verified
+from community_helpers import login, logout, register_user, register_verified, set_role
 from httpx import AsyncClient
 from sqlalchemy import text
 
 from core.db import SessionLocal
+from models.enums import UserRole
 
 
 @pytest.fixture(autouse=True)
@@ -241,3 +242,113 @@ async def test_author_can_edit_own_comment(client: AsyncClient) -> None:
         json={"body": "Чужая правка"},
     )
     assert stranger.status_code == 403
+
+
+async def _topic(client: AsyncClient, title: str) -> str:
+    category_id = await first_category_id(client)
+    created = await client.post(
+        "/api/forum/posts",
+        json={"title": title, "categoryId": category_id, "content": "Текст темы."},
+    )
+    assert created.status_code == 200, created.text
+    return created.json()["slug"]
+
+
+@pytest.mark.asyncio
+async def test_author_hides_leaf_and_empty_topic(client: AsyncClient) -> None:
+    await register_verified(client)
+    slug = await _topic(client, "Пустая тема")
+    hidden = await client.delete(f"/api/forum/posts/{slug}")
+    assert hidden.status_code == 204
+    assert (await client.get(f"/api/forum/posts/{slug}")).status_code == 404
+    assert (await client.get("/api/forum/posts")).json() == []
+
+    slug = await _topic(client, "Тема с ответом")
+    comment = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Лист"})
+    comment_id = comment.json()["id"]
+    blocked = await client.delete(f"/api/forum/posts/{slug}")
+    assert blocked.status_code == 403
+    assert (await client.delete(f"/api/forum/posts/{slug}/comments/{comment_id}")).status_code == 204
+    detail = await client.get(f"/api/forum/posts/{slug}")
+    assert detail.json()["comments"] == []
+
+
+@pytest.mark.asyncio
+async def test_author_cannot_hide_comment_with_reply(client: AsyncClient) -> None:
+    await register_verified(client)
+    slug = await _topic(client, "Ветка")
+    root = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Корень"})
+    root_id = root.json()["id"]
+    await client.post(
+        f"/api/forum/posts/{slug}/comments",
+        json={"body": "Ответ", "parentId": root_id},
+    )
+    denied = await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}")
+    assert denied.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
+    author = await register_verified(client, nickname="author-one", email="author-one@example.com")
+    slug = await _topic(client, "Модерация")
+    root = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Секрет"})
+    root_id = root.json()["id"]
+    child = await client.post(
+        f"/api/forum/posts/{slug}/comments",
+        json={"body": "Ветка жива", "parentId": root_id},
+    )
+    child_id = child.json()["id"]
+    await logout(client)
+
+    moderator = await register_verified(client, nickname="mod-one", email="mod-one@example.com")
+    await set_role(str(moderator["email"]), UserRole.MODERATOR)
+    await login(client, str(moderator["email"]))
+
+    hidden = await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}")
+    assert hidden.status_code == 204
+    detail = await client.get(f"/api/forum/posts/{slug}")
+    hidden_root = next(item for item in detail.json()["comments"] if item["id"] == root_id)
+    assert hidden_root["deleted"] is True
+    assert hidden_root["body"] == "Секрет"
+    assert hidden_root["deletedBy"] == moderator["nickname"]
+
+    await logout(client)
+    await login(client, str(author["email"]))
+    public = await client.get(f"/api/forum/posts/{slug}")
+    plaque = next(item for item in public.json()["comments"] if item["id"] == root_id)
+    assert plaque["deleted"] is True
+    assert plaque["body"] == ""
+    assert plaque["deletedBy"] is None
+    reply = await client.post(
+        f"/api/forum/posts/{slug}/comments",
+        json={"body": "На плиту", "parentId": root_id},
+    )
+    assert reply.status_code == 400
+
+    await logout(client)
+    await login(client, str(moderator["email"]))
+    restored = await client.post(f"/api/forum/posts/{slug}/comments/{root_id}/restore")
+    assert restored.status_code == 200
+    assert any(item["body"] == "Секрет" for item in restored.json()["comments"])
+
+    await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}")
+    destroyed = await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}/permanent")
+    assert destroyed.status_code == 204
+    after = await client.get(f"/api/forum/posts/{slug}")
+    by_id = {item["id"]: item for item in after.json()["comments"]}
+    assert root_id not in by_id
+    assert by_id[child_id]["parentId"] is None
+
+    await client.delete(f"/api/forum/posts/{slug}")
+    staff_view = await client.get(f"/api/forum/posts/{slug}")
+    assert staff_view.status_code == 200
+    assert staff_view.json()["deleted"] is True
+    assert staff_view.json()["content"] == "Текст темы."
+    await logout(client)
+    await login(client, str(author["email"]))
+    assert (await client.get(f"/api/forum/posts/{slug}")).status_code == 404
+
+    await logout(client)
+    await login(client, str(moderator["email"]))
+    assert (await client.delete(f"/api/forum/posts/{slug}/permanent")).status_code == 204
+    assert (await client.get(f"/api/forum/posts/{slug}")).status_code == 404

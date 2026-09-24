@@ -52,12 +52,17 @@ class ForumService:
         return await self._pack_many(posts, viewer, include_comments=False)
 
     async def get_post(self, slug: str, viewer: User | None = None) -> ForumPostOut:
-        post = await self._require_post(slug)
-        post.view_count += 1
-        await self._session.commit()
-        loaded = await self._repo.get_post_by_slug(slug)
-        assert loaded is not None
-        packed = await self._pack_many([loaded], viewer, include_comments=True)
+        staff = viewer is not None and is_staff(viewer.role)
+        post = await self._repo.get_post_by_slug(slug, include_deleted=staff)
+        if post is None:
+            raise ApiError.not_found()
+        if post.deleted_at is None:
+            post.view_count += 1
+            await self._session.commit()
+            loaded = await self._repo.get_post_by_slug(slug)
+            assert loaded is not None
+            post = loaded
+        packed = await self._pack_many([post], viewer, include_comments=True)
         return packed[0]
 
     async def create_post(self, payload: ForumPostCreate, author: User) -> ForumPostOut:
@@ -190,8 +195,92 @@ class ForumService:
         counts = await self._repo.comment_like_counts([comment.id])
         return ForumLikeOut(liked=liked, likes_count=counts.get(comment.id, 0))
 
+    async def hide_post(self, slug: str, actor: User) -> None:
+        post = await self._require_post(slug)
+        if not is_staff(actor.role):
+            if post.author_id != actor.id:
+                raise AuthError.forbidden()
+            counts = await self._repo.comment_counts([post.id])
+            if counts.get(post.id, 0) > 0:
+                raise AuthError.forbidden()
+        self._hide(post, actor)
+        await self._session.commit()
+
+    async def restore_post(self, slug: str, actor: User) -> ForumPostOut:
+        post = await self._require_deleted_post(slug)
+        self._restore(post, actor)
+        await self._session.commit()
+        return await self.get_post(slug, actor)
+
+    async def destroy_post(self, slug: str, actor: User) -> None:
+        if not is_staff(actor.role):
+            raise AuthError.forbidden()
+        post = await self._require_deleted_post(slug)
+        await self._session.delete(post)
+        await self._session.commit()
+
+    async def hide_comment(self, slug: str, comment_id: uuid.UUID, actor: User) -> None:
+        post = await self._require_post(slug)
+        comment = await self._repo.get_comment(comment_id)
+        if comment is None or comment.post_id != post.id:
+            raise ApiError.not_found()
+        if not is_staff(actor.role):
+            if comment.author_id != actor.id:
+                raise AuthError.forbidden()
+            if await self._repo.living_reply_count(comment.id) > 0:
+                raise AuthError.forbidden()
+        self._hide(comment, actor)
+        await self._session.commit()
+
+    async def restore_comment(
+        self, slug: str, comment_id: uuid.UUID, actor: User
+    ) -> ForumPostOut:
+        post = await self._require_post_any(slug, actor)
+        comment = await self._repo.get_comment(comment_id, include_deleted=True)
+        if comment is None or comment.post_id != post.id or comment.deleted_at is None:
+            raise ApiError.not_found()
+        self._restore(comment, actor)
+        await self._session.commit()
+        return await self.get_post(post.slug, actor)
+
+    async def destroy_comment(self, slug: str, comment_id: uuid.UUID, actor: User) -> None:
+        if not is_staff(actor.role):
+            raise AuthError.forbidden()
+        post = await self._require_post_any(slug, actor)
+        comment = await self._repo.get_comment(comment_id, include_deleted=True)
+        if comment is None or comment.post_id != post.id or comment.deleted_at is None:
+            raise ApiError.not_found()
+        await self._repo.reparent_children(comment)
+        await self._session.delete(comment)
+        await self._session.commit()
+
+    def _hide(self, row: ForumPost | ForumComment, actor: User) -> None:
+        row.deleted_at = datetime.now(timezone.utc)
+        row.deleted_by = actor.id
+        self._session.add(row)
+
+    def _restore(self, row: ForumPost | ForumComment, actor: User) -> None:
+        if not is_staff(actor.role) and row.deleted_by != actor.id:
+            raise AuthError.forbidden()
+        row.deleted_at = None
+        row.deleted_by = None
+
     async def _require_post(self, slug: str) -> ForumPost:
         post = await self._repo.get_post_by_slug(slug)
+        if post is None:
+            raise ApiError.not_found()
+        return post
+
+    async def _require_deleted_post(self, slug: str) -> ForumPost:
+        post = await self._repo.get_post_by_slug(slug, include_deleted=True)
+        if post is None or post.deleted_at is None:
+            raise ApiError.not_found()
+        return post
+
+    async def _require_post_any(self, slug: str, actor: User) -> ForumPost:
+        post = await self._repo.get_post_by_slug(
+            slug, include_deleted=is_staff(actor.role)
+        )
         if post is None:
             raise ApiError.not_found()
         return post
@@ -229,11 +318,17 @@ class ForumService:
         liked_ids: set[uuid.UUID] = set()
         if viewer is not None:
             liked_ids = await self._repo.liked_post_ids(viewer.id, ids)
+        staff = viewer is not None and is_staff(viewer.role)
+        deleted_names: dict[uuid.UUID, str] = {}
+        if staff:
+            deleted_names = await self._repo.nicknames(
+                [post.deleted_by for post in posts if post.deleted_by is not None]
+            )
         items: list[ForumPostOut] = []
         for post in posts:
             comments: list[ForumCommentOut] = []
             if include_comments:
-                raw = await self._repo.list_comments(post.id)
+                raw = await self._repo.list_comments(post.id, include_deleted=True)
                 comments = await self._comments_out(raw, viewer)
             items.append(
                 ForumPostOut(
@@ -252,6 +347,8 @@ class ForumService:
                     view_count=post.view_count,
                     likes_count=like_counts.get(post.id, 0),
                     liked=post.id in liked_ids,
+                    deleted=post.deleted_at is not None,
+                    deleted_by=deleted_names.get(post.deleted_by) if post.deleted_by else None,
                     comments=comments,
                 )
             )
@@ -260,22 +357,58 @@ class ForumService:
     async def _comments_out(
         self, comments: list[ForumComment], viewer: User | None
     ) -> list[ForumCommentOut]:
-        ids = [comment.id for comment in comments]
+        staff = viewer is not None and is_staff(viewer.role)
+        visible = [comment for comment in comments if self._comment_visible(comment, comments, staff)]
+        ids = [comment.id for comment in visible]
         counts = await self._repo.comment_like_counts(ids)
         liked_ids: set[uuid.UUID] = set()
         if viewer is not None:
             liked_ids = await self._repo.liked_comment_ids(viewer.id, ids)
-        return [
-            ForumCommentOut(
-                id=comment.id,
-                author=comment.author.nickname,
-                author_id=comment.author_id,
-                body=comment.body,
-                created_at=comment.created_at,
-                edited_at=comment.edited_at,
-                parent_id=comment.parent_id,
-                likes_count=counts.get(comment.id, 0),
-                liked=comment.id in liked_ids,
+        deleted_names: dict[uuid.UUID, str] = {}
+        if staff:
+            deleted_names = await self._repo.nicknames(
+                [comment.deleted_by for comment in visible if comment.deleted_by is not None]
             )
-            for comment in comments
-        ]
+        packed: list[ForumCommentOut] = []
+        for comment in visible:
+            hidden = comment.deleted_at is not None
+            tombstone = hidden and not staff
+            packed.append(
+                ForumCommentOut(
+                    id=comment.id,
+                    author=comment.author.nickname,
+                    author_id=comment.author_id,
+                    body="" if tombstone else comment.body,
+                    created_at=comment.created_at,
+                    edited_at=None if tombstone else comment.edited_at,
+                    parent_id=comment.parent_id,
+                    likes_count=0 if tombstone else counts.get(comment.id, 0),
+                    liked=False if tombstone else comment.id in liked_ids,
+                    deleted=hidden,
+                    deleted_by=deleted_names.get(comment.deleted_by) if hidden and comment.deleted_by else None,
+                )
+            )
+        return packed
+
+    def _comment_visible(
+        self, comment: ForumComment, comments: list[ForumComment], staff: bool
+    ) -> bool:
+        if comment.deleted_at is None or staff:
+            return True
+        return self._has_living_descendant(comment.id, comments)
+
+    def _has_living_descendant(
+        self, comment_id: uuid.UUID, comments: list[ForumComment]
+    ) -> bool:
+        children: dict[uuid.UUID, list[ForumComment]] = {}
+        for comment in comments:
+            if comment.parent_id is None:
+                continue
+            children.setdefault(comment.parent_id, []).append(comment)
+        pending = list(children.get(comment_id, []))
+        while pending:
+            current = pending.pop()
+            if current.deleted_at is None:
+                return True
+            pending.extend(children.get(current.id, []))
+        return False

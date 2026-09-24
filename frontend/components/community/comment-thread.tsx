@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Heart, User, Calendar, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import type { Comment } from "@/lib/types"
@@ -99,18 +100,26 @@ type CommentThreadProps = {
   comments: Comment[]
   canInteract: boolean
   currentUserId?: string
+  isStaff?: boolean
   onReply: (parentId: string, body: string) => Promise<void>
   onLike: (commentId: string) => void
   onEdit: (commentId: string, body: string) => Promise<void>
+  onDelete?: (commentId: string) => Promise<void>
+  onRestore?: (commentId: string) => Promise<void>
+  onPermanentDelete?: (commentId: string) => Promise<void>
 }
 
 export function CommentThread({
   comments,
   canInteract,
   currentUserId,
+  isStaff = false,
   onReply,
   onLike,
   onEdit,
+  onDelete,
+  onRestore,
+  onPermanentDelete,
 }: CommentThreadProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
@@ -125,6 +134,10 @@ export function CommentThread({
           depth={0}
           canInteract={canInteract}
           currentUserId={currentUserId}
+          isStaff={isStaff}
+          onDelete={onDelete}
+          onRestore={onRestore}
+          onPermanentDelete={onPermanentDelete}
           replyTo={replyTo}
           setReplyTo={setReplyTo}
           replyText={replyText}
@@ -145,6 +158,10 @@ function CommentNodeView({
   depth,
   canInteract,
   currentUserId,
+  isStaff,
+  onDelete,
+  onRestore,
+  onPermanentDelete,
   replyTo,
   setReplyTo,
   replyText,
@@ -159,6 +176,10 @@ function CommentNodeView({
   depth: number
   canInteract: boolean
   currentUserId?: string
+  isStaff: boolean
+  onDelete?: (commentId: string) => Promise<void>
+  onRestore?: (commentId: string) => Promise<void>
+  onPermanentDelete?: (commentId: string) => Promise<void>
   replyTo: string | null
   setReplyTo: (id: string | null) => void
   replyText: string
@@ -176,6 +197,11 @@ function CommentNodeView({
   const replyRef = useRef<HTMLTextAreaElement>(null)
   const pendingFocus = useRef(false)
   const canEdit = Boolean(currentUserId && comment.authorId === currentUserId)
+  const tombstone = Boolean(comment.deleted && !isStaff)
+  const canHide = Boolean(
+    !comment.deleted && onDelete && (isStaff || (canEdit && comment.replies.length === 0)),
+  )
+  const [confirm, setConfirm] = useState<"hide" | "permanent" | null>(null)
 
   useEffect(() => {
     if (!pendingFocus.current || replyTo !== comment.id) return
@@ -197,7 +223,7 @@ function CommentNodeView({
   }
 
   const onBodyMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!canInteract || canEdit) return
+    if (!canInteract || canEdit || comment.deleted) return
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
       setQuotePrompt(null)
@@ -235,16 +261,18 @@ function CommentNodeView({
           <div className="flex size-10 items-center justify-center rounded-full bg-muted">
             <User className="size-5 text-muted-foreground" />
           </div>
-          <button
-            type="button"
-            className="flex items-center gap-1 text-sm text-muted-foreground"
-            onClick={() => {
-              if (canInteract) onLike(comment.id)
-            }}
-          >
-            <Heart className={cn("size-4", comment.liked && "fill-primary text-primary")} />
-            {comment.likesCount}
-          </button>
+          {tombstone ? null : (
+            <button
+              type="button"
+              className="flex items-center gap-1 text-sm text-muted-foreground"
+              onClick={() => {
+                if (canInteract && !comment.deleted) onLike(comment.id)
+              }}
+            >
+              <Heart className={cn("size-4", comment.liked && "fill-primary text-primary")} />
+              {comment.likesCount}
+            </button>
+          )}
         </div>
         <div className="flex-1">
           <div className="mb-1 flex items-center justify-between">
@@ -257,7 +285,18 @@ function CommentNodeView({
               {comment.editedAt ? <span>изменено {comment.editedAt}</span> : null}
             </span>
           </div>
-          {editing ? (
+          {tombstone ? (
+            <p className="text-sm italic text-muted-foreground">Сообщение удалено</p>
+          ) : comment.deleted ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Скрыто{comment.deletedBy ? ` · ${comment.deletedBy}` : ""}
+              </p>
+              <div onMouseUp={onBodyMouseUp}>
+                <CommentBody text={comment.text} />
+              </div>
+            </div>
+          ) : editing ? (
             <div className="space-y-2">
               <Textarea
                 value={draft}
@@ -288,8 +327,25 @@ function CommentNodeView({
               <CommentBody text={comment.text} />
             </div>
           )}
-          <div className="mt-3 flex items-center">
-            {canEdit && !editing ? (
+          <div className="mt-3 flex items-center gap-3">
+            {comment.deleted && isStaff ? (
+              <>
+                <button
+                  type="button"
+                  className="ml-auto text-sm font-medium text-primary"
+                  onClick={() => void onRestore?.(comment.id)}
+                >
+                  Восстановить
+                </button>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-destructive"
+                  onClick={() => setConfirm("permanent")}
+                >
+                  Удалить навсегда
+                </button>
+              </>
+            ) : canEdit && !editing && !comment.deleted ? (
               <button
                 type="button"
                 className="ml-auto text-sm font-medium text-primary"
@@ -300,7 +356,7 @@ function CommentNodeView({
               >
                 Изменить
               </button>
-            ) : canInteract && !canEdit ? (
+            ) : canInteract && !canEdit && !comment.deleted ? (
               <button
                 type="button"
                 className="ml-auto text-sm font-medium text-primary"
@@ -309,7 +365,46 @@ function CommentNodeView({
                 Ответить
               </button>
             ) : null}
+            {canHide ? (
+              <button
+                type="button"
+                className={cn("text-sm font-medium text-muted-foreground", !canEdit && "ml-auto")}
+                onClick={() => setConfirm("hide")}
+              >
+                Удалить
+              </button>
+            ) : null}
           </div>
+          <Dialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null) }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {confirm === "permanent" ? "Удалить навсегда?" : "Удалить ответ?"}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                {confirm === "permanent"
+                  ? "Текст исчезнет без восстановления. Ответы на него останутся."
+                  : "Ответ скроется. Если на него уже ответили, на месте останется пометка."}
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setConfirm(null)}>
+                  Отмена
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const action = confirm
+                    setConfirm(null)
+                    if (action === "permanent") void onPermanentDelete?.(comment.id)
+                    if (action === "hide") void onDelete?.(comment.id)
+                  }}
+                >
+                  {confirm === "permanent" ? "Удалить навсегда" : "Удалить"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           {quotePrompt ? (
             <button
               type="button"
@@ -367,6 +462,10 @@ function CommentNodeView({
               setReplyText={setReplyText}
               editingId={editingId}
               setEditingId={setEditingId}
+              isStaff={isStaff}
+              onDelete={onDelete}
+              onRestore={onRestore}
+              onPermanentDelete={onPermanentDelete}
               onReply={onReply}
               onLike={onLike}
               onEdit={onEdit}

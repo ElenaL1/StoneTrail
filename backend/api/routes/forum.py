@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from core.deps import get_forum_service, get_optional_user, get_verified_user
 from models.user import User
@@ -104,3 +104,64 @@ async def toggle_comment_like(
     user: Annotated[User, Depends(get_verified_user)],
 ) -> ForumLikeOut:
     return await service.toggle_comment_like(slug, comment_id, user)
+
+
+@router.delete("/posts/{slug}", status_code=204)
+async def hide_post(
+    slug: str,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> Response:
+    await service.hide_post(slug, user)
+    return Response(status_code=204)
+
+
+@router.post("/posts/{slug}/restore", response_model=ForumPostOut)
+async def restore_post(
+    slug: str,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> ForumPostOut:
+    return await service.restore_post(slug, user)
+
+
+@router.delete("/posts/{slug}/permanent", status_code=204)
+async def destroy_post(
+    slug: str,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> Response:
+    await service.destroy_post(slug, user)
+    return Response(status_code=204)
+
+
+@router.delete("/posts/{slug}/comments/{comment_id}", status_code=204)
+async def hide_comment(
+    slug: str,
+    comment_id: UUID,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> Response:
+    await service.hide_comment(slug, comment_id, user)
+    return Response(status_code=204)
+
+
+@router.post("/posts/{slug}/comments/{comment_id}/restore", response_model=ForumPostOut)
+async def restore_comment(
+    slug: str,
+    comment_id: UUID,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> ForumPostOut:
+    return await service.restore_comment(slug, comment_id, user)
+
+
+@router.delete("/posts/{slug}/comments/{comment_id}/permanent", status_code=204)
+async def destroy_comment(
+    slug: str,
+    comment_id: UUID,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> Response:
+    await service.destroy_comment(slug, comment_id, user)
+    return Response(status_code=204)

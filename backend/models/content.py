@@ -84,11 +84,18 @@ class ForumPost(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
 
     category: Mapped[ForumCategory] = relationship()
     author: Mapped[User] = relationship(foreign_keys=[author_id])
-    comments: Mapped[list[ForumComment]] = relationship(back_populates="post")
-    likes: Mapped[list[ForumPostLike]] = relationship(back_populates="post")
+    comments: Mapped[list[ForumComment]] = relationship(
+        back_populates="post", passive_deletes=True
+    )
+    likes: Mapped[list[ForumPostLike]] = relationship(
+        back_populates="post", passive_deletes=True
+    )
 
 
 class ForumComment(TimestampMixin, SoftDeleteMixin, Base):
@@ -115,14 +122,19 @@ class ForumComment(TimestampMixin, SoftDeleteMixin, Base):
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
     parent_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("forum_comments.id", ondelete="CASCADE")
+        UUID(as_uuid=True), ForeignKey("forum_comments.id", ondelete="SET NULL")
     )
 
     post: Mapped[ForumPost] = relationship(back_populates="comments")
-    author: Mapped[User] = relationship()
+    author: Mapped[User] = relationship(foreign_keys=[author_id])
     parent: Mapped[ForumComment | None] = relationship(remote_side="ForumComment.id")
-    likes: Mapped[list[ForumCommentLike]] = relationship(back_populates="comment")
+    likes: Mapped[list[ForumCommentLike]] = relationship(
+        back_populates="comment", passive_deletes=True
+    )
 
 
 class ForumPostLike(Base):

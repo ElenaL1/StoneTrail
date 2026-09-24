@@ -1,12 +1,13 @@
 "use client"
 
 import React, { useCallback, useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { forumApi } from "@/lib/forum/api-client"
 import { CommentForm } from "@/components/community/comment-form"
 import { CommentThread } from "@/components/community/comment-thread"
 import { CreateTopicModal } from "@/components/community/create-topic-modal"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuth } from "@/lib/auth-context"
 import { isStaff } from "@/lib/content-utils"
 import { cn } from "@/lib/utils"
@@ -16,12 +17,18 @@ import type { Comment, ForumPost } from "@/lib/types"
 
 export default function TopicDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const { user } = useAuth()
+  const [confirm, setConfirm] = useState<"hide" | "permanent" | null>(null)
   const slug = String(params.slug ?? "")
   const [post, setPost] = useState<ForumPost | null | undefined>(undefined)
   const [scrollToId, setScrollToId] = useState<string | null>(null)
   const canInteract = Boolean(user?.emailVerified)
-  const canEdit = Boolean(user && post && (user.id === post.authorId || isStaff(user.role)))
+  const staff = Boolean(user && isStaff(user.role))
+  const canEdit = Boolean(user && post && !post.deleted && (user.id === post.authorId || staff))
+  const canHideTopic = Boolean(
+    user && post && !post.deleted && (staff || (user.id === post.authorId && post.commentCount === 0)),
+  )
 
   const load = useCallback(() => {
     if (!slug) return
@@ -137,6 +144,11 @@ export default function TopicDetailPage() {
             </div>
           </div>
 
+          {post.deleted ? (
+            <p className="mb-4 text-sm text-muted-foreground">
+              Тема скрыта{post.deletedBy ? ` · ${post.deletedBy}` : ""}
+            </p>
+          ) : null}
           <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
             {post.title}
           </h1>
@@ -165,8 +177,62 @@ export default function TopicDetailPage() {
               <Heart className={cn("size-4", post.liked && "fill-primary text-primary")} />
               {post.likesCount}
             </button>
-            {canEdit ? <CreateTopicModal post={post} onUpdated={setPost} /> : null}
+            <div className="flex items-center gap-2">
+              {post.deleted && staff ? (
+                <>
+                  <Button type="button" variant="outline" onClick={() => void forumApi.restorePost(post.slug).then(setPost)}>
+                    Восстановить
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setConfirm("permanent")}>
+                    Удалить навсегда
+                  </Button>
+                </>
+              ) : null}
+              {canHideTopic ? (
+                <Button type="button" variant="outline" onClick={() => setConfirm("hide")}>
+                  Удалить
+                </Button>
+              ) : null}
+              {canEdit ? <CreateTopicModal post={post} onUpdated={setPost} /> : null}
+            </div>
           </div>
+          <Dialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null) }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {confirm === "permanent" ? "Удалить тему навсегда?" : "Удалить тему?"}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                {confirm === "permanent"
+                  ? "Тема и все ответы исчезнут без восстановления."
+                  : "Тема скроется из списка. Её можно будет восстановить."}
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setConfirm(null)}>
+                  Отмена
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const action = confirm
+                    setConfirm(null)
+                    if (action === "hide") {
+                      void forumApi.hidePost(post.slug).then(() => {
+                        if (staff) load()
+                        else router.push("/community")
+                      })
+                    }
+                    if (action === "permanent") {
+                      void forumApi.destroyPost(post.slug).then(() => router.push("/community"))
+                    }
+                  }}
+                >
+                  {confirm === "permanent" ? "Удалить навсегда" : "Удалить"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </article>
 
         <section className="space-y-8">
@@ -183,8 +249,20 @@ export default function TopicDetailPage() {
             {comments.length > 0 ? (
               <CommentThread
                 comments={comments}
-                canInteract={canInteract}
+                canInteract={canInteract && !post.deleted}
                 currentUserId={user?.id}
+                isStaff={staff}
+                onDelete={async (commentId) => {
+                  await forumApi.hideComment(post.slug, commentId)
+                  load()
+                }}
+                onRestore={async (commentId) => {
+                  setPost(await forumApi.restoreComment(post.slug, commentId))
+                }}
+                onPermanentDelete={async (commentId) => {
+                  await forumApi.destroyComment(post.slug, commentId)
+                  load()
+                }}
                 onReply={async (parentId, body) => {
                   appendComment(await forumApi.addComment(post.slug, body, parentId))
                 }}
@@ -212,7 +290,7 @@ export default function TopicDetailPage() {
             )}
           </div>
 
-          <CommentForm slug={post.slug} onCommentAdded={appendComment} />
+          {post.deleted ? null : <CommentForm slug={post.slug} onCommentAdded={appendComment} />}
         </section>
       </div>
     </div>

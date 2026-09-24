@@ -105,7 +105,23 @@ describe("CreateTopicModal", () => {
     await events.click(screen.getByRole("button", { name: "Создать тему" }))
 
     expect(screen.getByRole("heading", { name: "Создать новую тему" })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeDisabled()
+    expect(await screen.findByRole("button", { name: "Выбрать категорию" })).toBeInTheDocument()
+  })
+
+  test("категория вкладки уже выбрана", async () => {
+    authState.user = verifiedUser()
+    listCategories.mockResolvedValue([
+      { id: "cat-1", code: "tips", label: "Советы" },
+      { id: "cat-2", code: "equipment", label: "Оборудование" },
+    ])
+    const events = userEvent.setup()
+    render(<CreateTopicModal categoryCode="equipment" />)
+
+    await events.click(screen.getByRole("button", { name: "Создать тему" }))
+
+    expect(await screen.findByRole("button", { name: "Оборудование" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeEnabled()
   })
 
   test("автор открывает форму с заголовком своей темы", async () => {

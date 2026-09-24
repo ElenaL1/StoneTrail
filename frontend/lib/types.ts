@@ -171,6 +171,8 @@ export type ForumPost = {
   viewCount: number
   likesCount: number
   liked: boolean
+  deleted?: boolean
+  deletedBy?: string
   comments: Comment[]
 }
 
@@ -185,6 +187,8 @@ export type Comment = {
   parentId?: string
   likesCount: number
   liked: boolean
+  deleted?: boolean
+  deletedBy?: string
 }
 
 export type ContentCategory = {
