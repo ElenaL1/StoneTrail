@@ -37,6 +37,7 @@ ARTICLE_CANNOT_SUBMIT = "Статью нельзя отправить на мо�
 ARTICLE_CANNOT_PUBLISH = "Прямая публикация доступна после одобрения первой статьи."
 ARTICLE_CANNOT_MODERATE = "Эту статью нельзя модерировать."
 COMMENT_REQUIRED = "Напишите комментарий."
+COMMENT_PARENT_INVALID = "Ответ можно оставить только к сообщению этой темы."
 
 
 def resend_wait(seconds: int) -> str:

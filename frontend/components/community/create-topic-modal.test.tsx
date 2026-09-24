@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import type { PublicUser } from "@/lib/auth/types"
+import type { ForumPost } from "@/lib/types"
 
 const push = vi.fn()
 const listCategories = vi.fn()
@@ -37,6 +38,7 @@ vi.mock("@/lib/forum/api-client", () => ({
   forumApi: {
     listCategories: (...args: unknown[]) => listCategories(...args),
     createPost: vi.fn(),
+    updatePost: vi.fn(),
   },
 }))
 
@@ -105,4 +107,35 @@ describe("CreateTopicModal", () => {
     expect(screen.getByRole("heading", { name: "Создать новую тему" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Опубликовать" })).toBeInTheDocument()
   })
+
+  test("автор открывает форму с заголовком своей темы", async () => {
+    authState.user = verifiedUser({ id: "author-1" })
+    const events = userEvent.setup()
+    render(<CreateTopicModal post={topic()} />)
+
+    await events.click(screen.getByRole("button", { name: "Редактировать" }))
+
+    expect(screen.getByRole("heading", { name: "Редактировать тему" })).toBeInTheDocument()
+    expect(screen.getByDisplayValue("Как выбрать диск")).toBeInTheDocument()
+  })
 })
+
+function topic(): ForumPost {
+  return {
+    id: "post-1",
+    slug: "kak-vybrat-disk",
+    title: "Как выбрать диск",
+    author: "StoneMaster",
+    authorId: "author-1",
+    category: "Советы",
+    categoryId: "cat-1",
+    date: "1 января 2026 г.",
+    excerpt: "Коротко",
+    content: "Текст темы",
+    commentCount: 0,
+    viewCount: 1,
+    likesCount: 0,
+    liked: false,
+    comments: [],
+  }
+}

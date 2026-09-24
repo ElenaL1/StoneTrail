@@ -25,6 +25,7 @@ class CategoryOut(CamelModel):
 
 class ForumCommentCreate(CamelModel):
     body: str
+    parent_id: uuid.UUID | None = None
 
     @field_validator("body")
     @classmethod
@@ -37,6 +38,9 @@ class ForumCommentOut(CamelModel):
     author: str
     body: str
     created_at: datetime
+    parent_id: uuid.UUID | None = None
+    likes_count: int = 0
+    liked: bool = False
 
 
 class ForumPostCreate(CamelModel):
@@ -55,17 +59,46 @@ class ForumPostCreate(CamelModel):
         return _required_text(value, messages.CONTENT_REQUIRED)
 
 
+class ForumPostUpdate(CamelModel):
+    title: str | None = None
+    category_id: uuid.UUID | None = None
+    content: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _required_text(value, messages.TITLE_REQUIRED)
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _required_text(value, messages.CONTENT_REQUIRED)
+
+
+class ForumLikeOut(CamelModel):
+    liked: bool
+    likes_count: int
+
+
 class ForumPostOut(CamelModel):
     id: uuid.UUID
     slug: str
     title: str
     author: str
+    author_id: uuid.UUID
     category: str
     category_id: uuid.UUID
     excerpt: str
     content: str
     created_at: datetime
     comment_count: int
+    view_count: int = 0
+    likes_count: int = 0
+    liked: bool = False
     comments: list[ForumCommentOut] = Field(default_factory=list)
 
 

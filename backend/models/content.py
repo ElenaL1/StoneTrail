@@ -77,6 +77,9 @@ class ForumPost(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     is_locked: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
+    view_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
     updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )
@@ -84,13 +87,18 @@ class ForumPost(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     category: Mapped[ForumCategory] = relationship()
     author: Mapped[User] = relationship(foreign_keys=[author_id])
     comments: Mapped[list[ForumComment]] = relationship(back_populates="post")
+    likes: Mapped[list[ForumPostLike]] = relationship(back_populates="post")
 
 
 class ForumComment(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "forum_comments"
     __table_args__ = (
         CheckConstraint("char_length(body) >= 1", name="forum_comments_body_len"),
+        CheckConstraint(
+            "parent_id IS DISTINCT FROM id", name="forum_comments_not_self_parent"
+        ),
         Index("forum_comments_post_created_idx", "post_id", "created_at"),
+        Index("forum_comments_parent_idx", "parent_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -105,9 +113,56 @@ class ForumComment(TimestampMixin, SoftDeleteMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("forum_comments.id", ondelete="CASCADE")
+    )
 
     post: Mapped[ForumPost] = relationship(back_populates="comments")
     author: Mapped[User] = relationship()
+    parent: Mapped[ForumComment | None] = relationship(remote_side="ForumComment.id")
+    likes: Mapped[list[ForumCommentLike]] = relationship(back_populates="comment")
+
+
+class ForumPostLike(Base):
+    __tablename__ = "forum_post_likes"
+    __table_args__ = (Index("forum_post_likes_post_idx", "post_id"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    post_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("forum_posts.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
+
+    post: Mapped[ForumPost] = relationship(back_populates="likes")
+
+
+class ForumCommentLike(Base):
+    __tablename__ = "forum_comment_likes"
+    __table_args__ = (Index("forum_comment_likes_comment_idx", "comment_id"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    comment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("forum_comments.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
+
+    comment: Mapped[ForumComment] = relationship(back_populates="likes")
 
 
 class Article(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):

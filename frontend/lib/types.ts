@@ -159,12 +159,16 @@ export type ForumPost = {
   slug: string
   title: string
   author: string
+  authorId: string
   category: string
   categoryId: string
   date: string
   excerpt: string
   content: string
   commentCount: number
+  viewCount: number
+  likesCount: number
+  liked: boolean
   comments: Comment[]
 }
 
@@ -174,6 +178,9 @@ export type Comment = {
   author: string
   text: string
   date: string
+  parentId?: string
+  likesCount: number
+  liked: boolean
 }
 
 export type ContentCategory = {

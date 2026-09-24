@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ForumPost } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, User, Calendar } from "lucide-react"
+import { MessageSquare, User, Calendar, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TopicCardProps {
@@ -40,9 +40,15 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
           <span className="font-medium">{post.author}</span>
         </div>
         
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <MessageSquare className="size-4" />
-          <span>{commentCount}</span>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Eye className="size-4" />
+            {post.viewCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageSquare className="size-4" />
+            <span>{commentCount}</span>
+          </span>
         </div>
       </div>
     </div>

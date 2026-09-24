@@ -3,17 +3,24 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { forumApi } from "@/lib/forum/api-client"
-import { CommentItem } from "@/components/community/comment-item"
 import { CommentForm } from "@/components/community/comment-form"
+import { CommentThread } from "@/components/community/comment-thread"
+import { CreateTopicModal } from "@/components/community/create-topic-modal"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, User, Calendar, MessageSquare } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
+import { isStaff } from "@/lib/content-utils"
+import { cn } from "@/lib/utils"
+import { ArrowLeft, User, Calendar, MessageSquare, Eye, Heart } from "lucide-react"
 import Link from "next/link"
-import type { ForumPost } from "@/lib/types"
+import type { Comment, ForumPost } from "@/lib/types"
 
 export default function TopicDetailPage() {
   const params = useParams()
+  const { user } = useAuth()
   const slug = String(params.slug ?? "")
   const [post, setPost] = useState<ForumPost | null | undefined>(undefined)
+  const canInteract = Boolean(user?.emailVerified)
+  const canEdit = Boolean(user && post && (user.id === post.authorId || isStaff(user.role)))
 
   const load = useCallback(() => {
     if (!slug) return
@@ -46,6 +53,45 @@ export default function TopicDetailPage() {
 
   const comments = post.comments
 
+  const appendComment = (comment: Comment) => {
+    setPost((current) =>
+      current
+        ? {
+            ...current,
+            comments: [...current.comments, comment],
+            commentCount: current.commentCount + 1,
+          }
+        : current,
+    )
+  }
+
+  const likePost = () => {
+    if (!canInteract) return
+    void forumApi.togglePostLike(post.slug).then((result) => {
+      setPost((current) =>
+        current ? { ...current, liked: result.liked, likesCount: result.likesCount } : current,
+      )
+    })
+  }
+
+  const likeComment = (commentId: string) => {
+    if (!canInteract) return
+    void forumApi.toggleCommentLike(post.slug, commentId).then((result) => {
+      setPost((current) =>
+        current
+          ? {
+              ...current,
+              comments: current.comments.map((comment) =>
+                comment.id === commentId
+                  ? { ...comment, liked: result.liked, likesCount: result.likesCount }
+                  : comment,
+              ),
+            }
+          : current,
+      )
+    })
+  }
+
   return (
     <div className="min-h-screen bg-background py-24 px-5 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -64,15 +110,20 @@ export default function TopicDetailPage() {
             <span className="inline-flex w-fit items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
               {post.category}
             </span>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Calendar className="size-4" />
                 {post.date}
               </span>
               <span className="flex items-center gap-1.5">
+                <Eye className="size-4" />
+                {post.viewCount}
+              </span>
+              <span className="flex items-center gap-1.5">
                 <MessageSquare className="size-4" />
                 {comments.length} ответов
               </span>
+              {canEdit ? <CreateTopicModal post={post} onUpdated={setPost} /> : null}
             </div>
           </div>
 
@@ -95,6 +146,14 @@ export default function TopicDetailPage() {
               {post.content}
             </p>
           </div>
+          <button
+            type="button"
+            className="mt-6 flex items-center gap-1.5 text-sm text-muted-foreground"
+            onClick={likePost}
+          >
+            <Heart className={cn("size-4", post.liked && "fill-primary text-primary")} />
+            {post.likesCount}
+          </button>
         </article>
 
         <section className="space-y-8">
@@ -109,9 +168,14 @@ export default function TopicDetailPage() {
 
           <div className="space-y-4">
             {comments.length > 0 ? (
-              comments.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} />
-              ))
+              <CommentThread
+                comments={comments}
+                canInteract={canInteract}
+                onReply={async (parentId, body) => {
+                  appendComment(await forumApi.addComment(post.slug, body, parentId))
+                }}
+                onLike={likeComment}
+              />
             ) : (
               <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
                 <p className="text-muted-foreground">
@@ -121,7 +185,7 @@ export default function TopicDetailPage() {
             )}
           </div>
 
-          <CommentForm slug={post.slug} onCommentAdded={load} />
+          <CommentForm slug={post.slug} onCommentAdded={appendComment} />
         </section>
       </div>
     </div>

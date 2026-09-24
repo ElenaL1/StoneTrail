@@ -11,21 +11,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/lib/auth-context"
 import { forumApi } from "@/lib/forum/api-client"
 import { ContentRequestError } from "@/lib/content-request"
-import type { ContentCategory } from "@/lib/types"
-import { PlusCircle } from "lucide-react"
+import type { ContentCategory, ForumPost } from "@/lib/types"
+import { Pencil, PlusCircle } from "lucide-react"
 
 type CreateTopicModalProps = {
+  post?: ForumPost
   onCreated?: () => void
+  onUpdated?: (post: ForumPost) => void
 }
 
-export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
+export function CreateTopicModal({ post, onCreated, onUpdated }: CreateTopicModalProps) {
   const { isReady, user } = useAuth()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [categories, setCategories] = useState<ContentCategory[]>([])
-  const [title, setTitle] = useState("")
-  const [categoryId, setCategoryId] = useState("")
-  const [content, setContent] = useState("")
+  const [title, setTitle] = useState(post?.title ?? "")
+  const [categoryId, setCategoryId] = useState(post?.categoryId ?? "")
+  const [content, setContent] = useState(post?.content ?? "")
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
@@ -37,7 +39,7 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
       .then((rows) => {
         if (cancelled) return
         setCategories(rows)
-        setCategoryId((current) => current || rows[0]?.id || "")
+        setCategoryId((current) => current || post?.categoryId || rows[0]?.id || "")
         if (rows.length === 0) {
           setError("Не удалось загрузить категории. Попробуйте обновить страницу.")
         }
@@ -49,7 +51,14 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
     return () => {
       cancelled = true
     }
-  }, [user?.emailVerified])
+  }, [post?.categoryId, user?.emailVerified])
+
+  useEffect(() => {
+    if (!open || !post) return
+    setTitle(post.title)
+    setCategoryId(post.categoryId)
+    setContent(post.content)
+  }, [open, post])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,12 +70,19 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
     setSubmitting(true)
     setError("")
     try {
-      const post = await forumApi.createPost({ title, categoryId, content })
+      if (post) {
+        const updated = await forumApi.updatePost(post.slug, { title, categoryId, content })
+        setOpen(false)
+        onUpdated?.(updated)
+        onCreated?.()
+        return
+      }
+      const created = await forumApi.createPost({ title, categoryId, content })
       setOpen(false)
       setTitle("")
       setContent("")
       onCreated?.()
-      router.push(`/community/${post.slug}`)
+      router.push(`/community/${created.slug}`)
     } catch (err) {
       setError(err instanceof ContentRequestError ? err.message : "Не удалось создать тему.")
     } finally {
@@ -92,14 +108,14 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <PlusCircle className="size-4" />
-          Создать тему
+        <Button className="gap-2" variant={post ? "outline" : "default"}>
+          {post ? <Pencil className="size-4" /> : <PlusCircle className="size-4" />}
+          {post ? "Редактировать" : "Создать тему"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Создать новую тему</DialogTitle>
+          <DialogTitle>{post ? "Редактировать тему" : "Создать новую тему"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
@@ -142,7 +158,7 @@ export function CreateTopicModal({ onCreated }: CreateTopicModalProps) {
               Отменить
             </Button>
             <Button type="submit" disabled={submitting || !categoryId}>
-              {submitting ? "Публикация…" : "Опубликовать"}
+              {submitting ? "Сохранение…" : post ? "Сохранить" : "Опубликовать"}
             </Button>
           </div>
         </form>

@@ -115,3 +115,90 @@ async def test_guest_can_read_but_not_comment(client: AsyncClient) -> None:
         f"/api/forum/posts/{slug}/comments", json={"body": "Теперь с аккаунтом"}
     )
     assert still.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_author_can_edit_topic_stranger_cannot(client: AsyncClient) -> None:
+    await register_verified(client)
+    category_id = await first_category_id(client)
+    created = await client.post(
+        "/api/forum/posts",
+        json={
+            "title": "Как пилить гранит",
+            "categoryId": category_id,
+            "content": "Исходный текст.",
+        },
+    )
+    slug = created.json()["slug"]
+    updated = await client.patch(
+        f"/api/forum/posts/{slug}",
+        json={"content": "Исправленный текст темы."},
+    )
+    assert updated.status_code == 200, updated.text
+    body = updated.json()
+    assert body["slug"] == slug
+    assert body["content"] == "Исправленный текст темы."
+    assert body["authorId"] == created.json()["authorId"]
+    await logout(client)
+
+    guest = await client.patch(
+        f"/api/forum/posts/{slug}", json={"content": "Чужая правка"}
+    )
+    assert guest.status_code == 401
+
+    await register_verified(client)
+    stranger = await client.patch(
+        f"/api/forum/posts/{slug}", json={"content": "Чужая правка"}
+    )
+    assert stranger.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_topic_views_likes_and_reply_tree(client: AsyncClient) -> None:
+    await register_verified(client)
+    category_id = await first_category_id(client)
+    created = await client.post(
+        "/api/forum/posts",
+        json={
+            "title": "Просмотры и ответы",
+            "categoryId": category_id,
+            "content": "Текст темы.",
+        },
+    )
+    slug = created.json()["slug"]
+
+    first = await client.get(f"/api/forum/posts/{slug}")
+    assert first.json()["viewCount"] == 1
+    second = await client.get(f"/api/forum/posts/{slug}")
+    assert second.json()["viewCount"] == 2
+
+    liked = await client.post(f"/api/forum/posts/{slug}/like")
+    assert liked.status_code == 200, liked.text
+    assert liked.json() == {"liked": True, "likesCount": 1}
+    unliked = await client.post(f"/api/forum/posts/{slug}/like")
+    assert unliked.json() == {"liked": False, "likesCount": 0}
+
+    root = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Первый ответ"}
+    )
+    assert root.status_code == 200, root.text
+    root_id = root.json()["id"]
+    reply = await client.post(
+        f"/api/forum/posts/{slug}/comments",
+        json={"body": "Ответ на ответ", "parentId": root_id},
+    )
+    assert reply.status_code == 200, reply.text
+    assert reply.json()["parentId"] == root_id
+
+    comment_like = await client.post(
+        f"/api/forum/posts/{slug}/comments/{root_id}/like"
+    )
+    assert comment_like.status_code == 200, comment_like.text
+    assert comment_like.json()["liked"] is True
+    assert comment_like.json()["likesCount"] == 1
+    removed = await client.post(f"/api/forum/posts/{slug}/comments/{root_id}/like")
+    assert removed.json()["liked"] is False
+
+    detail = await client.get(f"/api/forum/posts/{slug}")
+    by_id = {item["id"]: item for item in detail.json()["comments"]}
+    assert by_id[reply.json()["id"]]["parentId"] == root_id

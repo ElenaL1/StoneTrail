@@ -1156,6 +1156,8 @@ export const mockForumComments: Comment[] = [
     author: "StoneCut_Pro",
     text: "Согласен с Иваном. Я также заметил, что на некоторых кварцитах лучше работают диски с повышенным содержанием алмазного напыления.",
     date: "1 день назад",
+    likesCount: 0,
+    liked: false,
   },
   {
     id: "com-2",
@@ -1163,6 +1165,8 @@ export const mockForumComments: Comment[] = [
     author: "MarbleMaster",
     text: "А про зерно — я использую 3000 для финишного этапа, дает отличный результат.",
     date: "12 часов назад",
+    likesCount: 0,
+    liked: false,
   },
   {
     id: "com-3",
@@ -1170,6 +1174,8 @@ export const mockForumComments: Comment[] = [
     author: "Ivan_Slabs",
     text: "Отличный совет про фонарь! Многие об этом забывают, а потом удивляются трещинам после резки.",
     date: "4 дня назад",
+    likesCount: 0,
+    liked: false,
   },
   {
     id: "com-4",
@@ -1177,6 +1183,8 @@ export const mockForumComments: Comment[] = [
     author: "Kitchens_ Andrey",
     text: "Полностью поддержию по поводу матовых поверхностей. Они выглядят более благородно и менее маркие.",
     date: "3 дня назад",
+    likesCount: 0,
+    liked: false,
   },
   {
     id: "com-5",
@@ -1184,6 +1192,8 @@ export const mockForumComments: Comment[] = [
     author: "WorkSafe_Corp",
     text: "Мы установили системы аспирации на весь цех. Затраты окупились за счет здоровья сотрудников и отсутствия проблем с проверками.",
     date: "1 неделю назад",
+    likesCount: 0,
+    liked: false,
   },
 ]
 

@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models.content import ForumComment, ForumPost
+from models.content import ForumComment, ForumCommentLike, ForumPost, ForumPostLike
 from models.lookups import ForumCategory
 
 
@@ -106,3 +106,93 @@ class ForumRepository:
 
     def add_comment(self, comment: ForumComment) -> None:
         self._session.add(comment)
+
+    async def get_comment(self, comment_id: uuid.UUID) -> ForumComment | None:
+        stmt = select(ForumComment).where(
+            ForumComment.id == comment_id,
+            ForumComment.deleted_at.is_(None),
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def post_like_counts(
+        self, post_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, int]:
+        if not post_ids:
+            return {}
+        stmt = (
+            select(ForumPostLike.post_id, func.count())
+            .where(ForumPostLike.post_id.in_(list(post_ids)))
+            .group_by(ForumPostLike.post_id)
+        )
+        result = await self._session.execute(stmt)
+        return {post_id: count for post_id, count in result.all()}
+
+    async def liked_post_ids(
+        self, user_id: uuid.UUID, post_ids: Sequence[uuid.UUID]
+    ) -> set[uuid.UUID]:
+        if not post_ids:
+            return set()
+        stmt = select(ForumPostLike.post_id).where(
+            ForumPostLike.user_id == user_id,
+            ForumPostLike.post_id.in_(list(post_ids)),
+        )
+        result = await self._session.execute(stmt)
+        return set(result.scalars().all())
+
+    async def get_post_like(
+        self, user_id: uuid.UUID, post_id: uuid.UUID
+    ) -> ForumPostLike | None:
+        stmt = select(ForumPostLike).where(
+            ForumPostLike.user_id == user_id,
+            ForumPostLike.post_id == post_id,
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    def add_post_like(self, like: ForumPostLike) -> None:
+        self._session.add(like)
+
+    async def delete_post_like(self, like: ForumPostLike) -> None:
+        await self._session.delete(like)
+
+    async def comment_like_counts(
+        self, comment_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, int]:
+        if not comment_ids:
+            return {}
+        stmt = (
+            select(ForumCommentLike.comment_id, func.count())
+            .where(ForumCommentLike.comment_id.in_(list(comment_ids)))
+            .group_by(ForumCommentLike.comment_id)
+        )
+        result = await self._session.execute(stmt)
+        return {comment_id: count for comment_id, count in result.all()}
+
+    async def liked_comment_ids(
+        self, user_id: uuid.UUID, comment_ids: Sequence[uuid.UUID]
+    ) -> set[uuid.UUID]:
+        if not comment_ids:
+            return set()
+        stmt = select(ForumCommentLike.comment_id).where(
+            ForumCommentLike.user_id == user_id,
+            ForumCommentLike.comment_id.in_(list(comment_ids)),
+        )
+        result = await self._session.execute(stmt)
+        return set(result.scalars().all())
+
+    async def get_comment_like(
+        self, user_id: uuid.UUID, comment_id: uuid.UUID
+    ) -> ForumCommentLike | None:
+        stmt = select(ForumCommentLike).where(
+            ForumCommentLike.user_id == user_id,
+            ForumCommentLike.comment_id == comment_id,
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    def add_comment_like(self, like: ForumCommentLike) -> None:
+        self._session.add(like)
+
+    async def delete_comment_like(self, like: ForumCommentLike) -> None:
+        await self._session.delete(like)

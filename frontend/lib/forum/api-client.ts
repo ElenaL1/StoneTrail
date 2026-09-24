@@ -13,6 +13,14 @@ type CommentDto = {
   author: string
   body: string
   createdAt: string
+  parentId?: string | null
+  likesCount: number
+  liked: boolean
+}
+
+type LikeDto = {
+  liked: boolean
+  likesCount: number
 }
 
 type PostDto = {
@@ -25,7 +33,11 @@ type PostDto = {
   excerpt: string
   content: string
   createdAt: string
+  authorId: string
   commentCount: number
+  viewCount: number
+  likesCount: number
+  liked: boolean
   comments?: CommentDto[]
 }
 
@@ -36,6 +48,9 @@ function mapComment(dto: CommentDto, postId?: string): Comment {
     author: dto.author,
     text: dto.body,
     date: formatRuDate(dto.createdAt),
+    parentId: dto.parentId ?? undefined,
+    likesCount: dto.likesCount,
+    liked: dto.liked,
   }
 }
 
@@ -45,12 +60,16 @@ function mapPost(dto: PostDto): ForumPost {
     slug: dto.slug,
     title: dto.title,
     author: dto.author,
+    authorId: dto.authorId,
     category: dto.category,
     categoryId: dto.categoryId,
     excerpt: dto.excerpt,
     content: dto.content,
     date: formatRuDate(dto.createdAt),
     commentCount: dto.commentCount,
+    viewCount: dto.viewCount,
+    likesCount: dto.likesCount,
+    liked: dto.liked,
     comments: (dto.comments ?? []).map((comment) => mapComment(comment, dto.id)),
   }
 }
@@ -84,12 +103,37 @@ export const forumApi = {
     )
   },
 
-  async addComment(slug: string, body: string): Promise<Comment> {
+  async updatePost(
+    slug: string,
+    input: { title: string; categoryId: string; content: string },
+  ): Promise<ForumPost> {
+    return mapPost(
+      await contentRequest<PostDto>(`/api/forum/posts/${encodeURIComponent(slug)}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }),
+    )
+  },
+
+  async addComment(slug: string, body: string, parentId?: string): Promise<Comment> {
     return mapComment(
       await contentRequest<CommentDto>(`/api/forum/posts/${encodeURIComponent(slug)}/comments`, {
         method: "POST",
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ body, parentId }),
       }),
+    )
+  },
+
+  togglePostLike(slug: string): Promise<LikeDto> {
+    return contentRequest<LikeDto>(`/api/forum/posts/${encodeURIComponent(slug)}/like`, {
+      method: "POST",
+    })
+  },
+
+  toggleCommentLike(slug: string, commentId: string): Promise<LikeDto> {
+    return contentRequest<LikeDto>(
+      `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}/like`,
+      { method: "POST" },
     )
   },
 }

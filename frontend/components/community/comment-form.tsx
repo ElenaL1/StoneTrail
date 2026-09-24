@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import { forumApi } from "@/lib/forum/api-client"
 import { ContentRequestError } from "@/lib/content-request"
+import type { Comment } from "@/lib/types"
 import { Send } from "lucide-react"
 
 interface CommentFormProps {
   slug: string
-  onCommentAdded: () => void
+  onCommentAdded: (comment: Comment) => void
 }
 
 export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
@@ -28,9 +29,9 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
     setSubmitting(true)
     setError("")
     try {
-      await forumApi.addComment(slug, text.trim())
+      const created = await forumApi.addComment(slug, text.trim())
       setText("")
-      onCommentAdded()
+      onCommentAdded(created)
     } catch (err) {
       setError(err instanceof ContentRequestError ? err.message : "Не удалось отправить комментарий.")
     } finally {
