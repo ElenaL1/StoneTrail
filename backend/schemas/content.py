@@ -33,11 +33,22 @@ class ForumCommentCreate(CamelModel):
         return _required_text(value, messages.COMMENT_REQUIRED)
 
 
+class ForumCommentUpdate(CamelModel):
+    body: str
+
+    @field_validator("body")
+    @classmethod
+    def validate_body(cls, value: str) -> str:
+        return _required_text(value, messages.COMMENT_REQUIRED)
+
+
 class ForumCommentOut(CamelModel):
     id: uuid.UUID
     author: str
+    author_id: uuid.UUID
     body: str
     created_at: datetime
+    edited_at: datetime | None = None
     parent_id: uuid.UUID | None = None
     likes_count: int = 0
     liked: bool = False
@@ -95,6 +106,7 @@ class ForumPostOut(CamelModel):
     excerpt: str
     content: str
     created_at: datetime
+    edited_at: datetime | None = None
     comment_count: int
     view_count: int = 0
     likes_count: int = 0

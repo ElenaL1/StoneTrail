@@ -163,6 +163,7 @@ export type ForumPost = {
   category: string
   categoryId: string
   date: string
+  editedAt?: string
   excerpt: string
   content: string
   commentCount: number
@@ -176,8 +177,10 @@ export type Comment = {
   id: string
   postId?: string
   author: string
+  authorId: string
   text: string
   date: string
+  editedAt?: string
   parentId?: string
   likesCount: number
   liked: boolean

@@ -80,6 +80,7 @@ class ForumPost(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     view_count: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("0")
     )
+    edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )
@@ -113,6 +114,7 @@ class ForumComment(TimestampMixin, SoftDeleteMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
+    edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     parent_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("forum_comments.id", ondelete="CASCADE")
     )

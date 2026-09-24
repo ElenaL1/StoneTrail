@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +17,7 @@ from schemas.content import (
     CategoryOut,
     ForumCommentCreate,
     ForumCommentOut,
+    ForumCommentUpdate,
     ForumLikeOut,
     ForumPostCreate,
     ForumPostOut,
@@ -101,6 +103,7 @@ class ForumService:
                 )
             post.category_id = category.id
         post.updated_by = actor.id
+        post.edited_at = datetime.now(timezone.utc)
         await self._session.commit()
         loaded = await self._repo.get_post_by_slug(post.slug)
         assert loaded is not None
@@ -133,6 +136,23 @@ class ForumService:
         comments = await self._repo.list_comments(post.id)
         created = next(item for item in comments if item.id == comment.id)
         packed = await self._comments_out([created], author)
+        return packed[0]
+
+    async def update_comment(
+        self, slug: str, comment_id: uuid.UUID, payload: ForumCommentUpdate, actor: User
+    ) -> ForumCommentOut:
+        post = await self._require_post(slug)
+        comment = await self._repo.get_comment(comment_id)
+        if comment is None or comment.post_id != post.id:
+            raise ApiError.not_found()
+        if comment.author_id != actor.id:
+            raise AuthError.forbidden()
+        comment.body = payload.body
+        comment.edited_at = datetime.now(timezone.utc)
+        await self._session.commit()
+        comments = await self._repo.list_comments(post.id)
+        updated = next(item for item in comments if item.id == comment.id)
+        packed = await self._comments_out([updated], actor)
         return packed[0]
 
     async def toggle_post_like(self, slug: str, user: User) -> ForumLikeOut:
@@ -227,6 +247,7 @@ class ForumService:
                     excerpt=post.excerpt,
                     content=post.content,
                     created_at=post.created_at,
+                    edited_at=post.edited_at,
                     comment_count=comment_counts.get(post.id, 0),
                     view_count=post.view_count,
                     likes_count=like_counts.get(post.id, 0),
@@ -248,8 +269,10 @@ class ForumService:
             ForumCommentOut(
                 id=comment.id,
                 author=comment.author.nickname,
+                author_id=comment.author_id,
                 body=comment.body,
                 created_at=comment.created_at,
+                edited_at=comment.edited_at,
                 parent_id=comment.parent_id,
                 likes_count=counts.get(comment.id, 0),
                 liked=comment.id in liked_ids,

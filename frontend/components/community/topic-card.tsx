@@ -1,8 +1,6 @@
 import Link from "next/link"
 import { ForumPost } from "@/lib/types"
-import { Button } from "@/components/ui/button"
 import { MessageSquare, User, Calendar, Eye } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 interface TopicCardProps {
   post: ForumPost
@@ -11,9 +9,12 @@ interface TopicCardProps {
 
 export function TopicCard({ post, commentCount }: TopicCardProps) {
   return (
-    <div className="group relative flex flex-col justify-between rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-sm">
+    <Link
+      href={`/community/${post.slug}`}
+      className="group relative flex flex-col justify-between rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-sm"
+    >
       <div>
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex items-center justify-between gap-2">
           <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
             {post.category}
           </span>
@@ -22,13 +23,11 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
             {post.date}
           </span>
         </div>
-        
-        <Link href={`/community/${post.slug}`} className="mb-2 block">
-          <h3 className="text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
-            {post.title}
-          </h3>
-        </Link>
-        
+
+        <h3 className="mb-2 text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
+          {post.title}
+        </h3>
+
         <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {post.excerpt}
         </p>
@@ -39,7 +38,7 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
           <User className="size-4" />
           <span className="font-medium">{post.author}</span>
         </div>
-        
+
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Eye className="size-4" />
@@ -51,6 +50,6 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

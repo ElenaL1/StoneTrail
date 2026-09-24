@@ -1,4 +1,4 @@
-import { formatRuDate } from "@/lib/content-utils"
+import { formatRuDate, formatRuDateTime } from "@/lib/content-utils"
 import { contentRequest, isNotFound } from "@/lib/content-request"
 import type { Comment, ContentCategory, ForumPost } from "@/lib/types"
 
@@ -11,8 +11,10 @@ type CategoryDto = {
 type CommentDto = {
   id: string
   author: string
+  authorId: string
   body: string
   createdAt: string
+  editedAt?: string | null
   parentId?: string | null
   likesCount: number
   liked: boolean
@@ -33,6 +35,7 @@ type PostDto = {
   excerpt: string
   content: string
   createdAt: string
+  editedAt?: string | null
   authorId: string
   commentCount: number
   viewCount: number
@@ -46,8 +49,10 @@ function mapComment(dto: CommentDto, postId?: string): Comment {
     id: dto.id,
     postId,
     author: dto.author,
+    authorId: dto.authorId,
     text: dto.body,
-    date: formatRuDate(dto.createdAt),
+    date: formatRuDateTime(dto.createdAt),
+    editedAt: dto.editedAt ? formatRuDateTime(dto.editedAt) : undefined,
     parentId: dto.parentId ?? undefined,
     likesCount: dto.likesCount,
     liked: dto.liked,
@@ -66,6 +71,7 @@ function mapPost(dto: PostDto): ForumPost {
     excerpt: dto.excerpt,
     content: dto.content,
     date: formatRuDate(dto.createdAt),
+    editedAt: dto.editedAt ? formatRuDateTime(dto.editedAt) : undefined,
     commentCount: dto.commentCount,
     viewCount: dto.viewCount,
     likesCount: dto.likesCount,
@@ -128,6 +134,15 @@ export const forumApi = {
     return contentRequest<LikeDto>(`/api/forum/posts/${encodeURIComponent(slug)}/like`, {
       method: "POST",
     })
+  },
+
+  async updateComment(slug: string, commentId: string, body: string): Promise<Comment> {
+    return mapComment(
+      await contentRequest<CommentDto>(
+        `/api/forum/posts/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`,
+        { method: "PATCH", body: JSON.stringify({ body }) },
+      ),
+    )
   },
 
   toggleCommentLike(slug: string, commentId: string): Promise<LikeDto> {

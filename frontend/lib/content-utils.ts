@@ -15,6 +15,19 @@ export function formatRuDate(value: string | null | undefined): string {
   })
 }
 
+export function formatRuDateTime(value: string | null | undefined): string {
+  if (!value) return ""
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return date.toLocaleString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 export function formatReadTime(minutes: number): string {
   return `${minutes} мин`
 }

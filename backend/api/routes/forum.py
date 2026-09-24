@@ -9,6 +9,7 @@ from schemas.content import (
     CategoryOut,
     ForumCommentCreate,
     ForumCommentOut,
+    ForumCommentUpdate,
     ForumLikeOut,
     ForumPostCreate,
     ForumPostOut,
@@ -80,6 +81,17 @@ async def add_comment(
     user: Annotated[User, Depends(get_verified_user)],
 ) -> ForumCommentOut:
     return await service.add_comment(slug, payload, user)
+
+
+@router.patch("/posts/{slug}/comments/{comment_id}", response_model=ForumCommentOut)
+async def update_comment(
+    slug: str,
+    comment_id: UUID,
+    payload: ForumCommentUpdate,
+    service: Annotated[ForumService, Depends(get_forum_service)],
+    user: Annotated[User, Depends(get_verified_user)],
+) -> ForumCommentOut:
+    return await service.update_comment(slug, comment_id, payload, user)
 
 
 @router.post(

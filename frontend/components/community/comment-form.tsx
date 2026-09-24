@@ -49,6 +49,12 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
           placeholder={canComment ? "Напишите ваш ответ..." : "Войдите, чтобы оставить комментарий..."}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }
+          }}
           disabled={!canComment}
           className="pr-12 min-h-[100px]"
         />
@@ -63,6 +69,11 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
           </Button>
         </div>
       </div>
+      {canComment ? (
+        <p className="text-xs text-muted-foreground">
+          Выделите фрагмент и нажмите «Цитировать». Enter — отправить, Shift+Enter — новая строка.
+        </p>
+      ) : null}
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
       {!user ? (
         <p className="text-sm text-muted-foreground">

@@ -115,6 +115,7 @@ export default function TopicDetailPage() {
                 <Calendar className="size-4" />
                 {post.date}
               </span>
+              {post.editedAt ? <span>изменено {post.editedAt}</span> : null}
               <span className="flex items-center gap-1.5">
                 <Eye className="size-4" />
                 {post.viewCount}
@@ -123,7 +124,6 @@ export default function TopicDetailPage() {
                 <MessageSquare className="size-4" />
                 {comments.length} ответов
               </span>
-              {canEdit ? <CreateTopicModal post={post} onUpdated={setPost} /> : null}
             </div>
           </div>
 
@@ -146,14 +146,17 @@ export default function TopicDetailPage() {
               {post.content}
             </p>
           </div>
-          <button
-            type="button"
-            className="mt-6 flex items-center gap-1.5 text-sm text-muted-foreground"
-            onClick={likePost}
-          >
-            <Heart className={cn("size-4", post.liked && "fill-primary text-primary")} />
-            {post.likesCount}
-          </button>
+          <div className="mt-6 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground"
+              onClick={likePost}
+            >
+              <Heart className={cn("size-4", post.liked && "fill-primary text-primary")} />
+              {post.likesCount}
+            </button>
+            {canEdit ? <CreateTopicModal post={post} onUpdated={setPost} /> : null}
+          </div>
         </article>
 
         <section className="space-y-8">
@@ -171,10 +174,24 @@ export default function TopicDetailPage() {
               <CommentThread
                 comments={comments}
                 canInteract={canInteract}
+                currentUserId={user?.id}
                 onReply={async (parentId, body) => {
                   appendComment(await forumApi.addComment(post.slug, body, parentId))
                 }}
                 onLike={likeComment}
+                onEdit={async (commentId, body) => {
+                  const updated = await forumApi.updateComment(post.slug, commentId, body)
+                  setPost((current) =>
+                    current
+                      ? {
+                          ...current,
+                          comments: current.comments.map((comment) =>
+                            comment.id === commentId ? updated : comment,
+                          ),
+                        }
+                      : current,
+                  )
+                }}
               />
             ) : (
               <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">

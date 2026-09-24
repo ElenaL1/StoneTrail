@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Heart, User, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,14 +23,95 @@ export function commentTree(comments: Comment[]): CommentNode[] {
   return roots
 }
 
+const MAX_REPLY_INDENT = 4
+
+type CommentBlock = { kind: "quote"; text: string } | { kind: "text"; text: string }
+
+function commentBlocks(source: string): CommentBlock[] {
+  const blocks: CommentBlock[] = []
+  let quote: string[] | null = null
+  let plain: string[] | null = null
+
+  const flushQuote = () => {
+    if (!quote) return
+    blocks.push({ kind: "quote", text: quote.join("\n") })
+    quote = null
+  }
+  const flushPlain = () => {
+    if (!plain) return
+    const text = plain.join("\n").trim()
+    if (text) blocks.push({ kind: "text", text })
+    plain = null
+  }
+
+  for (const rawLine of source.split("\n")) {
+    const line = rawLine.replace(/\r$/, "")
+    if (line.startsWith(">")) {
+      flushPlain()
+      const content = line.slice(1).replace(/^ /, "")
+      if (quote) quote.push(content)
+      else quote = [content]
+    } else {
+      flushQuote()
+      if (plain) plain.push(line)
+      else plain = [line]
+    }
+  }
+  flushQuote()
+  flushPlain()
+  return blocks
+}
+
+function quoteSelection(fragment: string): string {
+  return fragment
+    .trim()
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n")
+}
+
+function CommentBody({ text }: { text: string }) {
+  const blocks = commentBlocks(text)
+  if (blocks.length === 1 && blocks[0].kind === "text") {
+    return <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{blocks[0].text}</p>
+  }
+  return (
+    <div className="space-y-2 text-sm leading-relaxed">
+      {blocks.map((block, index) =>
+        block.kind === "quote" ? (
+          <blockquote
+            key={index}
+            className="rounded-lg bg-muted px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap text-foreground/80"
+          >
+            {block.text}
+          </blockquote>
+        ) : (
+          <p key={index} className="whitespace-pre-wrap text-muted-foreground">
+            {block.text}
+          </p>
+        ),
+      )}
+    </div>
+  )
+}
+
 type CommentThreadProps = {
   comments: Comment[]
   canInteract: boolean
+  currentUserId?: string
   onReply: (parentId: string, body: string) => Promise<void>
   onLike: (commentId: string) => void
+  onEdit: (commentId: string, body: string) => Promise<void>
 }
 
-export function CommentThread({ comments, canInteract, onReply, onLike }: CommentThreadProps) {
+export function CommentThread({
+  comments,
+  canInteract,
+  currentUserId,
+  onReply,
+  onLike,
+  onEdit,
+}: CommentThreadProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null)
 
   return (
@@ -39,11 +120,14 @@ export function CommentThread({ comments, canInteract, onReply, onLike }: Commen
         <CommentNodeView
           key={comment.id}
           comment={comment}
+          depth={0}
           canInteract={canInteract}
+          currentUserId={currentUserId}
           replyTo={replyTo}
           setReplyTo={setReplyTo}
           onReply={onReply}
           onLike={onLike}
+          onEdit={onEdit}
         />
       ))}
     </div>
@@ -52,21 +136,72 @@ export function CommentThread({ comments, canInteract, onReply, onLike }: Commen
 
 function CommentNodeView({
   comment,
+  depth,
   canInteract,
+  currentUserId,
   replyTo,
   setReplyTo,
   onReply,
   onLike,
+  onEdit,
 }: {
   comment: CommentNode
+  depth: number
   canInteract: boolean
+  currentUserId?: string
   replyTo: string | null
   setReplyTo: (id: string | null) => void
   onReply: (parentId: string, body: string) => Promise<void>
   onLike: (commentId: string) => void
+  onEdit: (commentId: string, body: string) => Promise<void>
 }) {
   const [text, setText] = useState("")
+  const [draft, setDraft] = useState(comment.text)
+  const [editing, setEditing] = useState(false)
   const [sending, setSending] = useState(false)
+  const [quotePrompt, setQuotePrompt] = useState<{ x: number; y: number; text: string } | null>(null)
+  const replyRef = useRef<HTMLTextAreaElement>(null)
+  const pendingFocus = useRef(false)
+  const canEdit = Boolean(currentUserId && comment.authorId === currentUserId)
+
+  useEffect(() => {
+    if (!pendingFocus.current || replyTo !== comment.id) return
+    pendingFocus.current = false
+    const field = replyRef.current
+    if (!field) return
+    field.focus()
+    const end = field.value.length
+    field.setSelectionRange(end, end)
+  }, [comment.id, replyTo, text])
+
+  const applyQuote = (fragment: string) => {
+    const quoted = quoteSelection(fragment)
+    setText((current) => (current.trim() ? `${quoted}\n\n${current}` : `${quoted}\n\n`))
+    pendingFocus.current = true
+    setReplyTo(comment.id)
+    setQuotePrompt(null)
+    window.getSelection()?.removeAllRanges()
+  }
+
+  const onBodyMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!canInteract) return
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      setQuotePrompt(null)
+      return
+    }
+    const fragment = selection.toString().trim()
+    const range = selection.getRangeAt(0)
+    if (!fragment || !event.currentTarget.contains(range.commonAncestorContainer)) {
+      setQuotePrompt(null)
+      return
+    }
+    const rect =
+      typeof range.getBoundingClientRect === "function"
+        ? range.getBoundingClientRect()
+        : { left: 0, top: 0 }
+    setQuotePrompt({ x: rect.left, y: rect.top, text: fragment })
+  }
 
   const send = async () => {
     if (!text.trim()) return
@@ -89,12 +224,45 @@ function CommentNodeView({
         <div className="flex-1">
           <div className="mb-1 flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">{comment.author}</span>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="size-3" />
-              {comment.date}
+            <span className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3" />
+                {comment.date}
+              </span>
+              {comment.editedAt ? <span>изменено {comment.editedAt}</span> : null}
             </span>
           </div>
-          <p className="text-sm leading-relaxed text-muted-foreground">{comment.text}</p>
+          {editing ? (
+            <div className="space-y-2">
+              <Textarea
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                className="min-h-[80px]"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={sending || !draft.trim()}
+                  onClick={() => {
+                    setSending(true)
+                    void onEdit(comment.id, draft.trim())
+                      .then(() => setEditing(false))
+                      .finally(() => setSending(false))
+                  }}
+                >
+                  {sending ? "Сохранение…" : "Сохранить"}
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setEditing(false)}>
+                  Отменить
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div onMouseUp={onBodyMouseUp}>
+              <CommentBody text={comment.text} />
+            </div>
+          )}
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
@@ -106,24 +274,57 @@ function CommentNodeView({
               <Heart className={cn("size-4", comment.liked && "fill-primary text-primary")} />
               {comment.likesCount}
             </button>
-            {canInteract ? (
+            {canEdit ? (
               <button
                 type="button"
                 className="text-sm font-medium text-primary"
+                onClick={() => {
+                  setDraft(comment.text)
+                  setEditing((current) => !current)
+                }}
+              >
+                Изменить
+              </button>
+            ) : null}
+            {canInteract ? (
+              <button
+                type="button"
+                className="ml-auto text-sm font-medium text-primary"
                 onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
               >
                 Ответить
               </button>
             ) : null}
           </div>
+          {quotePrompt ? (
+            <button
+              type="button"
+              className="fixed z-30 -translate-y-[calc(100%+6px)] rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground shadow-sm"
+              style={{ left: quotePrompt.x, top: quotePrompt.y }}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => applyQuote(quotePrompt.text)}
+            >
+              Цитировать
+            </button>
+          ) : null}
           {replyTo === comment.id ? (
             <div className="mt-3 space-y-2">
               <Textarea
+                ref={replyRef}
                 value={text}
                 onChange={(event) => setText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                    event.preventDefault()
+                    void send()
+                  }
+                }}
                 placeholder="Напишите ответ..."
                 className="min-h-[80px]"
               />
+              <p className="text-xs text-muted-foreground">
+                Выделите фрагмент и нажмите «Цитировать». Enter — отправить, Shift+Enter — новая строка.
+              </p>
               <Button type="button" size="sm" disabled={sending || !text.trim()} onClick={() => void send()}>
                 {sending ? "Отправка…" : "Отправить"}
               </Button>
@@ -132,16 +333,25 @@ function CommentNodeView({
         </div>
       </div>
       {comment.replies.length > 0 ? (
-        <div className="ml-8 space-y-3 border-l border-border pl-4">
+        <div
+          data-testid={`replies-${comment.id}`}
+          className={cn(
+            "space-y-3",
+            depth < MAX_REPLY_INDENT && "ml-4 border-l border-border pl-3 sm:ml-8 sm:pl-4",
+          )}
+        >
           {comment.replies.map((reply) => (
             <CommentNodeView
               key={reply.id}
               comment={reply}
+              depth={depth + 1}
               canInteract={canInteract}
+              currentUserId={currentUserId}
               replyTo={replyTo}
               setReplyTo={setReplyTo}
               onReply={onReply}
               onLike={onLike}
+              onEdit={onEdit}
             />
           ))}
         </div>

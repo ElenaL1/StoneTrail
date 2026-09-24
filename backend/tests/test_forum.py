@@ -139,6 +139,8 @@ async def test_author_can_edit_topic_stranger_cannot(client: AsyncClient) -> Non
     assert body["slug"] == slug
     assert body["content"] == "Исправленный текст темы."
     assert body["authorId"] == created.json()["authorId"]
+    assert created.json()["editedAt"] is None
+    assert body["editedAt"] is not None
     await logout(client)
 
     guest = await client.patch(
@@ -169,6 +171,7 @@ async def test_topic_views_likes_and_reply_tree(client: AsyncClient) -> None:
 
     first = await client.get(f"/api/forum/posts/{slug}")
     assert first.json()["viewCount"] == 1
+    assert first.json()["editedAt"] is None
     second = await client.get(f"/api/forum/posts/{slug}")
     assert second.json()["viewCount"] == 2
 
@@ -202,3 +205,39 @@ async def test_topic_views_likes_and_reply_tree(client: AsyncClient) -> None:
     detail = await client.get(f"/api/forum/posts/{slug}")
     by_id = {item["id"]: item for item in detail.json()["comments"]}
     assert by_id[reply.json()["id"]]["parentId"] == root_id
+
+
+@pytest.mark.asyncio
+async def test_author_can_edit_own_comment(client: AsyncClient) -> None:
+    await register_verified(client)
+    category_id = await first_category_id(client)
+    created = await client.post(
+        "/api/forum/posts",
+        json={
+            "title": "Правка ответа",
+            "categoryId": category_id,
+            "content": "Текст темы.",
+        },
+    )
+    slug = created.json()["slug"]
+    comment = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Черновик ответа"}
+    )
+    comment_id = comment.json()["id"]
+    updated = await client.patch(
+        f"/api/forum/posts/{slug}/comments/{comment_id}",
+        json={"body": "Исправленный ответ"},
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["body"] == "Исправленный ответ"
+    assert comment.json()["editedAt"] is None
+    assert updated.json()["editedAt"] is not None
+    assert updated.json()["parentId"] is None
+    await logout(client)
+
+    await register_verified(client)
+    stranger = await client.patch(
+        f"/api/forum/posts/{slug}/comments/{comment_id}",
+        json={"body": "Чужая правка"},
+    )
+    assert stranger.status_code == 403
