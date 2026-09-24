@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { ForumPost } from "@/lib/types"
-import { MessageSquare, User, Calendar, Eye } from "lucide-react"
+import { MessageSquare, User, Calendar, Eye, Heart } from "lucide-react"
 
 interface TopicCardProps {
   post: ForumPost
@@ -40,6 +40,10 @@ export function TopicCard({ post, commentCount }: TopicCardProps) {
         </div>
 
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Heart className="size-4" />
+            {post.likesCount}
+          </span>
           <span className="flex items-center gap-1.5">
             <Eye className="size-4" />
             {post.viewCount}

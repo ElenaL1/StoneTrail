@@ -56,7 +56,7 @@ export function CommentForm({ slug, onCommentAdded }: CommentFormProps) {
             }
           }}
           disabled={!canComment}
-          className="pr-12 min-h-[100px]"
+          className="min-h-[100px] max-h-60 resize-y overflow-y-auto pr-12 [field-sizing:content]"
         />
         <div className="absolute right-2 bottom-2">
           <Button

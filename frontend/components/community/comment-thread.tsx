@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Heart, User, Calendar } from "lucide-react"
+import { Heart, User, Calendar, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -79,14 +79,14 @@ function CommentBody({ text }: { text: string }) {
     <div className="space-y-2 text-sm leading-relaxed">
       {blocks.map((block, index) =>
         block.kind === "quote" ? (
-          <blockquote
-            key={index}
-            className="rounded-lg bg-muted px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap text-foreground/80"
-          >
-            {block.text}
+          <blockquote key={index} className="flex gap-2 rounded-lg bg-muted px-3 py-2">
+            <Quote className="mt-1 size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="whitespace-pre-wrap text-sm italic leading-relaxed text-muted-foreground">
+              {block.text}
+            </span>
           </blockquote>
         ) : (
-          <p key={index} className="whitespace-pre-wrap text-muted-foreground">
+          <p key={index} className="whitespace-pre-wrap pt-1 text-foreground">
             {block.text}
           </p>
         ),
@@ -113,6 +113,8 @@ export function CommentThread({
   onEdit,
 }: CommentThreadProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null)
+  const [replyText, setReplyText] = useState("")
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   return (
     <div className="space-y-4">
@@ -125,6 +127,10 @@ export function CommentThread({
           currentUserId={currentUserId}
           replyTo={replyTo}
           setReplyTo={setReplyTo}
+          replyText={replyText}
+          setReplyText={setReplyText}
+          editingId={editingId}
+          setEditingId={setEditingId}
           onReply={onReply}
           onLike={onLike}
           onEdit={onEdit}
@@ -141,6 +147,10 @@ function CommentNodeView({
   currentUserId,
   replyTo,
   setReplyTo,
+  replyText,
+  setReplyText,
+  editingId,
+  setEditingId,
   onReply,
   onLike,
   onEdit,
@@ -151,13 +161,16 @@ function CommentNodeView({
   currentUserId?: string
   replyTo: string | null
   setReplyTo: (id: string | null) => void
+  replyText: string
+  setReplyText: (value: string | ((current: string) => string)) => void
+  editingId: string | null
+  setEditingId: (id: string | null) => void
   onReply: (parentId: string, body: string) => Promise<void>
   onLike: (commentId: string) => void
   onEdit: (commentId: string, body: string) => Promise<void>
 }) {
-  const [text, setText] = useState("")
   const [draft, setDraft] = useState(comment.text)
-  const [editing, setEditing] = useState(false)
+  const editing = editingId === comment.id
   const [sending, setSending] = useState(false)
   const [quotePrompt, setQuotePrompt] = useState<{ x: number; y: number; text: string } | null>(null)
   const replyRef = useRef<HTMLTextAreaElement>(null)
@@ -172,11 +185,11 @@ function CommentNodeView({
     field.focus()
     const end = field.value.length
     field.setSelectionRange(end, end)
-  }, [comment.id, replyTo, text])
+  }, [comment.id, replyTo, replyText])
 
   const applyQuote = (fragment: string) => {
     const quoted = quoteSelection(fragment)
-    setText((current) => (current.trim() ? `${quoted}\n\n${current}` : `${quoted}\n\n`))
+    setReplyText((current) => (current.trim() ? `${current.trim()}\n\n${quoted}\n\n` : `${quoted}\n\n`))
     pendingFocus.current = true
     setReplyTo(comment.id)
     setQuotePrompt(null)
@@ -184,7 +197,7 @@ function CommentNodeView({
   }
 
   const onBodyMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!canInteract) return
+    if (!canInteract || canEdit) return
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
       setQuotePrompt(null)
@@ -204,11 +217,11 @@ function CommentNodeView({
   }
 
   const send = async () => {
-    if (!text.trim()) return
+    if (!replyText.trim()) return
     setSending(true)
     try {
-      await onReply(comment.id, text.trim())
-      setText("")
+      await onReply(comment.id, replyText.trim())
+      setReplyText("")
       setReplyTo(null)
     } finally {
       setSending(false)
@@ -218,8 +231,20 @@ function CommentNodeView({
   return (
     <div data-testid={`comment-${comment.id}`} className="space-y-3">
       <div className="flex gap-4 rounded-lg border border-border/50 bg-secondary/30 p-4">
-        <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
-          <User className="size-5 text-muted-foreground" />
+        <div className="flex w-10 flex-shrink-0 flex-col items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+            <User className="size-5 text-muted-foreground" />
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-1 text-sm text-muted-foreground"
+            onClick={() => {
+              if (canInteract) onLike(comment.id)
+            }}
+          >
+            <Heart className={cn("size-4", comment.liked && "fill-primary text-primary")} />
+            {comment.likesCount}
+          </button>
         </div>
         <div className="flex-1">
           <div className="mb-1 flex items-center justify-between">
@@ -237,7 +262,7 @@ function CommentNodeView({
               <Textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                className="min-h-[80px]"
+                className="min-h-[80px] max-h-60 resize-y overflow-y-auto [field-sizing:content]"
               />
               <div className="flex gap-2">
                 <Button
@@ -247,13 +272,13 @@ function CommentNodeView({
                   onClick={() => {
                     setSending(true)
                     void onEdit(comment.id, draft.trim())
-                      .then(() => setEditing(false))
+                      .then(() => setEditingId(null))
                       .finally(() => setSending(false))
                   }}
                 >
                   {sending ? "Сохранение…" : "Сохранить"}
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => setEditing(false)}>
+                <Button type="button" size="sm" variant="outline" onClick={() => setEditingId(null)}>
                   Отменить
                 </Button>
               </div>
@@ -263,30 +288,19 @@ function CommentNodeView({
               <CommentBody text={comment.text} />
             </div>
           )}
-          <div className="mt-3 flex items-center gap-3">
-            <button
-              type="button"
-              className="flex items-center gap-1 text-sm text-muted-foreground"
-              onClick={() => {
-                if (canInteract) onLike(comment.id)
-              }}
-            >
-              <Heart className={cn("size-4", comment.liked && "fill-primary text-primary")} />
-              {comment.likesCount}
-            </button>
-            {canEdit ? (
+          <div className="mt-3 flex items-center">
+            {canEdit && !editing ? (
               <button
                 type="button"
-                className="text-sm font-medium text-primary"
+                className="ml-auto text-sm font-medium text-primary"
                 onClick={() => {
                   setDraft(comment.text)
-                  setEditing((current) => !current)
+                  setEditingId(comment.id)
                 }}
               >
                 Изменить
               </button>
-            ) : null}
-            {canInteract ? (
+            ) : canInteract && !canEdit ? (
               <button
                 type="button"
                 className="ml-auto text-sm font-medium text-primary"
@@ -311,8 +325,8 @@ function CommentNodeView({
             <div className="mt-3 space-y-2">
               <Textarea
                 ref={replyRef}
-                value={text}
-                onChange={(event) => setText(event.target.value)}
+                value={replyText}
+                onChange={(event) => setReplyText(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                     event.preventDefault()
@@ -320,12 +334,12 @@ function CommentNodeView({
                   }
                 }}
                 placeholder="Напишите ответ..."
-                className="min-h-[80px]"
+                className="min-h-[80px] max-h-60 resize-y overflow-y-auto [field-sizing:content]"
               />
               <p className="text-xs text-muted-foreground">
                 Выделите фрагмент и нажмите «Цитировать». Enter — отправить, Shift+Enter — новая строка.
               </p>
-              <Button type="button" size="sm" disabled={sending || !text.trim()} onClick={() => void send()}>
+              <Button type="button" size="sm" disabled={sending || !replyText.trim()} onClick={() => void send()}>
                 {sending ? "Отправка…" : "Отправить"}
               </Button>
             </div>
@@ -349,6 +363,10 @@ function CommentNodeView({
               currentUserId={currentUserId}
               replyTo={replyTo}
               setReplyTo={setReplyTo}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              editingId={editingId}
+              setEditingId={setEditingId}
               onReply={onReply}
               onLike={onLike}
               onEdit={onEdit}

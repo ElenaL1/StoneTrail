@@ -71,6 +71,7 @@ function mapPost(dto: PostDto): ForumPost {
     excerpt: dto.excerpt,
     content: dto.content,
     date: formatRuDate(dto.createdAt),
+    createdAt: dto.createdAt,
     editedAt: dto.editedAt ? formatRuDateTime(dto.editedAt) : undefined,
     commentCount: dto.commentCount,
     viewCount: dto.viewCount,

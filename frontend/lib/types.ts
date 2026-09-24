@@ -163,6 +163,7 @@ export type ForumPost = {
   category: string
   categoryId: string
   date: string
+  createdAt?: string
   editedAt?: string
   excerpt: string
   content: string

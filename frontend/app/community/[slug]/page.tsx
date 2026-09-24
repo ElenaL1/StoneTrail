@@ -19,6 +19,7 @@ export default function TopicDetailPage() {
   const { user } = useAuth()
   const slug = String(params.slug ?? "")
   const [post, setPost] = useState<ForumPost | null | undefined>(undefined)
+  const [scrollToId, setScrollToId] = useState<string | null>(null)
   const canInteract = Boolean(user?.emailVerified)
   const canEdit = Boolean(user && post && (user.id === post.authorId || isStaff(user.role)))
 
@@ -30,6 +31,14 @@ export default function TopicDetailPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    if (!scrollToId) return
+    const node = document.querySelector(`[data-testid="comment-${CSS.escape(scrollToId)}"]`)
+    if (!node) return
+    node.scrollIntoView({ block: "center", behavior: "smooth" })
+    setScrollToId(null)
+  }, [scrollToId, post])
 
   if (post === undefined) {
     return (
@@ -54,6 +63,7 @@ export default function TopicDetailPage() {
   const comments = post.comments
 
   const appendComment = (comment: Comment) => {
+    setScrollToId(comment.id)
     setPost((current) =>
       current
         ? {

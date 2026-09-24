@@ -50,10 +50,13 @@ describe("CommentThread", () => {
       />,
     )
 
-    expect(screen.getByRole("button", { name: "Ответить" }).className).toContain("ml-auto")
+    expect(screen.queryByRole("button", { name: "Ответить" })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Изменить" }).className).toContain("ml-auto")
     expect(screen.queryByText(/изменено/)).not.toBeInTheDocument()
     await events.click(screen.getByRole("button", { name: "Изменить" }))
     expect(screen.getByDisplayValue("Корневой ответ")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Отменить" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Изменить" })).not.toBeInTheDocument()
   })
 
   test("после четвёртого уровня ответы больше не сдвигаются", () => {
@@ -108,8 +111,12 @@ describe("CommentThread", () => {
     )
 
     const quote = screen.getByText("кусок исходного ответа")
-    expect(quote.closest("blockquote")?.className).toContain("rounded-lg")
-    expect(screen.getByText("Согласен")).toBeInTheDocument()
+    expect(quote.className).toContain("italic")
+    expect(quote.closest("blockquote")?.querySelector("svg")?.classList.contains("size-3")).toBe(true)
+    expect(screen.queryByText("Цитата")).not.toBeInTheDocument()
+    const reply = screen.getByText("Согласен")
+    expect(reply.className).not.toContain("italic")
+    expect(reply.className).toContain("text-foreground")
     expect(screen.queryByText("> кусок исходного ответа")).not.toBeInTheDocument()
   })
 
@@ -139,6 +146,60 @@ describe("CommentThread", () => {
 
     await events.click(screen.getByRole("button", { name: "Цитировать" }))
     expect(screen.getByPlaceholderText("Напишите ответ...")).toHaveValue("> Корневой\n\n")
+  })
+
+  test("цитата дописывается в конец уже набранного ответа", async () => {
+    const events = userEvent.setup()
+    render(
+      <CommentThread
+        comments={[comment()]}
+        canInteract
+        onReply={vi.fn()}
+        onLike={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    )
+
+    await events.click(screen.getByRole("button", { name: "Ответить" }))
+    const field = screen.getByPlaceholderText("Напишите ответ...")
+    await events.type(field, "уже есть")
+    const paragraph = screen.getByText("Корневой ответ")
+    const node = paragraph.firstChild
+    if (!(node instanceof Text)) throw new Error("нет текстового узла")
+    const range = document.createRange()
+    range.setStart(node, 0)
+    range.setEnd(node, "Корневой".length)
+    const selection = window.getSelection()
+    if (!selection) throw new Error("нет выделения")
+    selection.removeAllRanges()
+    selection.addRange(range)
+    fireEvent.mouseUp(paragraph)
+    await events.click(screen.getByRole("button", { name: "Цитировать" }))
+    expect(field).toHaveValue("уже есть\n\n> Корневой\n\n")
+  })
+
+  test("правка второго ответа закрывает первую", async () => {
+    const events = userEvent.setup()
+    render(
+      <CommentThread
+        comments={[
+          comment({ id: "a", authorId: "me", text: "Первый" }),
+          comment({ id: "b", authorId: "me", text: "Второй" }),
+        ]}
+        canInteract
+        currentUserId="me"
+        onReply={vi.fn()}
+        onLike={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    )
+
+    const [firstEdit, secondEdit] = screen.getAllByRole("button", { name: "Изменить" })
+    await events.click(firstEdit)
+    expect(screen.getByDisplayValue("Первый")).toBeInTheDocument()
+    await events.click(secondEdit)
+    expect(screen.queryByDisplayValue("Первый")).not.toBeInTheDocument()
+    expect(screen.getByDisplayValue("Второй")).toBeInTheDocument()
   })
 
   test("Enter отправляет ответ, Shift+Enter оставляет перенос строки", async () => {
