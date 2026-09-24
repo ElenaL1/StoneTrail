@@ -6,78 +6,84 @@
 
 Сообщество — отраслевой хаб: форум, экспертные статьи, новости и услуги (подбор, раскрой, логистика и консультации). Интерфейс на русском.
 
-Каталог камня и изделий читается из FastAPI `/api/catalog/*`. Новости, форум и статьи на фронтенде пока моковые (`frontend/lib/mock-data.ts`). Авторизация идёт в FastAPI `/auth/*` (см. `backend/`).
+Каталог, авторизация, форум и статьи читаются из FastAPI. Новости пока моковые (`frontend/lib/mock-data.ts`).
 
 ## Стек
 
 - Next.js 16 (App Router) и React 19
-- TypeScript
-- Tailwind CSS v4
-- shadcn/ui (`@base-ui/react`)
-- Vitest
-- Docker + nginx для деплоя
+- TypeScript, Tailwind CSS v4, shadcn/ui (`@base-ui/react`)
+- FastAPI, PostgreSQL 16, Alembic
+- Docker и nginx
 
-## Структура репозитория
+## Локальный запуск
 
-```
-frontend/     Next.js-приложение
-backend/     FastAPI + PostgreSQL
-infra/        docker-compose и nginx
-.github/      CI/CD (тесты, сборка образа, деплой)
-```
+Нужны Node.js 22+, pnpm, Python 3.11+ и Docker. Фронтенд и API — два процесса. Браузер ходит в API напрямую (`NEXT_PUBLIC_API_URL=http://localhost:8000`).
 
-## Запуск локально
-
-Нужны **Node.js 22+** и **pnpm**. Если pnpm ещё нет:
+### Backend
 
 ```bash
-corepack enable
+cd backend
+cp .env.example .env
+docker compose up -d
+python -m venv .venv
 ```
 
-Затем:
+Активация окружения: Windows — `.venv\Scripts\activate`, Unix — `source .venv/bin/activate`. Дальше:
+
+```bash
+pip install -e ".[dev]"
+alembic upgrade head
+uvicorn api.main:app --reload
+```
+
+Проверка: [http://localhost:8000/health](http://localhost:8000/health). OpenAPI: [http://localhost:8000/docs](http://localhost:8000/docs).
+
+Каталог после первого подъёма базы пустой. Сид идемпотентный:
+
+```bash
+python scripts/seed_catalog.py
+```
+
+В `.env` для локальной разработки оставьте `AUTH_DEBUG_LINKS=true` и пустой SMTP: ссылки подтверждения почты и сброса пароля приходят в ответе API и в логе uvicorn. Подробности эндпоинтов — в [backend/README.md](backend/README.md).
+
+### Frontend
 
 ```bash
 cd frontend
 pnpm install
+cp .env.example .env.local
 pnpm dev
 ```
 
-Приложение откроется на [http://localhost:3000](http://localhost:3000).
-
-Другие команды (из каталога `frontend/`):
+Приложение: [http://localhost:3000](http://localhost:3000).
 
 ```bash
-pnpm test         # Vitest
-pnpm test:watch   # тесты в watch-режиме
-pnpm lint         # ESLint
-pnpm build        # production-сборка
-pnpm start        # запуск собранного приложения
+pnpm test
+pnpm lint
+pnpm build
 ```
 
-## Docker
+## Запуск на сервере
 
-Прод собирается в `infra/`: nginx на порту **8080** проксирует `/` на фронт и `/auth`, `/api`, `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Образы публикует CI в GitHub Container Registry (`ghcr.io`, теги `:${GITHUB_SHA}` и `:latest`); на сервере compose поднимает SHA-теги.
+Прод — `infra/docker-compose.yaml`. Nginx в контейнере слушает **8080** и проксирует `/` на фронт, а `/auth`, `/api` и `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Браузер ходит same-origin; серверный рендер Next.js использует `API_URL=http://backend:8000`. Миграции выполняет entrypoint образа backend.
+
+Образы публикует CI в GitHub Container Registry (`ghcr.io`, теги `:${GITHUB_SHA}` и `:latest`). Self-hosted runner копирует compose в `~/stonetrail/infra`, логинится в `ghcr.io` и поднимает SHA-теги frontend и backend.
 
 Один раз на VPS:
 
 ```bash
 cd ~/stonetrail/infra
-cp .env.example .env   # или создать .env вручную
-# задать POSTGRES_PASSWORD
+cp .env.example .env
+# задать POSTGRES_PASSWORD и при необходимости SMTP_*
 ```
 
-CI логинится в `ghcr.io`, делает `docker compose pull frontend backend && docker compose up -d` (nginx и Postgres не перекачиваются, если уже есть локально). После **первого** поднятия каталог пустой, пока не выполнить сид (не нужно на каждый последующий deploy):
+Домен `stonetrail.ru` принимает системный nginx на 80/443 и проксирует на `127.0.0.1:8080`. Пример конфига — [infra/host-nginx-stonetrail.conf](infra/host-nginx-stonetrail.conf).
+
+После **первого** поднятия каталог сидируется вручную (не на каждый deploy):
 
 ```bash
 cd ~/stonetrail/infra
 docker compose exec backend python scripts/seed_catalog.py
 ```
 
-Локальная сборка образов:
-
-```bash
-docker build -t stonetrail-frontend ./frontend
-docker build -t stonetrail-backend ./backend
-```
-
-Сайт за compose: [http://localhost:8080](http://localhost:8080). Локальная разработка по-прежнему два процесса (`pnpm dev` + `uvicorn`) и `NEXT_PUBLIC_API_URL=http://localhost:8000`.
+Сайт за compose: [http://localhost:8080](http://localhost:8080). На сервере — [https://stonetrail.ru](https://stonetrail.ru).
