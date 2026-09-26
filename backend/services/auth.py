@@ -21,6 +21,7 @@ from core.security import (
 )
 from models.enums import AuthTokenType, UserRole
 from models.user import AuthToken, Session, User
+from repositories.auth_identities import YANDEX_PROVIDER, AuthIdentityRepository
 from repositories.auth_tokens import AuthTokenRepository
 from repositories.sessions import SessionRepository
 from repositories.users import UserRepository
@@ -68,6 +69,7 @@ class AuthService:
         self._users = UserRepository(session)
         self._sessions = SessionRepository(session)
         self._tokens = AuthTokenRepository(session)
+        self._identities = AuthIdentityRepository(session)
 
     async def resolve_session(self, raw_token: str) -> ResolvedSession | None:
         row = await self._sessions.get_alive_by_token_hash(hash_token(raw_token))
@@ -156,11 +158,8 @@ class AuthService:
             raise AuthError.rate_limited(retry)
 
         user = await self._users.get_alive_by_email(data.email)
-        hashed = (
-            user.password_hash
-            if user is not None and user.is_active
-            else dummy_password_hash()
-        )
+        stored = user.password_hash if user is not None and user.is_active else None
+        hashed = stored if stored else dummy_password_hash()
         password_ok = verify_password(data.password, hashed)
         if user is None or not user.is_active or not password_ok:
             limiter.hit(
@@ -176,6 +175,10 @@ class AuthService:
         await self._session.commit()
         await self._session.refresh(user)
         return AuthOutcome(user=user, raw_session_token=raw_session)
+
+    async def is_yandex_linked(self, user_id: uuid.UUID) -> bool:
+        identity = await self._identities.get_for_user(user_id, YANDEX_PROVIDER)
+        return identity is not None
 
     async def logout(self, resolved: ResolvedSession | None) -> AuthOutcome:
         if resolved is not None:

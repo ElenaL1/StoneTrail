@@ -60,6 +60,17 @@ python scripts/seed_catalog.py
 
 При `AUTH_DEBUG_LINKS=true` register / resend / change-email / forgot возвращают `demoVerificationPath` или `demoResetPath` (ссылка также пишется в лог). Флаг не зависит от SMTP: если почта не ушла, debug-ссылка сама не появится. В проде выключить. Для несуществующего email forgot отдаёт `/reset-password?token=invalid`.
 
+Вход через Яндекс ID — тот же `User` и та же cookie `st_session`. Пароль Яндекса на сайт не попадает: бэкенд обменивает одноразовый `code` и ищет человека по `auth_identities` (`provider=yandex`, id Яндекса), не по email. Совпадение email с уже существующим аккаунтом не сливает учётки: пользователя просят войти паролем и нажать «Подключить Яндекс ID» в профиле.
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/auth/yandex` | редирект на Яндекс, cookie `st_oauth` |
+| GET | `/auth/yandex/callback` | код, `state`, сессия или редирект на сайт |
+| GET | `/auth/yandex/pending` | email и предложенный ник до завершения регистрации |
+| POST | `/auth/yandex/complete` | ник, согласие с условиями, создание пользователя |
+
+Переменные: `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`, `YANDEX_REDIRECT_URI`. Пока они пустые, маршруты отвечают ошибкой и приложение стартует. В кабинете Яндекса (приложение «Для авторизации пользователей») укажите Redirect URI `https://stonetrail.ru/auth/yandex/callback`, локально — `http://localhost:8000/auth/yandex/callback`. Suggest Hostname не нужен. Секрет и токен Яндекса в логи и на фронт не попадают.
+
 SMTP (Selectel): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` (`starttls` или `tls`), `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`. Письмо отправляется после commit пользователя/токена; ошибка SMTP логируется и не откатывает регистрацию. Пароль SMTP в логи и ответы не пишется. Selectel принимает SMTP только со своих серверов — локально поля можно оставить пустыми.
 
 Ошибки — единый JSON: `{ message, code, fieldErrors, retryAfterSeconds, requestId }`, без FastAPI `detail`. У каждого ответа есть заголовок `X-Request-ID`. Уровень логов задаётся `LOG_LEVEL` (`debug`, `info`, `warning`, `error`, по умолчанию `info`). Подробности — в `docs/error-handling.md`.

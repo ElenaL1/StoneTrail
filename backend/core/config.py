@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     verify_token_ttl_seconds: int = 24 * 60 * 60
     reset_token_ttl_seconds: int = 60 * 60
     session_ttl_seconds: int = 7 * 24 * 60 * 60
+    oauth_state_ttl_seconds: int = 10 * 60
+    yandex_client_id: str = ""
+    yandex_client_secret: str = ""
+    yandex_redirect_uri: str = ""
     log_level: Literal["debug", "info", "warning", "error"] = "info"
 
     @field_validator("log_level", mode="before")
@@ -56,6 +60,14 @@ class Settings(BaseSettings):
             normalized = value.strip().lower()
             return normalized or "starttls"
         return value
+
+    @property
+    def yandex_enabled(self) -> bool:
+        return bool(
+            self.yandex_client_id.strip()
+            and self.yandex_client_secret
+            and self.yandex_redirect_uri.strip()
+        )
 
     @property
     def smtp_enabled(self) -> bool:

@@ -54,6 +54,7 @@ function verifiedUser(overrides: Partial<PublicUser> = {}): PublicUser {
     canPublishArticles: false,
     role: "user",
     marketingConsent: false,
+    yandexLinked: false,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     lastLoginAt: null,
@@ -128,5 +129,12 @@ describe("LoginForm", () => {
     await submitLogin()
 
     expect(push).toHaveBeenCalledWith("/verify-email")
+  })
+
+  test("показывает вход через Яндекс и сообщение о существующем аккаунте", () => {
+    render(<LoginForm yandexCode="link_required" />)
+
+    expect(screen.getByRole("link", { name: "Войти через Яндекс" })).toHaveAttribute("href", "/auth/yandex")
+    expect(screen.getByRole("alert")).toHaveTextContent(AUTH_MESSAGES.yandexLinkRequired)
   })
 })

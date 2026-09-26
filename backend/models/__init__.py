@@ -21,6 +21,7 @@ from models.lookups import (
     StoneType,
 )
 from models.media import Media, MediaLink
+from models.oauth import AuthIdentity, OauthState
 from models.user import AuthToken, Session, User
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     "ArticleCategory",
     "ArticleComment",
     "ArticleLike",
+    "AuthIdentity",
     "AuthToken",
     "Base",
     "BlockItem",
@@ -43,6 +45,7 @@ __all__ = [
     "MediaLink",
     "NewsLike",
     "Notification",
+    "OauthState",
     "Product",
     "ProductItem",
     "Promotion",

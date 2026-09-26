@@ -56,7 +56,7 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     email: Mapped[str] = mapped_column(CITEXT, nullable=False)
-    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(Text)
     nickname: Mapped[str] = mapped_column(Text, nullable=False)
     first_name: Mapped[str] = mapped_column(
         Text, nullable=False, server_default=text("''")

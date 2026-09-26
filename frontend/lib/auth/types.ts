@@ -32,6 +32,7 @@ export type PublicUser = {
   website: string
   phone: string
   emailVerified: boolean
+  yandexLinked: boolean
   canPublishArticles: boolean
   role: UserRole
   marketingConsent: boolean
@@ -51,6 +52,18 @@ export type RegisterInput = {
 export type LoginInput = {
   email: string
   password: string
+}
+
+export type YandexCompleteInput = {
+  nickname: string
+  termsAccepted: boolean
+}
+
+export type YandexPending = {
+  email: string
+  suggestedNickname: string
+  firstName: string
+  lastName: string
 }
 
 export type ProfileUpdateInput = {

@@ -11,6 +11,7 @@ from api.routes.auth import router as auth_router
 from api.routes.catalog import router as catalog_router
 from api.routes.forum import router as forum_router
 from api.routes.health import router as health_router
+from api.routes.yandex_auth import router as yandex_auth_router
 from core.config import get_settings
 from core.db import engine
 from core.logging import configure_logging
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
     )
     application.include_router(health_router)
     application.include_router(auth_router)
+    application.include_router(yandex_auth_router)
     application.include_router(catalog_router)
     application.include_router(forum_router)  # topics and comments
     application.include_router(articles_router)

@@ -95,6 +95,18 @@ class AuthError(ApiError):
         return cls(403, "forbidden", messages.FORBIDDEN)
 
     @classmethod
+    def yandex_oauth_failed(cls) -> AuthError:
+        return cls(502, "yandex_oauth_failed", messages.YANDEX_OAUTH_FAILED)
+
+    @classmethod
+    def yandex_state_invalid(cls) -> AuthError:
+        return cls(400, "yandex_state_invalid", messages.YANDEX_STATE_INVALID)
+
+    @classmethod
+    def yandex_already_linked(cls) -> AuthError:
+        return cls(409, "yandex_already_linked", messages.YANDEX_ALREADY_LINKED)
+
+    @classmethod
     def token(cls, code: str, *, verify: bool) -> AuthError:
         if code == "token_used":
             message = messages.VERIFY_USED if verify else messages.RESET_USED

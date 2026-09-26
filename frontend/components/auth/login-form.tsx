@@ -7,13 +7,15 @@ import { Loader2 } from "lucide-react"
 import { fieldControlClassName, FormField } from "@/components/auth/form-field"
 import { PasswordInput } from "@/components/auth/password-input"
 import { Button } from "@/components/ui/button"
+import { YandexAuthButton } from "@/components/auth/yandex-auth-button"
 import { useAuth } from "@/lib/auth-context"
-import { getSafeNext, registerPath } from "@/lib/auth/paths"
+import { getSafeNext, registerPath, yandexNotice } from "@/lib/auth/paths"
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
 import { validateEmailValue } from "@/lib/auth/validation"
 
 type LoginFormProps = {
   next?: string | null
+  yandexCode?: string | null
   autoFocus?: boolean
   onCreateAccount?: () => void
   onSuccess?: () => void
@@ -21,16 +23,22 @@ type LoginFormProps = {
 
 export function LoginFormFromQuery() {
   const searchParams = useSearchParams()
-  return <LoginForm next={searchParams.get("next")} />
+  return <LoginForm next={searchParams.get("next")} yandexCode={searchParams.get("yandex")} />
 }
 
-export function LoginForm({ next = null, autoFocus = false, onCreateAccount, onSuccess }: LoginFormProps) {
+export function LoginForm({
+  next = null,
+  yandexCode = null,
+  autoFocus = false,
+  onCreateAccount,
+  onSuccess,
+}: LoginFormProps) {
   const router = useRouter()
   const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
-  const [formError, setFormError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(yandexNotice(yandexCode))
   const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -112,6 +120,13 @@ export function LoginForm({ next = null, autoFocus = false, onCreateAccount, onS
           "Войти"
         )}
       </Button>
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        или
+        <span className="h-px flex-1 bg-border" />
+      </div>
+      <YandexAuthButton next={next} label="Войти через Яндекс" />
 
       <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
         <Link href="/forgot-password" className="font-medium text-primary underline-offset-4 hover:underline">

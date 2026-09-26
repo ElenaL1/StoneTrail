@@ -227,3 +227,30 @@ class ResetPasswordResponse(CamelModel):
 
 class LogoutResponse(CamelModel):
     ok: bool = True
+
+
+class YandexCompleteRequest(CamelModel):
+    nickname: str
+    terms_accepted: bool
+
+    @field_validator("nickname")
+    @classmethod
+    def validate_nickname(cls, value: str) -> str:
+        error = person_name_error(value, "nickname")
+        if error:
+            raise ValueError(error)
+        return value.strip()
+
+    @field_validator("terms_accepted")
+    @classmethod
+    def validate_terms(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError(messages.TERMS_REQUIRED)
+        return value
+
+
+class YandexPendingResponse(CamelModel):
+    email: str
+    suggested_nickname: str
+    first_name: str
+    last_name: str

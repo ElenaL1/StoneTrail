@@ -8,6 +8,7 @@ import { EmailTakenError } from "@/components/auth/email-taken-error"
 import { fieldControlClassName, FormField } from "@/components/auth/form-field"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PasswordStrengthMeter } from "@/components/auth/password-strength"
+import { YandexAuthButton } from "@/components/auth/yandex-auth-button"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import { generatePassword, offerStorePassword } from "@/lib/auth/password"
@@ -230,6 +231,13 @@ export function RegisterForm({ next = null, autoFocus = false, onSignIn }: Regis
           "Создать аккаунт"
         )}
       </Button>
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        или
+        <span className="h-px flex-1 bg-border" />
+      </div>
+      <YandexAuthButton next={next} label="Войти через Яндекс" />
     </form>
   )
 }

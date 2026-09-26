@@ -11,6 +11,8 @@ import type {
   PublicUser,
   RegisterInput,
   ResendResult,
+  YandexCompleteInput,
+  YandexPending,
 } from "@/lib/auth/types"
 
 const AUTH_ERROR_CODES: ReadonlySet<string> = new Set([
@@ -72,6 +74,7 @@ function normalizeUser(data: PublicUser): PublicUser {
     ...data,
     name: data.name || data.nickname,
     avatar: data.avatar ?? "",
+    yandexLinked: Boolean(data.yandexLinked),
     canPublishArticles: Boolean(data.canPublishArticles),
   }
 }
@@ -184,6 +187,19 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ email }),
     })
+  },
+
+  async yandexPending(): Promise<AuthResult<YandexPending>> {
+    return request<YandexPending>("/auth/yandex/pending")
+  },
+
+  async completeYandex(input: YandexCompleteInput): Promise<AuthResult> {
+    const result = await request<PublicUser>("/auth/yandex/complete", {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+    if (!result.ok) return result
+    return { ok: true, data: normalizeUser(result.data) }
   },
 
   async resetPassword(

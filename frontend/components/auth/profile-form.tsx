@@ -1,13 +1,15 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { CheckCircle2, Loader2, UserRound } from "lucide-react"
 import { fieldControlClassName, FormField } from "@/components/auth/form-field"
+import { YandexAuthButton } from "@/components/auth/yandex-auth-button"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import { ACTIVITY_TYPES } from "@/lib/auth/types"
 import { AUTH_MESSAGES, AVATAR_ACCEPTED_TYPES, AVATAR_MAX_BYTES, COUNTRIES } from "@/lib/auth/constants"
 import { formatPhone } from "@/lib/utils"
+import { yandexNotice } from "@/lib/auth/paths"
 import { validatePersonName, validateProfileInput, validateWebsite } from "@/lib/auth/validation"
 
 export function ProfileForm() {
@@ -82,6 +84,7 @@ export function ProfileForm() {
   }
 
   return (
+    <div className="space-y-10">
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex size-20 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
@@ -295,5 +298,35 @@ export function ProfileForm() {
         )}
       </Button>
     </form>
+    <YandexAccountSection linked={Boolean(user.yandexLinked)} />
+    </div>
+  )
+}
+
+function YandexAccountSection({ linked }: { linked: boolean }) {
+  const [notice, setNotice] = useState<string | null>(null)
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("yandex")
+    if (code === "linked") return
+    setNotice(yandexNotice(code))
+  }, [])
+
+  return (
+    <section className="space-y-3 border-t border-border pt-8">
+      <h2 className="text-sm font-medium text-foreground">Яндекс ID</h2>
+      {notice ? (
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+          {notice}
+        </p>
+      ) : null}
+      {linked ? (
+        <p className="text-sm text-muted-foreground" role="status">
+          Яндекс ID подключён.
+        </p>
+      ) : (
+        <YandexAuthButton intent="link" next="/profile" label="Подключить Яндекс ID" />
+      )}
+    </section>
   )
 }

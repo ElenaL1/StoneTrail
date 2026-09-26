@@ -30,7 +30,7 @@ from services.auth import AuthOutcome, AuthService, ResolvedSession
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def _public_user(user: User) -> dict[str, object]:
+async def _public_user(user: User, service: AuthService) -> dict[str, object]:
     payload = PublicUser(
         id=user.id,
         email=str(user.email),
@@ -47,6 +47,7 @@ def _public_user(user: User) -> dict[str, object]:
         website=user.website,
         phone=user.phone,
         email_verified=user.email_verified,
+        yandex_linked=await service.is_yandex_linked(user.id),
         can_publish_articles=user.can_publish_articles,
         role=user.role,
         marketing_consent=user.marketing_consent,
@@ -74,7 +75,7 @@ async def register(
     outcome = await service.register(payload, ip=client_ip(request))
     _apply_outcome(response, outcome)
     assert outcome.user is not None
-    body = _public_user(outcome.user)
+    body = await _public_user(outcome.user, service)
     if outcome.demo_verification_path:
         body["demoVerificationPath"] = outcome.demo_verification_path
     return body
@@ -90,7 +91,7 @@ async def login(
     outcome = await service.login(payload, ip=client_ip(request))
     _apply_outcome(response, outcome)
     assert outcome.user is not None
-    return _public_user(outcome.user)
+    return await _public_user(outcome.user, service)
 
 
 @router.post("/logout", response_model=LogoutResponse)
@@ -107,8 +108,9 @@ async def logout(
 @router.get("/me", response_model=PublicUser)
 async def me(
     user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> dict[str, object]:
-    return _public_user(user)
+    return await _public_user(user, service)
 
 
 @router.patch("/profile", response_model=PublicUser)
@@ -119,7 +121,7 @@ async def update_profile(
 ) -> dict[str, object]:
     outcome = await service.update_profile(user, payload)
     assert outcome.user is not None
-    return _public_user(outcome.user)
+    return await _public_user(outcome.user, service)
 
 
 @router.post("/verify-email", response_model=PublicUser)
@@ -132,7 +134,7 @@ async def verify_email(
     outcome = await service.verify_email(payload.token, resolved)
     _apply_outcome(response, outcome)
     assert outcome.user is not None
-    return _public_user(outcome.user)
+    return await _public_user(outcome.user, service)
 
 
 @router.post("/resend-verification", response_model=ResendResponse)
