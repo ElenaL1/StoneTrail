@@ -1,3 +1,3 @@
-from schemas.health import HealthResponse
+from schemas.health import HealthResponse, ReadyResponse
 
-__all__ = ["HealthResponse"]
+__all__ = ["HealthResponse", "ReadyResponse"]

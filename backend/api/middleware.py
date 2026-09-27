@@ -10,6 +10,8 @@ from core.logging import ACCESS_LOGGER, request_id_var, sanitize_request_id
 
 logger = logging.getLogger(ACCESS_LOGGER)
 
+_QUIET_HEALTH = {"/health", "/health/live", "/health/ready"}
+
 
 class RequestContextMiddleware:
     def __init__(self, app: ASGIApp) -> None:
@@ -45,18 +47,23 @@ class RequestContextMiddleware:
             duration_ms = int((time.perf_counter() - started) * 1000)
             user_id = state.get("user_id") if isinstance(state, dict) else None
             route = _route(scope)
-            logger.info(
-                "request",
-                extra={
-                    "requestId": request_id,
-                    "userId": user_id,
-                    "route": route,
-                    "method": scope.get("method"),
-                    "statusCode": status_code,
-                    "durationMs": duration_ms,
-                },
-            )
+            if not _quiet_health(route, status_code):
+                logger.info(
+                    "request",
+                    extra={
+                        "requestId": request_id,
+                        "userId": user_id,
+                        "route": route,
+                        "method": scope.get("method"),
+                        "statusCode": status_code,
+                        "durationMs": duration_ms,
+                    },
+                )
             request_id_var.reset(token)
+
+
+def _quiet_health(route: str, status_code: int) -> bool:
+    return status_code < 400 and route in _QUIET_HEALTH
 
 
 def _header(scope: Scope, name: bytes) -> str | None:

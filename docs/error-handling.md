@@ -62,4 +62,4 @@ docker logs backend | python scripts/summarize_logs.py
 
 ## Наблюдение
 
-Сейчас достаточно JSON-логов и `GET /health`. При росте можно снимать долю 5xx и latency из этих строк одним экспортёром. Отдельный Prometheus внутри приложения не ставится.
+Проверки живости и готовности, внешний uptime и алерты описаны в [monitoring.md](monitoring.md). Долю 5xx и latency по маршрутам по-прежнему смотрят в JSON-логах (`scripts/summarize_logs.py`). Отдельный Prometheus внутри приложения не ставится.
