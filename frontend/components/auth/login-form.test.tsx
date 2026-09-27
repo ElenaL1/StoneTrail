@@ -135,6 +135,24 @@ describe("LoginForm", () => {
     render(<LoginForm yandexCode="link_required" />)
 
     expect(screen.getByRole("link", { name: "Войти через Яндекс" })).toHaveAttribute("href", "/auth/yandex")
+    expect(screen.getByRole("button", { name: "Войти и подключить Яндекс" })).toBeInTheDocument()
     expect(screen.getByRole("alert")).toHaveTextContent(AUTH_MESSAGES.yandexLinkRequired)
+  })
+
+  test("после пароля на экране существующего аккаунта открывает привязку Яндекса", async () => {
+    const onSuccess = vi.fn()
+    const assign = vi.fn()
+    const user = userEvent.setup()
+    vi.stubGlobal("location", { ...window.location, assign })
+    login.mockResolvedValue({ ok: true, data: verifiedUser() } satisfies AuthResult)
+    render(<LoginForm yandexCode="link_required" next="/catalog" onSuccess={onSuccess} />)
+
+    await user.type(screen.getByRole("textbox", { name: /email/i }), "ivan@company.ru")
+    await user.type(screen.getByPlaceholderText("Введите пароль"), "StoneTrail1")
+    await user.click(screen.getByRole("button", { name: "Войти и подключить Яндекс" }))
+
+    expect(assign).toHaveBeenCalledWith("/auth/yandex?intent=link&next=%2Fprofile")
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(push).not.toHaveBeenCalled()
   })
 })

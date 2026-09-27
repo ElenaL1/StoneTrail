@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { YandexAuthButton } from "@/components/auth/yandex-auth-button"
 import { useAuth } from "@/lib/auth-context"
 import { getSafeNext, registerPath, yandexNotice } from "@/lib/auth/paths"
+import { yandexStartPath } from "@/lib/auth/yandex"
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
 import { validateEmailValue } from "@/lib/auth/validation"
 
@@ -40,6 +41,7 @@ export function LoginForm({
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
   const [formError, setFormError] = useState<string | null>(yandexNotice(yandexCode))
   const [submitting, setSubmitting] = useState(false)
+  const linkingYandex = yandexCode === "link_required"
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -67,6 +69,11 @@ export function LoginForm({
       return
     }
 
+    if (linkingYandex) {
+      window.location.assign(yandexStartPath("/profile", "link"))
+      return
+    }
+
     if (onSuccess) {
       onSuccess()
       return
@@ -77,6 +84,12 @@ export function LoginForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {formError ? (
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      ) : null}
+
       <FormField id="email" label="Email" error={errors.email} required>
         <input
           id="email"
@@ -104,18 +117,14 @@ export function LoginForm({
         />
       </FormField>
 
-      {formError ? (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
-          {formError}
-        </p>
-      ) : null}
-
       <Button type="submit" disabled={submitting} className="h-11 w-full">
         {submitting ? (
           <>
             <Loader2 className="size-4 animate-spin" />
             Вход…
           </>
+        ) : linkingYandex ? (
+          "Войти и подключить Яндекс"
         ) : (
           "Войти"
         )}
