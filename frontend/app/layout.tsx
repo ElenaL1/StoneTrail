@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { YandexMetrika } from '@/components/yandex-metrika'
 import { Inter, Manrope } from 'next/font/google'
 import { AuthModal } from '@/components/auth/auth-modal'
 import { AuthModalProvider } from '@/lib/auth-modal-context'
@@ -78,6 +80,11 @@ export default function RootLayout({
           </AuthModalProvider>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === 'production' && (
+          <Suspense fallback={null}>
+            <YandexMetrika />
+          </Suspense>
+        )}
       </body>
     </html>
   )
