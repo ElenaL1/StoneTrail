@@ -33,6 +33,7 @@ def authorize_url(settings: Settings, state: str) -> str:
             "redirect_uri": settings.yandex_redirect_uri,
             "state": state,
             "scope": _SCOPES,
+            "force_confirm": "yes",
         }
     )
     return f"{_AUTHORIZE_URL}?{query}"

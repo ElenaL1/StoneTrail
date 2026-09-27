@@ -142,7 +142,11 @@ class YandexAuthService:
         row = await self._states.get_by_hash(hash_token(cookie_state))
         if row is None:
             return YandexRedirect(path=self._login_path("yandex_state_invalid"))
-        if self._expired(row) or row.used_at is not None or row.finished_at is not None:
+        if self._expired(row) or row.finished_at is not None:
+            return YandexRedirect(path=self._login_path("yandex_state_invalid"))
+        if row.used_at is not None:
+            if self._resumable_registration(row):
+                return YandexRedirect(path="/register/yandex", clear_oauth_cookie=False)
             return YandexRedirect(path=self._login_path("yandex_state_invalid"))
 
         if error:
@@ -191,7 +195,7 @@ class YandexAuthService:
         existing = await self._users.get_alive_by_email(email)
         if existing is not None:
             await self._finish(row)
-            return YandexRedirect(path=self._login_path("link_required"))
+            return YandexRedirect(path=self._login_path("link_required", email))
 
         row.provider_user_id = profile.id
         row.email = email
@@ -370,8 +374,20 @@ class YandexAuthService:
             return None
         return normalize_email(profile.email)
 
-    def _login_path(self, code: str) -> str:
-        return f"/login?yandex={quote(code)}"
+    def _resumable_registration(self, row: OauthState) -> bool:
+        return (
+            row.intent == LOGIN_INTENT
+            and bool(row.provider_user_id)
+            and bool(row.email)
+            and row.finished_at is None
+            and not self._expired(row)
+        )
+
+    def _login_path(self, code: str, email: str | None = None) -> str:
+        path = f"/login?yandex={quote(code)}"
+        if email:
+            path += f"&email={quote(email)}"
+        return path
 
     def _failure_path(self, row: OauthState, code: str) -> str:
         if row.intent == LINK_INTENT:

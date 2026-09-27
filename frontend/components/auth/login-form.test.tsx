@@ -131,12 +131,23 @@ describe("LoginForm", () => {
     expect(push).toHaveBeenCalledWith("/verify-email")
   })
 
-  test("показывает вход через Яндекс и сообщение о существующем аккаунте", () => {
-    render(<LoginForm yandexCode="link_required" />)
+  test("показывает вход через Яндекс и почту уже существующего аккаунта", () => {
+    render(<LoginForm yandexCode="link_required" yandexEmail="anna@yandex.ru" />)
 
     expect(screen.getByRole("link", { name: "Войти через Яндекс" })).toHaveAttribute("href", "/auth/yandex")
     expect(screen.getByRole("button", { name: "Войти и подключить Яндекс" })).toBeInTheDocument()
-    expect(screen.getByRole("alert")).toHaveTextContent(AUTH_MESSAGES.yandexLinkRequired)
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      AUTH_MESSAGES.yandexLinkRequired("anna@yandex.ru"),
+    )
+    expect(screen.getByRole("textbox", { name: /email/i })).toHaveValue("anna@yandex.ru")
+  })
+
+  test("без адреса Яндекса не подставляет почту в форму", () => {
+    render(<LoginForm yandexCode="link_required" yandexEmail="<script>" />)
+
+    expect(screen.getByRole("alert")).toHaveTextContent(AUTH_MESSAGES.yandexLinkRequiredUnknown)
+    expect(screen.getByRole("alert")).not.toHaveTextContent("<script>")
+    expect(screen.getByRole("textbox", { name: /email/i })).toHaveValue("")
   })
 
   test("после пароля на экране существующего аккаунта открывает привязку Яндекса", async () => {

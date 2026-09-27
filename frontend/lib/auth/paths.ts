@@ -1,4 +1,5 @@
 import { AUTH_MESSAGES } from "@/lib/auth/constants"
+import { validateEmailValue } from "@/lib/auth/validation"
 
 export function getSafeNext(next: string | null | undefined, fallback = "/profile"): string {
   if (!next) return fallback
@@ -15,7 +16,6 @@ export function loginPath(next?: string | null): string {
 }
 
 const YANDEX_NOTICES: Record<string, string> = {
-  link_required: AUTH_MESSAGES.yandexLinkRequired,
   yandex_oauth_failed: AUTH_MESSAGES.yandexOauthFailed,
   yandex_oauth_cancelled: AUTH_MESSAGES.yandexOauthCancelled,
   yandex_state_invalid: AUTH_MESSAGES.yandexStateInvalid,
@@ -26,8 +26,18 @@ const YANDEX_NOTICES: Record<string, string> = {
   rate_limited: AUTH_MESSAGES.yandexRateLimited,
 }
 
-export function yandexNotice(code: string | null | undefined): string | null {
+export function yandexNotice(
+  code: string | null | undefined,
+  email?: string | null,
+): string | null {
   if (!code) return null
+  if (code === "link_required") {
+    const address = email?.trim() ?? ""
+    if (address && !validateEmailValue(address)) {
+      return AUTH_MESSAGES.yandexLinkRequired(address)
+    }
+    return AUTH_MESSAGES.yandexLinkRequiredUnknown
+  }
   return YANDEX_NOTICES[code] ?? null
 }
 

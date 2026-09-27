@@ -17,29 +17,45 @@ import { validateEmailValue } from "@/lib/auth/validation"
 type LoginFormProps = {
   next?: string | null
   yandexCode?: string | null
+  yandexEmail?: string | null
   autoFocus?: boolean
   onCreateAccount?: () => void
   onSuccess?: () => void
 }
 
+function yandexEmailValue(code: string | null, email: string | null): string {
+  const address = email?.trim() ?? ""
+  if (code !== "link_required" || !address || validateEmailValue(address)) return ""
+  return address
+}
+
 export function LoginFormFromQuery() {
   const searchParams = useSearchParams()
-  return <LoginForm next={searchParams.get("next")} yandexCode={searchParams.get("yandex")} />
+  return (
+    <LoginForm
+      next={searchParams.get("next")}
+      yandexCode={searchParams.get("yandex")}
+      yandexEmail={searchParams.get("email")}
+    />
+  )
 }
 
 export function LoginForm({
   next = null,
   yandexCode = null,
+  yandexEmail = null,
   autoFocus = false,
   onCreateAccount,
   onSuccess,
 }: LoginFormProps) {
   const router = useRouter()
   const { login } = useAuth()
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(() => yandexEmailValue(yandexCode, yandexEmail))
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
-  const [formError, setFormError] = useState<string | null>(yandexNotice(yandexCode))
+  const [formError, setFormError] = useState<string | null>(() =>
+    yandexNotice(yandexCode, yandexEmail),
+  )
   const [submitting, setSubmitting] = useState(false)
   const linkingYandex = yandexCode === "link_required"
 

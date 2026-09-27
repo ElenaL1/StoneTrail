@@ -139,7 +139,9 @@ async def test_matching_email_does_not_merge_accounts(client: AsyncClient):
         state,
         profile=_profile(id="111", email="shared@stonetrail.ru", login="shared"),
     )
-    assert callback.headers["location"].endswith("/login?yandex=link_required")
+    query = parse_qs(urlparse(callback.headers["location"]).query)
+    assert query["yandex"] == ["link_required"]
+    assert query["email"] == ["shared@stonetrail.ru"]
     pending = await client.get("/auth/yandex/pending")
     assert pending.status_code == 400
 
@@ -212,12 +214,59 @@ async def test_expired_and_invalid_code_and_cancel(client: AsyncClient):
     )
 
 
-async def test_repeated_callback_is_rejected(client: AsyncClient):
+async def test_authorize_url_asks_yandex_to_confirm_the_account(client: AsyncClient):
+    started, _state = await _start(client)
+    query = parse_qs(urlparse(started.headers["location"]).query)
+    assert query["force_confirm"] == ["yes"]
+
+
+async def test_repeated_callback_resumes_pending_registration(client: AsyncClient):
+    _started, state = await _start(client)
+    profile = _profile()
+    fetch = AsyncMock(return_value=profile)
+    with patch("services.yandex_auth.exchange_code_for_profile", fetch):
+        first = await client.get(
+            "/auth/yandex/callback", params={"state": state, "code": "code"}
+        )
+        second = await client.get(
+            "/auth/yandex/callback",
+            params={"state": state, "code": "other-code"},
+        )
+    assert first.headers["location"].endswith("/register/yandex")
+    assert second.headers["location"].endswith("/register/yandex")
+    assert fetch.await_count == 1
+    pending = await client.get("/auth/yandex/pending")
+    assert pending.status_code == 200
+    assert pending.json()["email"] == "yandex-user@stonetrail.ru"
+
+
+async def test_callback_after_finished_registration_is_rejected(client: AsyncClient):
     _started, state = await _start(client)
     first = await _callback(client, state, profile=_profile())
     assert first.headers["location"].endswith("/register/yandex")
-    second = await _callback(client, state, profile=_profile())
+    oauth = first.cookies.get("st_oauth")
+    await _complete(client)
+    client.cookies.set("st_oauth", oauth)
+    second = await client.get(
+        "/auth/yandex/callback",
+        params={"state": state, "code": "other-code"},
+    )
     assert second.headers["location"].endswith("/login?yandex=yandex_state_invalid")
+    me = await client.get("/auth/me")
+    assert me.json()["email"] == "yandex-user@stonetrail.ru"
+
+
+async def test_plus_address_is_kept_in_the_login_redirect(client: AsyncClient):
+    await register_verified(client, email="user+tag@stonetrail.ru")
+    await logout(client)
+    _started, state = await _start(client)
+    callback = await _callback(
+        client,
+        state,
+        profile=_profile(id="222", email="user+tag@stonetrail.ru", login="tagged"),
+    )
+    query = parse_qs(urlparse(callback.headers["location"]).query)
+    assert query["email"] == ["user+tag@stonetrail.ru"]
 
 
 async def test_yandex_routes_fail_closed_without_config(
