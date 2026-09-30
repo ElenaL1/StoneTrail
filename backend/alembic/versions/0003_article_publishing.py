@@ -16,18 +16,14 @@ def upgrade() -> None:
     op.execute("ALTER TYPE publication_status ADD VALUE IF NOT EXISTS 'pending_review'")
     op.execute("ALTER TYPE publication_status ADD VALUE IF NOT EXISTS 'needs_revision'")
     op.execute("ALTER TYPE publication_status ADD VALUE IF NOT EXISTS 'rejected'")
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE users
         ADD COLUMN can_publish_articles BOOLEAN NOT NULL DEFAULT false
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         ALTER TABLE articles
         ADD COLUMN moderation_note TEXT NOT NULL DEFAULT ''
-        """
-    )
+        """)
 
 
 def downgrade() -> None:

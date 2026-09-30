@@ -87,3 +87,9 @@ docker compose exec backend python scripts/seed_catalog.py
 ```
 
 Сайт за compose: [http://localhost:8080](http://localhost:8080). На сервере — [https://stonetrail.ru](https://stonetrail.ru).
+
+## Документация
+
+- [integration_documentation.md](integration_documentation.md) — CI/CD, Яндекс ID, Метрика, мониторинг и логи
+- [security_audit.md](security_audit.md) — аудит зависимостей и проверки по коду
+- [docs/monitoring.md](docs/monitoring.md) — health-check и UptimeRobot

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -108,7 +108,7 @@ class ForumService:
                 )
             post.category_id = category.id
         post.updated_by = actor.id
-        post.edited_at = datetime.now(timezone.utc)
+        post.edited_at = datetime.now(UTC)
         await self._session.commit()
         loaded = await self._repo.get_post_by_slug(post.slug)
         assert loaded is not None
@@ -153,7 +153,7 @@ class ForumService:
         if comment.author_id != actor.id:
             raise AuthError.forbidden()
         comment.body = payload.body
-        comment.edited_at = datetime.now(timezone.utc)
+        comment.edited_at = datetime.now(UTC)
         await self._session.commit()
         comments = await self._repo.list_comments(post.id)
         updated = next(item for item in comments if item.id == comment.id)
@@ -164,9 +164,7 @@ class ForumService:
         post = await self._require_post(slug)
         existing = await self._repo.get_post_like(user.id, post.id)
         if existing is None:
-            self._repo.add_post_like(
-                ForumPostLike(user_id=user.id, post_id=post.id)
-            )
+            self._repo.add_post_like(ForumPostLike(user_id=user.id, post_id=post.id))
             liked = True
         else:
             await self._repo.delete_post_like(existing)
@@ -243,7 +241,9 @@ class ForumService:
         await self._session.commit()
         return await self.get_post(post.slug, actor)
 
-    async def destroy_comment(self, slug: str, comment_id: uuid.UUID, actor: User) -> None:
+    async def destroy_comment(
+        self, slug: str, comment_id: uuid.UUID, actor: User
+    ) -> None:
         if not is_staff(actor.role):
             raise AuthError.forbidden()
         post = await self._require_post_any(slug, actor)
@@ -255,7 +255,7 @@ class ForumService:
         await self._session.commit()
 
     def _hide(self, row: ForumPost | ForumComment, actor: User) -> None:
-        row.deleted_at = datetime.now(timezone.utc)
+        row.deleted_at = datetime.now(UTC)
         row.deleted_by = actor.id
         self._session.add(row)
 
@@ -348,7 +348,9 @@ class ForumService:
                     likes_count=like_counts.get(post.id, 0),
                     liked=post.id in liked_ids,
                     deleted=post.deleted_at is not None,
-                    deleted_by=deleted_names.get(post.deleted_by) if post.deleted_by else None,
+                    deleted_by=(
+                        deleted_names.get(post.deleted_by) if post.deleted_by else None
+                    ),
                     comments=comments,
                 )
             )
@@ -358,7 +360,11 @@ class ForumService:
         self, comments: list[ForumComment], viewer: User | None
     ) -> list[ForumCommentOut]:
         staff = viewer is not None and is_staff(viewer.role)
-        visible = [comment for comment in comments if self._comment_visible(comment, comments, staff)]
+        visible = [
+            comment
+            for comment in comments
+            if self._comment_visible(comment, comments, staff)
+        ]
         ids = [comment.id for comment in visible]
         counts = await self._repo.comment_like_counts(ids)
         liked_ids: set[uuid.UUID] = set()
@@ -367,7 +373,11 @@ class ForumService:
         deleted_names: dict[uuid.UUID, str] = {}
         if staff:
             deleted_names = await self._repo.nicknames(
-                [comment.deleted_by for comment in visible if comment.deleted_by is not None]
+                [
+                    comment.deleted_by
+                    for comment in visible
+                    if comment.deleted_by is not None
+                ]
             )
         packed: list[ForumCommentOut] = []
         for comment in visible:
@@ -385,7 +395,11 @@ class ForumService:
                     likes_count=0 if tombstone else counts.get(comment.id, 0),
                     liked=False if tombstone else comment.id in liked_ids,
                     deleted=hidden,
-                    deleted_by=deleted_names.get(comment.deleted_by) if hidden and comment.deleted_by else None,
+                    deleted_by=(
+                        deleted_names.get(comment.deleted_by)
+                        if hidden and comment.deleted_by
+                        else None
+                    ),
                 )
             )
         return packed

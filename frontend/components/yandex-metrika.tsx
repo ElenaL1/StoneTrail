@@ -23,8 +23,8 @@ declare global {
 
 function ensureYmQueue() {
   if (window.ym) return
-  const queued = function ymQueue(this: unknown) {
-    ;(queued.a = queued.a || []).push(arguments)
+  const queued = function ymQueue(this: unknown, ...args: unknown[]) {
+    ;(queued.a = queued.a || []).push(args)
   } as YmFunction
   queued.l = Date.now()
   window.ym = queued

@@ -7,9 +7,8 @@
 ```text
 UptimeRobot
     |
-    +-- https://stonetrail.ru/              frontend, nginx, DNS, TLS
-    +-- https://stonetrail.ru/health/live   процесс API
-    +-- https://stonetrail.ru/health/ready  база и внешние сервисы
+    +-- https://stonetrail.ru/              HTTP, метод HEAD
+    +-- https://stonetrail.ru/health/ready  Keyword, метод GET
                 |
                 v
               nginx  -->  FastAPI
@@ -53,26 +52,23 @@ API и сайт на одном домене. Отдельный health-роут
 
 ## UptimeRobot
 
-Три монитора типа HTTP(s), интервал 5 минут. Алерт после 3 неудачных проверок подряд. Письмо и при падении, и когда проверка снова успешна. Порог времени ответа — 5 секунд на каждом мониторе. Контакт — email. Telegram включается в интерфейсе UptimeRobot, код приложения для этого не нужен.
+Бесплатный план. Интервал 5 минут. Алерт после 3 неудач подряд, письмо и при падении, и когда проверка снова успешна. Контакт — email аккаунта. Смена метода HEAD на GET в HTTP-мониторе платная, поэтому её нет.
 
-1. Frontend: `https://stonetrail.ru/`, метод GET, ожидается HTTP 200.
-2. Liveness: `https://stonetrail.ru/health/live`, метод GET, ожидается HTTP 200.
-3. Readiness: `https://stonetrail.ru/health/ready`, метод GET, keyword `"status":"ok"`. База даёт не-200. SMTP или Яндекс дают 200, но без этого keyword, и монитор тоже срабатывает.
+1. Главная `https://stonetrail.ru/` — тип HTTP. Бесплатный монитор шлёт HEAD и ждёт ответ без ошибки.
+2. `https://stonetrail.ru/health/ready` — тип Keyword, не HTTP. Такой монитор сам шлёт GET. Keyword: `"status":"ok"`. Условие: keyword not exists. База даёт не-200. SMTP или Яндекс дают 200 без этой строки, и монитор тоже срабатывает.
+3. `https://stonetrail.ru/health/live` в UptimeRobot не используется. Endpoint в приложении есть и отвечает на GET, но HTTP-монитор бьёт HEAD и получает 405.
 
 Один короткий обрыв до монитора письмо не отправляет.
 
-После деплоя откройте оба служебных URL и главную. Главная и `/health/live` должны быть 200, `/health/ready` должен содержать `"status":"ok"`.
-
 ## Что означает сбой
 
-| Что случилось | `/health/live` | `/health/ready` | Сайт | Письмо |
+| Что случилось | Главная | `/health/ready` | Сайт | Письмо |
 | --- | --- | --- | --- | --- |
-| Всё работает | 200 | 200, `ok` | открывается | нет |
-| База недоступна | 200 | 503, `down` | API отвечает ошибкой | да, монитор readiness |
-| SMTP или Яндекс недоступны | 200 | 200, `degraded` | открывается, почта или вход Яндекса могут не работать | да, keyword readiness |
-| Процесс API остановлен | нет ответа | нет ответа | главная может открыться без данных API | да, монитор liveness |
+| Всё работает | ответ без ошибки | в теле есть `"status":"ok"` | открывается | нет |
+| База недоступна | может открываться | 503, `down` | API отвечает ошибкой | да, монитор ready |
+| SMTP или Яндекс недоступны | открывается | 200, `degraded`, строки `"status":"ok"` нет | открывается, почта или вход Яндекса могут не работать | да, монитор ready |
+| Процесс API остановлен | может открываться | нет успешного ответа | данные API не приходят | да, монитор ready |
 | VPS, DNS или TLS недоступны | нет ответа | нет ответа | не открывается | да, монитор главной |
-| Ответ дольше 5 секунд три раза подряд | 200, но медленно | 200, но медленно | открывается медленно | да, порог времени |
 
 Долю 5xx по обычным маршрутам этот uptime не считает. Её смотрят в JSON-логах контейнера backend и в `scripts/summarize_logs.py`.
 
@@ -80,9 +76,9 @@ API и сайт на одном домене. Отдельный health-роут
 
 - База: `docker compose ps` в `~/stonetrail/infra`, затем `docker compose logs --tail=120 db backend`. Проверка с сервера: `curl -sf http://127.0.0.1:8080/health/ready`.
 - Backend: `docker compose logs --tail=120 backend`. Если контейнер вышел, `docker compose ps -a`.
-- Frontend или nginx: монитор главной красный, а `/health/live` зелёный. Смотреть `docker compose logs --tail=120 frontend nginx` и системный nginx на 443.
+- Frontend или nginx: монитор главной красный, а `/health/ready` ещё отвечает. Смотреть `docker compose logs --tail=120 frontend nginx` и системный nginx на 443.
 - SMTP или Яндекс: `/health/ready` с `"status":"degraded"`. В логе backend строка `health_check_failed` и имя компонента. Секреты и адрес SMTP туда не пишутся.
-- Медленные ответы: порог UptimeRobot. Конкретный запрос ищется по `requestId` в логах, как в [error-handling.md](error-handling.md).
+- Медленный конкретный запрос ищется по `requestId` в логах, как в [error-handling.md](error-handling.md).
 
 ## Локально
 

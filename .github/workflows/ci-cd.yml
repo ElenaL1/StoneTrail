@@ -28,6 +28,7 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - run: pnpm test
 
   backend-tests:
@@ -62,6 +63,8 @@ jobs:
           cache-dependency-path: backend/pyproject.toml
 
       - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: black --check .
       - run: alembic upgrade head
       - run: pytest -ra --tb=short
 

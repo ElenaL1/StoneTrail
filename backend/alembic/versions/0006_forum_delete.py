@@ -13,40 +13,32 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE forum_posts
         ADD COLUMN deleted_by UUID REFERENCES users (id) ON DELETE SET NULL
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         ALTER TABLE forum_comments
         ADD COLUMN deleted_by UUID REFERENCES users (id) ON DELETE SET NULL
-        """
-    )
+        """)
     op.execute(
         "ALTER TABLE forum_comments DROP CONSTRAINT forum_comments_parent_id_fkey"
     )
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE forum_comments
         ADD CONSTRAINT forum_comments_parent_id_fkey
         FOREIGN KEY (parent_id) REFERENCES forum_comments (id) ON DELETE SET NULL
-        """
-    )
+        """)
 
 
 def downgrade() -> None:
     op.execute(
         "ALTER TABLE forum_comments DROP CONSTRAINT forum_comments_parent_id_fkey"
     )
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE forum_comments
         ADD CONSTRAINT forum_comments_parent_id_fkey
         FOREIGN KEY (parent_id) REFERENCES forum_comments (id) ON DELETE CASCADE
-        """
-    )
+        """)
     op.execute("ALTER TABLE forum_comments DROP COLUMN deleted_by")
     op.execute("ALTER TABLE forum_posts DROP COLUMN deleted_by")

@@ -9,7 +9,11 @@ vi.mock("next/navigation", () => ({
 }))
 
 vi.mock("next/script", () => ({
-  default: ({ src, id }: { src?: string; id?: string }) => <script id={id} src={src} />,
+  default: ({ src, id }: { src?: string; id?: string }) => (
+    // Mock only. A real script tag is not inserted into the page.
+    // eslint-disable-next-line @next/next/no-sync-scripts
+    <script id={id} src={src} />
+  ),
 }))
 
 import { YandexMetrika } from "@/components/yandex-metrika"

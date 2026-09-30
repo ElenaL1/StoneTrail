@@ -94,9 +94,7 @@ async def update_comment(
     return await service.update_comment(slug, comment_id, payload, user)
 
 
-@router.post(
-    "/posts/{slug}/comments/{comment_id}/like", response_model=ForumLikeOut
-)
+@router.post("/posts/{slug}/comments/{comment_id}/like", response_model=ForumLikeOut)
 async def toggle_comment_like(
     slug: str,
     comment_id: UUID,

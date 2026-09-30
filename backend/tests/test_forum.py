@@ -194,9 +194,7 @@ async def test_topic_views_likes_and_reply_tree(client: AsyncClient) -> None:
     assert reply.status_code == 200, reply.text
     assert reply.json()["parentId"] == root_id
 
-    comment_like = await client.post(
-        f"/api/forum/posts/{slug}/comments/{root_id}/like"
-    )
+    comment_like = await client.post(f"/api/forum/posts/{slug}/comments/{root_id}/like")
     assert comment_like.status_code == 200, comment_like.text
     assert comment_like.json()["liked"] is True
     assert comment_like.json()["likesCount"] == 1
@@ -264,11 +262,15 @@ async def test_author_hides_leaf_and_empty_topic(client: AsyncClient) -> None:
     assert (await client.get("/api/forum/posts")).json() == []
 
     slug = await _topic(client, "Тема с ответом")
-    comment = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Лист"})
+    comment = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Лист"}
+    )
     comment_id = comment.json()["id"]
     blocked = await client.delete(f"/api/forum/posts/{slug}")
     assert blocked.status_code == 403
-    assert (await client.delete(f"/api/forum/posts/{slug}/comments/{comment_id}")).status_code == 204
+    assert (
+        await client.delete(f"/api/forum/posts/{slug}/comments/{comment_id}")
+    ).status_code == 204
     detail = await client.get(f"/api/forum/posts/{slug}")
     assert detail.json()["comments"] == []
 
@@ -277,7 +279,9 @@ async def test_author_hides_leaf_and_empty_topic(client: AsyncClient) -> None:
 async def test_author_cannot_hide_comment_with_reply(client: AsyncClient) -> None:
     await register_verified(client)
     slug = await _topic(client, "Ветка")
-    root = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Корень"})
+    root = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Корень"}
+    )
     root_id = root.json()["id"]
     await client.post(
         f"/api/forum/posts/{slug}/comments",
@@ -289,9 +293,13 @@ async def test_author_cannot_hide_comment_with_reply(client: AsyncClient) -> Non
 
 @pytest.mark.asyncio
 async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
-    author = await register_verified(client, nickname="author-one", email="author-one@example.com")
+    author = await register_verified(
+        client, nickname="author-one", email="author-one@example.com"
+    )
     slug = await _topic(client, "Модерация")
-    root = await client.post(f"/api/forum/posts/{slug}/comments", json={"body": "Секрет"})
+    root = await client.post(
+        f"/api/forum/posts/{slug}/comments", json={"body": "Секрет"}
+    )
     root_id = root.json()["id"]
     child = await client.post(
         f"/api/forum/posts/{slug}/comments",
@@ -300,14 +308,18 @@ async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
     child_id = child.json()["id"]
     await logout(client)
 
-    moderator = await register_verified(client, nickname="mod-one", email="mod-one@example.com")
+    moderator = await register_verified(
+        client, nickname="mod-one", email="mod-one@example.com"
+    )
     await set_role(str(moderator["email"]), UserRole.MODERATOR)
     await login(client, str(moderator["email"]))
 
     hidden = await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}")
     assert hidden.status_code == 204
     detail = await client.get(f"/api/forum/posts/{slug}")
-    hidden_root = next(item for item in detail.json()["comments"] if item["id"] == root_id)
+    hidden_root = next(
+        item for item in detail.json()["comments"] if item["id"] == root_id
+    )
     assert hidden_root["deleted"] is True
     assert hidden_root["body"] == "Секрет"
     assert hidden_root["deletedBy"] == moderator["nickname"]
@@ -332,7 +344,9 @@ async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
     assert any(item["body"] == "Секрет" for item in restored.json()["comments"])
 
     await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}")
-    destroyed = await client.delete(f"/api/forum/posts/{slug}/comments/{root_id}/permanent")
+    destroyed = await client.delete(
+        f"/api/forum/posts/{slug}/comments/{root_id}/permanent"
+    )
     assert destroyed.status_code == 204
     after = await client.get(f"/api/forum/posts/{slug}")
     by_id = {item["id"]: item for item in after.json()["comments"]}
@@ -350,7 +364,9 @@ async def test_staff_hides_restores_and_destroys(client: AsyncClient) -> None:
 
     await logout(client)
     await login(client, str(moderator["email"]))
-    assert (await client.delete(f"/api/forum/posts/{slug}/permanent")).status_code == 204
+    assert (
+        await client.delete(f"/api/forum/posts/{slug}/permanent")
+    ).status_code == 204
     assert (await client.get(f"/api/forum/posts/{slug}")).status_code == 404
 
 

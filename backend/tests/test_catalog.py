@@ -4,6 +4,14 @@ import re
 from datetime import UTC, datetime
 
 import pytest
+from catalog_fixtures import (
+    add_block_item,
+    add_lot,
+    add_media,
+    add_product,
+    add_product_item,
+    add_stone,
+)
 from httpx import AsyncClient
 from sqlalchemy import func, select, text
 
@@ -16,14 +24,6 @@ from models.enums import (
     MediaOwner,
     ProductCategory,
     ProductItemKind,
-)
-from catalog_fixtures import (
-    add_block_item,
-    add_lot,
-    add_media,
-    add_product,
-    add_product_item,
-    add_stone,
 )
 
 UUID_RE = re.compile(

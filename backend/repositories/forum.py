@@ -67,7 +67,11 @@ class ForumRepository:
     async def get_post_by_slug(
         self, slug: str, *, include_deleted: bool = False
     ) -> ForumPost | None:
-        stmt = select(ForumPost).where(ForumPost.slug == slug).options(*self._post_options())
+        stmt = (
+            select(ForumPost)
+            .where(ForumPost.slug == slug)
+            .options(*self._post_options())
+        )
         if not include_deleted:
             stmt = stmt.where(ForumPost.deleted_at.is_(None))
         result = await self._session.execute(stmt)

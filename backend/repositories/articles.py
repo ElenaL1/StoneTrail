@@ -185,9 +185,7 @@ class ArticleRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def covers(
-        self, article_ids: Sequence[uuid.UUID]
-    ) -> dict[uuid.UUID, str]:
+    async def covers(self, article_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, str]:
         if not article_ids:
             return {}
         stmt = (
