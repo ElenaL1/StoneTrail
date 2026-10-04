@@ -9,6 +9,7 @@ export type Material = {
   location: string
   quarry: string
   country: string
+  description?: string
   status: "В наличии" | "Мало" | "Продано"
   slabs: number
   tiles: number

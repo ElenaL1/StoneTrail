@@ -62,10 +62,9 @@ export function MaterialDetailPage({
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-4">
                 {material.name}
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Премиальный слэб с исключительной текстурой и однородностью цвета.
-                Идеально подходит для столешниц, облицовки каминов и акцентных стен.
-              </p>
+              {material.description ? (
+                <p className="text-lg text-muted-foreground leading-relaxed">{material.description}</p>
+              ) : null}
               <StoneInventoryLinks material={material} lots={lots} className="mt-5" />
             </div>
 

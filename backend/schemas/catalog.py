@@ -34,6 +34,7 @@ class MaterialOut(CamelModel):
     location: str
     quarry: str
     country: str
+    description: str = ""
     status: StoneStatus
     slabs: int
     tiles: int

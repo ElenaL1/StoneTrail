@@ -112,6 +112,7 @@ async def test_list_and_get_stone_camel_case(client: AsyncClient) -> None:
     row = rows[0]
     assert row["id"] == "calacatta-gold"
     assert row["name"] == "Calacatta Gold"
+    assert row["description"] == "Описание сорта"
     assert row["type"] == "Мрамор"
     assert row["image"] == "/stone/calacatta.png"
     assert row["supplier"] == "StoneTrail"

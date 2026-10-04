@@ -296,6 +296,7 @@ class CatalogService(CatalogAdminMixin):
                     location=LOCATION,
                     quarry=stone.quarry,
                     country=stone.country,
+                    description=stone.description,
                     status=_stone_status(in_stock),
                     slabs=slabs,
                     tiles=tiles,
