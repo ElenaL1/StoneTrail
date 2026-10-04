@@ -81,23 +81,6 @@ export default function AdminCatalogPage() {
     }))
   }
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        await load()
-        const params = new URLSearchParams(window.location.search)
-        const stone = params.get("stone")
-        const block = params.get("block")
-        const product = params.get("product")
-        if (stone) await editStone(stone)
-        else if (block) await editBlock(block)
-        else if (product) await editProduct(product)
-      } catch (err) {
-        setError(err instanceof ContentRequestError ? err.message : "Не удалось загрузить каталог.")
-      }
-    })()
-  }, [])
-
   const fail = (err: unknown) => {
     setError(err instanceof ContentRequestError ? err.message : "Не удалось сохранить.")
   }
@@ -232,6 +215,23 @@ export default function AdminCatalogPage() {
     })
     setTab("products")
   }
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await load()
+        const params = new URLSearchParams(window.location.search)
+        const stone = params.get("stone")
+        const block = params.get("block")
+        const product = params.get("product")
+        if (stone) await editStone(stone)
+        else if (block) await editBlock(block)
+        else if (product) await editProduct(product)
+      } catch (err) {
+        setError(err instanceof ContentRequestError ? err.message : "Не удалось загрузить каталог.")
+      }
+    })()
+  }, [])
 
   return (
     <div className="space-y-6">

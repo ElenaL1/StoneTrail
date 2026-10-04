@@ -36,9 +36,7 @@ class UserRepository:
 
     async def list_alive(self) -> list[User]:
         result = await self._session.execute(
-            select(User)
-            .where(User.deleted_at.is_(None))
-            .order_by(User.email, User.id)
+            select(User).where(User.deleted_at.is_(None)).order_by(User.email, User.id)
         )
         return list(result.scalars().all())
 

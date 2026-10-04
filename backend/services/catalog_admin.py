@@ -129,9 +129,7 @@ class CatalogAdminMixin:
                 messages.LOOKUP_INVALID, {"stoneSlug": messages.LOOKUP_INVALID}
             )
         lot = BlockLot(
-            slug=await self._fresh_slug(
-                BlockLot, payload.slug, stone.name, "lot"
-            ),
+            slug=await self._fresh_slug(BlockLot, payload.slug, stone.name, "lot"),
             stone_id=stone.id,
             description=payload.description.strip(),
             expert_note=payload.expert_note.strip(),

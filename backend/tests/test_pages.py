@@ -37,9 +37,7 @@ async def test_editor_publishes_page_and_admin_publishes_legal(
     )
     assert saved.status_code == 200, saved.text
     title = next(
-        item
-        for item in saved.json()["blocks"]
-        if item["blockKey"] == "hero.title"
+        item for item in saved.json()["blocks"] if item["blockKey"] == "hero.title"
     )
     assert title["draftValue"] == "О мастерской"
     assert title["publishedValue"] == ""

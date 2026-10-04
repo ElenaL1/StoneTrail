@@ -378,7 +378,9 @@ class PageContentService:
             title=page.title,
             legal=page.legal,
             effective_from=effective,
-            blocks=[_admin_block(block, by_key.get(block.key)) for block in page.blocks],
+            blocks=[
+                _admin_block(block, by_key.get(block.key)) for block in page.blocks
+            ],
         )
 
     async def save_draft(
@@ -395,8 +397,10 @@ class PageContentService:
                 )
             value = item.value.strip()
             media_id = None
-            if block.kind == PageBlockKind.IMAGE and value and not (
-                value.startswith("/") or value.startswith("http")
+            if (
+                block.kind == PageBlockKind.IMAGE
+                and value
+                and not (value.startswith("/") or value.startswith("http"))
             ):
                 media = await self._session.get(Media, _uuid(value))
                 if media is None:
