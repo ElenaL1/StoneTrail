@@ -6,6 +6,9 @@ import { fieldControlClassName, FormField } from "@/components/auth/form-field"
 import { YandexAuthButton } from "@/components/auth/yandex-auth-button"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
+import { ContentRequestError } from "@/lib/content-request"
+import { mediaApi } from "@/lib/media/api"
+import { uploadToPresignedUrl } from "@/lib/media/upload"
 import { ACTIVITY_TYPES } from "@/lib/auth/types"
 import { AUTH_MESSAGES, AVATAR_ACCEPTED_TYPES, AVATAR_MAX_BYTES, COUNTRIES } from "@/lib/auth/constants"
 import { formatPhone } from "@/lib/utils"
@@ -13,7 +16,7 @@ import { yandexNotice } from "@/lib/auth/paths"
 import { validatePersonName, validateProfileInput, validateWebsite } from "@/lib/auth/validation"
 
 export function ProfileForm() {
-  const { user, updateProfile } = useAuth()
+  const { user, updateProfile, refreshUser } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
   const [values, setValues] = useState({
     nickname: user?.nickname ?? "",
@@ -34,6 +37,7 @@ export function ProfileForm() {
   const [formError, setFormError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [avatarProgress, setAvatarProgress] = useState<number | null>(null)
 
   if (!user) return null
 
@@ -42,7 +46,7 @@ export function ProfileForm() {
     setSaved(false)
   }
 
-  const handleAvatar = (file: File | undefined) => {
+  const handleAvatar = async (file: File | undefined) => {
     if (!file) return
     if (!(AVATAR_ACCEPTED_TYPES as readonly string[]).includes(file.type)) {
       setErrors((current) => ({ ...current, avatar: AUTH_MESSAGES.avatarInvalid }))
@@ -52,16 +56,44 @@ export function ProfileForm() {
       setErrors((current) => ({ ...current, avatar: AUTH_MESSAGES.avatarTooLarge }))
       return
     }
-    const reader = new FileReader()
-    reader.onload = () => {
-      setField("avatar", String(reader.result ?? ""))
-      setErrors((current) => {
-        const next = { ...current }
-        delete next.avatar
-        return next
-      })
+    setAvatarProgress(0)
+    setErrors((current) => {
+      const next = { ...current }
+      delete next.avatar
+      return next
+    })
+    try {
+      const presign = await mediaApi.init("avatar", file.type, file.size)
+      await uploadToPresignedUrl(presign.uploadUrl, file, presign.headers, setAvatarProgress)
+      const saved = await mediaApi.complete(presign.id)
+      setField("avatar", saved.publicUrl)
+      await refreshUser()
+    } catch (err) {
+      setErrors((current) => ({
+        ...current,
+        avatar: err instanceof ContentRequestError ? err.message : "Не удалось загрузить фото.",
+      }))
+    } finally {
+      setAvatarProgress(null)
     }
-    reader.readAsDataURL(file)
+  }
+
+  const removeAvatar = async () => {
+    setErrors((current) => {
+      const next = { ...current }
+      delete next.avatar
+      return next
+    })
+    try {
+      await mediaApi.clearAvatar()
+      setField("avatar", "")
+      await refreshUser()
+    } catch (err) {
+      setErrors((current) => ({
+        ...current,
+        avatar: err instanceof ContentRequestError ? err.message : "Не удалось удалить фото.",
+      }))
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -95,9 +127,22 @@ export function ProfileForm() {
           )}
         </div>
         <div className="space-y-2">
-          <Button type="button" variant="outline" className="h-10" onClick={() => fileRef.current?.click()}>
-            Загрузить фото
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10"
+              disabled={avatarProgress !== null}
+              onClick={() => fileRef.current?.click()}
+            >
+              {avatarProgress !== null ? `Загрузка ${avatarProgress}%` : "Загрузить фото"}
+            </Button>
+            {values.avatar ? (
+              <Button type="button" variant="outline" className="h-10" onClick={() => void removeAvatar()}>
+                Удалить фото
+              </Button>
+            ) : null}
+          </div>
           <input
             ref={fileRef}
             type="file"
@@ -105,7 +150,10 @@ export function ProfileForm() {
             className="sr-only"
             tabIndex={-1}
             aria-hidden="true"
-            onChange={(event) => handleAvatar(event.target.files?.[0])}
+            onChange={(event) => {
+              void handleAvatar(event.target.files?.[0])
+              event.target.value = ""
+            }}
           />
           {errors.avatar ? (
             <p className="text-xs text-destructive" role="alert">

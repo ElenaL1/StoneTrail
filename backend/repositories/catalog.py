@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
-from models.enums import CustomGroup, MediaOwner, ProductCategory
+from models.enums import CustomGroup, MediaOwner, MediaStatus, ProductCategory
 from models.lookups import Application, Finish, StoneType
 from models.media import Media, MediaLink
 
@@ -155,6 +155,7 @@ class CatalogRepository:
             .where(
                 MediaLink.owner_type == owner_type,
                 MediaLink.owner_id.in_(list(owner_ids)),
+                Media.status == MediaStatus.READY,
             )
             .order_by(MediaLink.sort_order.asc(), MediaLink.id.asc())
         )

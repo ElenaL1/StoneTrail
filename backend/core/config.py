@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     s3_access_key: str = ""
     s3_secret_key: str = ""
     s3_public_base_url: str = ""
+    s3_upload_expires_seconds: int = 300
+    max_image_size_bytes: int = 10 * 1024 * 1024
+    max_avatar_size_bytes: int = 1 * 1024 * 1024
+    max_video_size_bytes: int = 100 * 1024 * 1024
+    max_forum_images: int = 4
+    max_forum_videos: int = 1
+    media_pending_ttl_seconds: int = 24 * 60 * 60
+    media_init_max_attempts: int = 30
+    media_init_window_seconds: int = 15 * 60
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -83,6 +92,14 @@ class Settings(BaseSettings):
             and self.s3_secret_key
             and self.s3_public_base_url.strip()
         )
+
+    @property
+    def s3_region_ready(self) -> bool:
+        region = self.s3_region.strip()
+        endpoint = self.s3_endpoint.strip().lower()
+        if "selcloud.ru" in endpoint:
+            return bool(region) and region != "us-east-1"
+        return bool(region)
 
     @property
     def smtp_enabled(self) -> bool:

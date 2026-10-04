@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { adminApi, type MediaItem } from "@/lib/admin/api"
+import { uploadToPresignedUrl } from "@/lib/media/upload"
 import { catalogApi } from "@/lib/catalog/api-client"
 import { ContentRequestError } from "@/lib/content-request"
 import type { Material, Product, StoneBlock } from "@/lib/types"
@@ -47,11 +48,7 @@ export default function AdminMediaPage() {
       return
     }
     const presign = await adminApi.presign(file.type, file.size)
-    const headers = new Headers(presign.headers)
-    const uploaded = await fetch(presign.uploadUrl, { method: "PUT", headers, body: file })
-    if (!uploaded.ok && !presign.uploadUrl.startsWith("memory://")) {
-      throw new ContentRequestError(uploaded.status, "network", "Не удалось отправить файл в хранилище.")
-    }
+    await uploadToPresignedUrl(presign.uploadUrl, file, presign.headers)
     await adminApi.confirmMedia({
       storageKey: presign.storageKey,
       alt: alt.trim(),

@@ -7,6 +7,7 @@ import { forumApi } from "@/lib/forum/api-client"
 import { CommentForm } from "@/components/community/comment-form"
 import { CommentThread } from "@/components/community/comment-thread"
 import { CreateTopicModal } from "@/components/community/create-topic-modal"
+import { MediaPlayer } from "@/components/media/media-player"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuth } from "@/lib/auth-context"
@@ -190,6 +191,13 @@ export default function TopicDetailPage() {
               {post.content}
             </p>
           </div>
+          {post.attachments?.length ? (
+            <div className="mt-8 space-y-4">
+              {post.attachments.map((item) => (
+                <MediaPlayer key={item.id} item={item} />
+              ))}
+            </div>
+          ) : null}
           <div className="mt-6 flex items-center justify-between gap-3">
             <button
               type="button"

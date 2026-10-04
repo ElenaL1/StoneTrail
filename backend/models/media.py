@@ -18,7 +18,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base, pg_enum
-from models.enums import MediaOwner
+from models.enums import MediaKind, MediaOwner, MediaStatus
 
 
 class Media(Base):
@@ -36,13 +36,31 @@ class Media(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
-    storage_key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    storage_key: Mapped[str | None] = mapped_column(Text, unique=True)
     public_url: Mapped[str] = mapped_column(Text, nullable=False)
     mime_type: Mapped[str] = mapped_column(Text, nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     width_px: Mapped[int | None] = mapped_column(Integer)
     height_px: Mapped[int | None] = mapped_column(Integer)
     alt: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("''"))
+    kind: Mapped[MediaKind] = mapped_column(
+        pg_enum(MediaKind, "media_kind"),
+        nullable=False,
+        default=MediaKind.IMAGE,
+        server_default=text("'image'::media_kind"),
+    )
+    status: Mapped[MediaStatus] = mapped_column(
+        pg_enum(MediaStatus, "media_status"),
+        nullable=False,
+        default=MediaStatus.READY,
+        server_default=text("'ready'::media_status"),
+    )
+    uploaded_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    external_provider: Mapped[str | None] = mapped_column(Text)
+    external_id: Mapped[str | None] = mapped_column(Text)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=text("now()")
     )

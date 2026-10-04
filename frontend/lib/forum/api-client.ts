@@ -1,6 +1,6 @@
 import { formatRuDate, formatRuDateTime } from "@/lib/content-utils"
 import { contentRequest, isNotFound } from "@/lib/content-request"
-import type { Comment, ContentCategory, ForumPost } from "@/lib/types"
+import type { Comment, ContentCategory, ForumAttachment, ForumPost } from "@/lib/types"
 
 type CategoryDto = {
   id: string
@@ -27,6 +27,15 @@ type LikeDto = {
   likesCount: number
 }
 
+type AttachmentDto = {
+  id: string
+  kind: ForumAttachment["kind"]
+  publicUrl: string
+  mimeType: string
+  sizeBytes: number
+  alt: string
+}
+
 type PostDto = {
   id: string
   slug: string
@@ -46,6 +55,7 @@ type PostDto = {
   deleted?: boolean
   deletedBy?: string | null
   comments?: CommentDto[]
+  attachments?: AttachmentDto[]
 }
 
 function mapComment(dto: CommentDto, postId?: string): Comment {
@@ -86,6 +96,7 @@ function mapPost(dto: PostDto): ForumPost {
     deleted: dto.deleted,
     deletedBy: dto.deletedBy ?? undefined,
     comments: (dto.comments ?? []).map((comment) => mapComment(comment, dto.id)),
+    attachments: dto.attachments ?? [],
   }
 }
 
@@ -109,7 +120,12 @@ export const forumApi = {
     }
   },
 
-  async createPost(input: { title: string; categoryId: string; content: string }): Promise<ForumPost> {
+  async createPost(input: {
+    title: string
+    categoryId: string
+    content: string
+    attachmentIds?: string[]
+  }): Promise<ForumPost> {
     return mapPost(
       await contentRequest<PostDto>("/api/forum/posts", {
         method: "POST",
@@ -120,7 +136,7 @@ export const forumApi = {
 
   async updatePost(
     slug: string,
-    input: { title: string; categoryId: string; content: string },
+    input: { title: string; categoryId: string; content: string; attachmentIds?: string[] },
   ): Promise<ForumPost> {
     return mapPost(
       await contentRequest<PostDto>(`/api/forum/posts/${encodeURIComponent(slug)}`, {

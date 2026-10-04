@@ -103,12 +103,6 @@ async def get_admin_user(
     return user
 
 
-async def get_forum_service(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> ForumService:
-    return ForumService(session)
-
-
 async def get_article_service(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ArticleService:
@@ -132,6 +126,13 @@ def get_object_storage() -> ObjectStorage:
     if settings.s3_enabled:
         return S3Storage(settings)
     return UnconfiguredStorage()
+
+
+async def get_forum_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+) -> ForumService:
+    return ForumService(session, MediaService(session, storage))
 
 
 async def get_media_service(

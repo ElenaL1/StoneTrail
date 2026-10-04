@@ -56,10 +56,20 @@ class ForumCommentOut(CamelModel):
     deleted_by: str | None = None
 
 
+class ForumAttachmentOut(CamelModel):
+    id: uuid.UUID
+    kind: str
+    public_url: str
+    mime_type: str
+    size_bytes: int
+    alt: str
+
+
 class ForumPostCreate(CamelModel):
     title: str
     category_id: uuid.UUID
     content: str
+    attachment_ids: list[uuid.UUID] = Field(default_factory=list)
 
     @field_validator("title")
     @classmethod
@@ -76,6 +86,7 @@ class ForumPostUpdate(CamelModel):
     title: str | None = None
     category_id: uuid.UUID | None = None
     content: str | None = None
+    attachment_ids: list[uuid.UUID] | None = None
 
     @field_validator("title")
     @classmethod
@@ -116,6 +127,7 @@ class ForumPostOut(CamelModel):
     deleted: bool = False
     deleted_by: str | None = None
     comments: list[ForumCommentOut] = Field(default_factory=list)
+    attachments: list[ForumAttachmentOut] = Field(default_factory=list)
 
 
 class ArticleCommentCreate(CamelModel):

@@ -35,6 +35,7 @@ from schemas.auth import (
 )
 from schemas.user import parse_activity
 from services.mail import AuthEmailKind, send_auth_email
+from services.media import avatar_url
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,9 @@ class AuthService:
         self._sessions = SessionRepository(session)
         self._tokens = AuthTokenRepository(session)
         self._identities = AuthIdentityRepository(session)
+
+    async def avatar_for(self, user_id: uuid.UUID) -> str:
+        return await avatar_url(self._session, user_id)
 
     async def resolve_session(self, raw_token: str) -> ResolvedSession | None:
         row = await self._sessions.get_alive_by_token_hash(hash_token(raw_token))

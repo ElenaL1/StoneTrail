@@ -11,10 +11,12 @@ from core.errors import ApiError, AuthError
 from core.roles import is_staff
 from core.slug import slugify
 from models.content import ForumComment, ForumCommentLike, ForumPost, ForumPostLike
+from models.enums import MediaOwner
 from models.user import User
 from repositories.forum import ForumRepository
 from schemas.content import (
     CategoryOut,
+    ForumAttachmentOut,
     ForumCommentCreate,
     ForumCommentOut,
     ForumCommentUpdate,
@@ -23,6 +25,7 @@ from schemas.content import (
     ForumPostOut,
     ForumPostUpdate,
 )
+from services.media import MediaService
 
 RESERVED_SLUGS = {"categories"}
 EXCERPT_LEN = 280
@@ -36,9 +39,10 @@ def _excerpt(content: str) -> str:
 
 
 class ForumService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, media: MediaService) -> None:
         self._session = session
         self._repo = ForumRepository(session)
+        self._media = media
 
     async def list_categories(self) -> list[CategoryOut]:
         rows = await self._repo.list_categories()
@@ -82,7 +86,12 @@ class ForumService:
             canonical_path=f"/community/{slug}",
         )
         self._repo.add_post(post)
+        await self._session.flush()
+        removed = await self._media.sync_post_attachments(
+            post.id, author, payload.attachment_ids
+        )
         await self._session.commit()
+        self._media.delete_stored(removed)
         loaded = await self._repo.get_post_by_slug(post.slug)
         assert loaded is not None
         packed = await self._pack_many([loaded], author, include_comments=False)
@@ -107,9 +116,15 @@ class ForumService:
                     {"categoryId": messages.CATEGORY_INVALID},
                 )
             post.category_id = category.id
+        removed: list[str] = []
+        if payload.attachment_ids is not None:
+            removed = await self._media.sync_post_attachments(
+                post.id, actor, payload.attachment_ids
+            )
         post.updated_by = actor.id
         post.edited_at = datetime.now(UTC)
         await self._session.commit()
+        self._media.delete_stored(removed)
         loaded = await self._repo.get_post_by_slug(post.slug)
         assert loaded is not None
         packed = await self._pack_many([loaded], actor, include_comments=True)
@@ -214,8 +229,10 @@ class ForumService:
         if not is_staff(actor.role):
             raise AuthError.forbidden()
         post = await self._require_deleted_post(slug)
+        removed = await self._media.remove_owner(MediaOwner.FORUM_POST, post.id)
         await self._session.delete(post)
         await self._session.commit()
+        self._media.delete_stored(removed)
 
     async def hide_comment(self, slug: str, comment_id: uuid.UUID, actor: User) -> None:
         post = await self._require_post(slug)
@@ -313,6 +330,7 @@ class ForumService:
         include_comments: bool,
     ) -> list[ForumPostOut]:
         ids = [post.id for post in posts]
+        attachments = await self._media.attachments_for(ids)
         comment_counts = await self._repo.comment_counts(ids)
         like_counts = await self._repo.post_like_counts(ids)
         liked_ids: set[uuid.UUID] = set()
@@ -352,6 +370,10 @@ class ForumService:
                         deleted_names.get(post.deleted_by) if post.deleted_by else None
                     ),
                     comments=comments,
+                    attachments=[
+                        ForumAttachmentOut.model_validate(item.model_dump())
+                        for item in attachments.get(post.id, [])
+                    ],
                 )
             )
         return items

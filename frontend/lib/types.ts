@@ -187,6 +187,15 @@ export type IndustryNews = {
   deleted: boolean
 }
 
+export type ForumAttachment = {
+  id: string
+  kind: "image" | "video" | "external_video"
+  publicUrl: string
+  mimeType: string
+  sizeBytes: number
+  alt: string
+}
+
 export type ForumPost = {
   id: string
   slug: string
@@ -207,6 +216,7 @@ export type ForumPost = {
   deleted?: boolean
   deletedBy?: string
   comments: Comment[]
+  attachments: ForumAttachment[]
 }
 
 export type Comment = {

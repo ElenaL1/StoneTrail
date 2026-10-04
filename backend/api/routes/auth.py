@@ -40,7 +40,7 @@ async def _public_user(user: User, service: AuthService) -> dict[str, object]:
         company=user.company,
         position=user.position,
         activity_type=activity_to_label(user.activity_type),
-        avatar="",
+        avatar=await service.avatar_for(user.id),
         country=user.country,
         city=user.city,
         bio=user.bio,

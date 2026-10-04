@@ -154,5 +154,6 @@ function topic(): ForumPost {
     likesCount: 0,
     liked: false,
     comments: [],
+    attachments: [],
   }
 }

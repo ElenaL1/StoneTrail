@@ -146,3 +146,16 @@ class MediaOwner(StrEnum):
     NEWS = "news"
     PROMOTION = "promotion"
     USER_AVATAR = "user_avatar"
+    FORUM_POST = "forum_post"
+
+
+class MediaKind(StrEnum):
+    IMAGE = "image"
+    VIDEO = "video"
+    EXTERNAL_VIDEO = "external_video"
+
+
+class MediaStatus(StrEnum):
+    PENDING = "pending"
+    READY = "ready"
+    FAILED = "failed"

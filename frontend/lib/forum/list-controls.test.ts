@@ -19,6 +19,7 @@ function post(overrides: Partial<ForumPost>): ForumPost {
     likesCount: 0,
     liked: false,
     comments: [],
+    attachments: [],
     ...overrides,
   }
 }
