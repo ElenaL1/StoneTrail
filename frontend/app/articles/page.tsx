@@ -7,7 +7,7 @@ import { ArticleCard } from "@/components/articles/article-card"
 import { WriteArticleButton } from "@/components/articles/write-article-button"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { ContentEnter } from "@/components/content-enter"
 import { articlesApi } from "@/lib/articles/api-client"
 import type { Article, ContentCategory } from "@/lib/types"
@@ -21,7 +21,7 @@ export default function ArticlesPage() {
   const [categories, setCategories] = useState<ContentCategory[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
-  const isBannerEnabled = arePromotionsEnabled()
+  const isBannerEnabled = useHasBanner()
 
   useEffect(() => {
     void articlesApi.listCategories().then(setCategories)

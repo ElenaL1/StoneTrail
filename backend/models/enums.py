@@ -78,6 +78,19 @@ class NewsStatus(StrEnum):
     PUBLISHED = "published"
 
 
+class BannerTemplate(StrEnum):
+    STONE = "stone"
+    SLAB = "slab"
+    QUARRY = "quarry"
+    VEIN = "vein"
+    LEDGER = "ledger"
+    SPLIT = "split"
+    BAND = "band"
+    FRAME = "frame"
+    SEAL = "seal"
+    QUIET = "quiet"
+
+
 class NotificationType(StrEnum):
     COMMUNITY = "community"
     CATALOG = "catalog"
@@ -110,6 +123,17 @@ class InquirySource(StrEnum):
     CATALOG_PRODUCT = "catalog_product"
     CATALOG_BLOCK = "catalog_block"
     OTHER = "other"
+
+
+class PageBlockKind(StrEnum):
+    TEXT = "text"
+    MARKDOWN = "markdown"
+    IMAGE = "image"
+
+
+class PageBlockStatus(StrEnum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
 
 
 class MediaOwner(StrEnum):

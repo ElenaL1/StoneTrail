@@ -1,9 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from core.deps import (
+    get_admin_user,
     get_article_service,
+    get_editor_user,
     get_optional_user,
     get_staff_user,
     get_verified_user,
@@ -45,6 +47,15 @@ async def list_moderation(
     _staff: Annotated[User, Depends(get_staff_user)],
 ) -> list[ArticleOut]:
     return await service.list_moderation()
+
+
+@router.get("/manage", response_model=list[ArticleOut])
+async def list_managed(
+    service: Annotated[ArticleService, Depends(get_article_service)],
+    editor: Annotated[User, Depends(get_editor_user)],
+    deleted: bool = False,
+) -> list[ArticleOut]:
+    return await service.list_managed(deleted=deleted, viewer=editor)
 
 
 @router.get("", response_model=list[ArticleOut])
@@ -114,6 +125,25 @@ async def moderate_article(
     staff: Annotated[User, Depends(get_staff_user)],
 ) -> ArticleOut:
     return await service.moderate(slug, payload, staff)
+
+
+@router.delete("/{slug}", status_code=204)
+async def delete_article(
+    slug: str,
+    service: Annotated[ArticleService, Depends(get_article_service)],
+    admin: Annotated[User, Depends(get_admin_user)],
+) -> Response:
+    await service.hide_article(slug, admin)
+    return Response(status_code=204)
+
+
+@router.post("/{slug}/restore", response_model=ArticleOut)
+async def restore_article(
+    slug: str,
+    service: Annotated[ArticleService, Depends(get_article_service)],
+    admin: Annotated[User, Depends(get_admin_user)],
+) -> ArticleOut:
+    return await service.restore_article(slug, admin)
 
 
 @router.post("/{slug}/comments", response_model=ArticleCommentOut)

@@ -4,6 +4,14 @@ export function isStaff(role: UserRole | undefined): boolean {
   return role === "moderator" || role === "editor" || role === "admin"
 }
 
+export function isEditor(role: UserRole | undefined): boolean {
+  return role === "editor" || role === "admin"
+}
+
+export function isAdmin(role: UserRole | undefined): boolean {
+  return role === "admin"
+}
+
 export function formatRuDate(value: string | null | undefined): string {
   if (!value) return ""
   const date = new Date(value)

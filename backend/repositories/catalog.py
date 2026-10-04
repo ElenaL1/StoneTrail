@@ -3,12 +3,13 @@ from __future__ import annotations
 import uuid
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
 from models.enums import CustomGroup, MediaOwner, ProductCategory
+from models.lookups import Application, Finish, StoneType
 from models.media import Media, MediaLink
 
 
@@ -171,3 +172,94 @@ class CatalogRepository:
             cover = primary.get(owner_id) or (urls[0] if urls else "")
             packed[owner_id] = (cover, urls)
         return packed
+
+    async def get_stone_any(self, slug: str) -> Stone | None:
+        result = await self._session.execute(
+            select(Stone)
+            .where(Stone.slug == slug)
+            .options(selectinload(Stone.stone_type))
+        )
+        return result.scalar_one_or_none()
+
+    async def get_lot_any(self, slug: str) -> BlockLot | None:
+        result = await self._session.execute(
+            select(BlockLot)
+            .where(BlockLot.slug == slug)
+            .options(
+                selectinload(BlockLot.stone).selectinload(Stone.stone_type),
+                selectinload(BlockLot.items).selectinload(BlockItem.finish),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_product_any(self, slug: str) -> Product | None:
+        result = await self._session.execute(
+            select(Product)
+            .where(Product.slug == slug)
+            .options(
+                selectinload(Product.stone).selectinload(Stone.stone_type),
+                selectinload(Product.items).selectinload(ProductItem.finish),
+                selectinload(Product.applications),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def slug_taken(
+        self, model: type, slug: str, *, exclude: uuid.UUID | None
+    ) -> bool:
+        stmt = select(model.id).where(model.slug == slug, model.deleted_at.is_(None))
+        if exclude is not None:
+            stmt = stmt.where(model.id != exclude)
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    async def stone_has_dependents(self, stone_id: uuid.UUID) -> bool:
+        lots = await self._session.execute(
+            select(func.count())
+            .select_from(BlockLot)
+            .where(BlockLot.stone_id == stone_id, BlockLot.deleted_at.is_(None))
+        )
+        products = await self._session.execute(
+            select(func.count())
+            .select_from(Product)
+            .where(Product.stone_id == stone_id, Product.deleted_at.is_(None))
+        )
+        return int(lots.scalar_one()) > 0 or int(products.scalar_one()) > 0
+
+    async def list_lookups(
+        self,
+    ) -> tuple[list[StoneType], list[Finish], list[Application]]:
+        types = await self._session.execute(
+            select(StoneType)
+            .where(StoneType.is_active.is_(True))
+            .order_by(StoneType.sort_order, StoneType.label)
+        )
+        finishes = await self._session.execute(
+            select(Finish)
+            .where(Finish.is_active.is_(True))
+            .order_by(Finish.sort_order, Finish.label)
+        )
+        applications = await self._session.execute(
+            select(Application)
+            .where(Application.is_active.is_(True))
+            .order_by(Application.sort_order, Application.label)
+        )
+        return (
+            list(types.scalars().all()),
+            list(finishes.scalars().all()),
+            list(applications.scalars().all()),
+        )
+
+    async def lookup_by_code(self, model: type, code: str):
+        result = await self._session.execute(
+            select(model).where(model.code == code, model.is_active.is_(True))
+        )
+        return result.scalar_one_or_none()
+
+    async def clear_block_items(self, lot_id: uuid.UUID) -> None:
+        await self._session.execute(delete(BlockItem).where(BlockItem.lot_id == lot_id))
+
+    async def clear_product_items(self, product_id: uuid.UUID) -> None:
+        await self._session.execute(
+            delete(ProductItem).where(ProductItem.product_id == product_id)
+        )

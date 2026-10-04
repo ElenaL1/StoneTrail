@@ -1,4 +1,5 @@
 import { LegalPage } from "@/components/legal-page"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 export const metadata = {
   title: "Cookies-политика — StoneTrail",
@@ -6,13 +7,19 @@ export const metadata = {
     "Какие cookies используются на сайте StoneTrail, их цели, срок хранения и способы отключить cookie-трекинг.",
 }
 
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  const copy = await loadCopy("legal/cookies")
+  const body = copy.text("body", "")
   return (
     <LegalPage
       tag="Правовая информация"
-      title="Cookies-политика"
-      summary="Cookie — это короткие текстовые файлы, которые используются браузерами и серверами для хранения настроек сессии, статистики и функциональных особенностей. Ниже — информация о Cookie, которые используются на стonetrail.ru."
-      updated="12 марта 2025"
+      title={copy.text("title", "Cookies-политика")}
+      summary={copy.text(
+        "summary",
+        "Cookie — это короткие текстовые файлы, которые используются браузерами и серверами для хранения настроек сессии, статистики и функциональных особенностей. Ниже — информация о Cookie, которые используются на стonetrail.ru.",
+      )}
+      updated={copy.effectiveFrom ?? "12 марта 2025"}
+      markdown={body || undefined}
       related={[
         { name: "Политика конфиденциальности", href: "/legal/privacy" },
         { name: "Условия использования", href: "/legal/terms" },

@@ -105,6 +105,28 @@ class ArticleRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_slug_any(self, slug: str) -> Article | None:
+        stmt = (
+            select(Article)
+            .where(Article.slug == slug)
+            .options(*self._article_options())
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def list_managed(self, *, deleted: bool) -> list[Article]:
+        stmt = select(Article).options(*self._article_options())
+        if deleted:
+            stmt = stmt.where(Article.deleted_at.is_not(None))
+        else:
+            stmt = stmt.where(
+                Article.deleted_at.is_(None),
+                Article.publication_status == PublicationStatus.PUBLISHED,
+            )
+        stmt = stmt.order_by(Article.updated_at.desc())
+        result = await self._session.execute(stmt)
+        return list(result.scalars().unique().all())
+
     async def get_by_id(self, article_id: uuid.UUID) -> Article | None:
         stmt = (
             select(Article)

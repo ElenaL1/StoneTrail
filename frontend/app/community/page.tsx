@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LayoutGrid, List, RotateCcw, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { ContentEnter } from "@/components/content-enter"
 import type { ContentCategory, ForumPost } from "@/lib/types"
 
@@ -66,7 +66,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className={cn("min-h-screen py-24 px-5 lg:px-8", !arePromotionsEnabled() ? "bg-muted/30" : "bg-background")}>
+    <div className={cn("min-h-screen py-24 px-5 lg:px-8", !useHasBanner() ? "bg-muted/30" : "bg-background")}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">

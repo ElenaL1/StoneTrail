@@ -16,11 +16,5 @@ export default async function Page({
   const relatedMaterial = block.blockStoneId
     ? await catalogApi.getStone(block.blockStoneId)
     : null
-  return (
-    <BlockDetailPage
-      block={block}
-      lots={lots}
-      relatedMaterial={relatedMaterial}
-    />
-  )
+  return <BlockDetailPage block={block} lots={lots} relatedMaterial={relatedMaterial} />
 }

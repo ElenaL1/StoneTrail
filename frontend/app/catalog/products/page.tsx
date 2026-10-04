@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { catalogApi } from "@/lib/catalog/api-client"
 import { ProductCatalog } from "@/components/products/product-catalog"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 
 export const metadata = {
   title: "Изделия из камня — StoneTrail",
@@ -10,12 +10,12 @@ export const metadata = {
     "Камень для интерьеров, архитектуры и благоустройства. Слэбы, заготовки, плита, брусчатка и изделия под заказ.",
 }
 
-function ProductCatalogFallback() {
+function ProductCatalogFallback({ banner }: { banner: boolean }) {
   return (
     <div
       className={cn(
         "min-h-screen py-24 px-5 lg:px-8",
-        !arePromotionsEnabled() ? "bg-muted/30" : "bg-background",
+        !banner ? "bg-muted/30" : "bg-background",
       )}
     >
       <div className="mx-auto max-w-7xl">
@@ -33,9 +33,9 @@ function ProductCatalogFallback() {
 }
 
 export default async function ProductsCatalogPage() {
-  const products = await catalogApi.listProducts()
+  const [products, banner] = await Promise.all([catalogApi.listProducts(), hasActiveBanner()])
   return (
-    <Suspense fallback={<ProductCatalogFallback />}>
+    <Suspense fallback={<ProductCatalogFallback banner={banner} />}>
       <ProductCatalog products={products} />
     </Suspense>
   )

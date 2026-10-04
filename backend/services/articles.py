@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import messages
 from core.errors import ApiError, AuthError
-from core.roles import is_staff
+from core.roles import is_admin, is_staff
 from core.slug import slugify
 from models.content import Article, ArticleComment, ArticleLike
 from models.enums import PublicationStatus
@@ -25,6 +25,7 @@ from schemas.content import (
     CategoryOut,
     ModerateArticleRequest,
 )
+from services.audit import record_audit
 
 RESERVED_SLUGS = {"categories", "mine", "moderation", "new"}
 EDITABLE_STATUSES = {
@@ -91,6 +92,50 @@ class ArticleService:
     async def list_moderation(self) -> list[ArticleOut]:
         articles = await self._repo.list_moderation()
         return await self._to_list(articles, None, include_comments=False)
+
+    async def list_managed(self, *, deleted: bool, viewer: User) -> list[ArticleOut]:
+        articles = await self._repo.list_managed(deleted=deleted)
+        return await self._to_list(articles, viewer, include_comments=False)
+
+    async def hide_article(self, slug: str, actor: User) -> None:
+        if not is_admin(actor.role):
+            raise AuthError.forbidden()
+        article = await self._require_article(slug)
+        if article.publication_status != PublicationStatus.PUBLISHED:
+            raise AuthError.validation(messages.ARTICLE_DELETE_FORBIDDEN)
+        article.deleted_at = datetime.now(UTC)
+        article.updated_by = actor.id
+        await record_audit(
+            self._session,
+            actor_id=actor.id,
+            action="article_delete",
+            entity_type="article",
+            entity_id=str(article.id),
+            detail={"slug": article.slug},
+        )
+        await self._session.commit()
+
+    async def restore_article(self, slug: str, actor: User) -> ArticleOut:
+        if not is_admin(actor.role):
+            raise AuthError.forbidden()
+        article = await self._repo.get_by_slug_any(slug)
+        if article is None or article.deleted_at is None:
+            raise ApiError.not_found()
+        article.deleted_at = None
+        article.updated_by = actor.id
+        await record_audit(
+            self._session,
+            actor_id=actor.id,
+            action="article_restore",
+            entity_type="article",
+            entity_id=str(article.id),
+            detail={"slug": article.slug},
+        )
+        await self._session.commit()
+        loaded = await self._repo.get_by_id(article.id)
+        assert loaded is not None
+        packed = await self._to_list([loaded], actor, include_comments=False)
+        return packed[0]
 
     async def get_article(self, slug: str, viewer: User | None) -> ArticleOut:
         article = await self._repo.get_by_slug(slug)
@@ -275,6 +320,14 @@ class ArticleService:
         article.updated_by = actor.id
         if article.author is not None:
             article.author.can_publish_articles = True
+        await record_audit(
+            self._session,
+            actor_id=actor.id,
+            action="article_publish",
+            entity_type="article",
+            entity_id=str(article.id),
+            detail={"slug": article.slug},
+        )
         await self._session.commit()
         loaded = await self._repo.get_by_id(article.id)
         assert loaded is not None

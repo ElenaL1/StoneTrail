@@ -47,6 +47,14 @@ class ApiError(Exception):
     def not_found(cls) -> ApiError:
         return cls(404, "not_found", messages.NOT_FOUND)
 
+    @classmethod
+    def conflict(cls, message: str) -> ApiError:
+        return cls(409, "conflict", message)
+
+    @classmethod
+    def unavailable(cls, message: str) -> ApiError:
+        return cls(503, "unavailable", message)
+
 
 class AuthError(ApiError):
     @classmethod

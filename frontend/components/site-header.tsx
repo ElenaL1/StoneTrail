@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Menu, Search, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { ChevronDown, Menu, Search, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -11,16 +11,44 @@ import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { SearchModal } from "@/components/search-modal"
 import { NotificationDropdown } from "@/components/notification-dropdown"
 import { cn } from "@/lib/utils"
-import { SEARCH_CATEGORIES } from "@/lib/search-utils"
 import { useAuth } from "@/lib/auth-context"
+import { useAdminMode } from "@/lib/admin-mode"
+import { isEditor } from "@/lib/content-utils"
+
+const PRIMARY_NAV = [
+  { label: "Новости", href: "/news" },
+  { label: "Каталог камня", href: "/catalog" },
+  { label: "Блоки", href: "/catalog/blocks" },
+  { label: "Изделия из камня", href: "/catalog/products" },
+  { label: "Форум", href: "/community" },
+  { label: "Статьи", href: "/articles" },
+] as const
+
+function isCurrent(pathname: string, href: string) {
+  if (href === "/catalog") {
+    return (
+      pathname === "/catalog" ||
+      (pathname.startsWith("/catalog/") &&
+        !pathname.startsWith("/catalog/blocks") &&
+        !pathname.startsWith("/catalog/products"))
+    )
+  }
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
+const itemClass =
+  "whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-foreground"
 
 export function SiteHeader() {
   const { isReady, user, logout } = useAuth()
+  const { enabled, toggle } = useAdminMode()
   const pathname = usePathname()
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -31,61 +59,41 @@ export function SiteHeader() {
 
   useEffect(() => {
     setOpen(false)
+    setAccountOpen(false)
   }, [pathname])
 
-  const getHref = (id: string) => {
-    const hrefMap: Record<string, string> = {
-      News: "/news",
-      StoneCatalog: "/catalog",
-      Blocks: "/catalog/blocks",
-      ProductsCatalog: "/catalog/products",
-      Forum: "/community",
-      Articles: "/articles",
+  useEffect(() => {
+    if (!accountOpen) return
+
+    const onPointer = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (accountRef.current && !accountRef.current.contains(target)) setAccountOpen(false)
     }
-    return hrefMap[id] || "#"
-  }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAccountOpen(false)
+    }
+
+    document.addEventListener("mousedown", onPointer)
+    document.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("mousedown", onPointer)
+      document.removeEventListener("keydown", onKey)
+    }
+  }, [accountOpen])
 
   const handleLogout = () => {
     void logout()
     setOpen(false)
+    setAccountOpen(false)
     router.push("/")
   }
 
-  const authControls = !isReady ? null : user ? (
+  const guestActions = (fullWidth: boolean) => (
     <>
-      <Button variant="ghost" className="text-foreground" asChild>
-        <Link href="/profile">Профиль</Link>
-      </Button>
-      <Button variant="outline" onClick={handleLogout}>
-        Выйти
-      </Button>
-    </>
-  ) : (
-    <>
-      <OpenAuthButton view="login" variant="ghost" className="text-foreground">
+      <OpenAuthButton view="login" variant={fullWidth ? "outline" : "ghost"} className={cn(!fullWidth && "text-foreground", fullWidth && "w-full")}>
         Войти
       </OpenAuthButton>
-      <OpenAuthButton view="register" className="bg-primary text-primary-foreground hover:bg-primary/90">
-        Присоединиться
-      </OpenAuthButton>
-    </>
-  )
-
-  const mobileAuthControls = !isReady ? null : user ? (
-    <>
-      <Button variant="outline" className="w-full" asChild>
-        <Link href="/profile">Профиль</Link>
-      </Button>
-      <Button className="w-full" variant="outline" onClick={handleLogout}>
-        Выйти
-      </Button>
-    </>
-  ) : (
-    <>
-      <OpenAuthButton view="login" variant="outline" className="w-full">
-        Войти
-      </OpenAuthButton>
-      <OpenAuthButton view="register" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+      <OpenAuthButton view="register" className={cn("bg-primary text-primary-foreground hover:bg-primary/90", fullWidth && "w-full")}>
         Присоединиться
       </OpenAuthButton>
     </>
@@ -100,17 +108,17 @@ export function SiteHeader() {
           : "border-b border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <div className="flex items-center gap-10">
-          <Link href="/" aria-label="Главная StoneTrail">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 lg:px-8">
+        <div className="flex min-w-0 items-center gap-8">
+          <Link href="/" aria-label="Главная StoneTrail" className="shrink-0">
             <Logo />
           </Link>
           <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-            {SEARCH_CATEGORIES.map((item) => (
+            {PRIMARY_NAV.map((item) => (
               <Link
-                key={item.id}
-                href={getHref(item.id)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                key={item.href}
+                href={item.href}
+                className={cn(itemClass, isCurrent(pathname, item.href) ? "bg-secondary text-foreground" : "text-muted-foreground")}
               >
                 {item.label}
               </Link>
@@ -118,7 +126,7 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        <div className="hidden items-center gap-1 lg:flex">
+        <div className="hidden shrink-0 items-center gap-1 lg:flex">
           <Button
             variant="ghost"
             size="icon"
@@ -131,7 +139,51 @@ export function SiteHeader() {
           <NotificationDropdown />
           <ThemeToggle />
           <div className="mx-2 h-5 w-px bg-border" aria-hidden="true" />
-          {authControls}
+          {!isReady ? null : user ? (
+            <div className="relative" ref={accountRef}>
+              <Button
+                variant="outline"
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+                onClick={() => setAccountOpen((value) => !value)}
+              >
+                <span className="max-w-32 truncate">{user.nickname}</span>
+                <ChevronDown className={cn("size-4 transition-transform", accountOpen && "rotate-180")} />
+              </Button>
+              {accountOpen ? (
+                <div role="menu" className="absolute right-0 top-full z-50 mt-2 min-w-52 rounded-xl border border-border bg-card p-1 shadow-xl">
+                  {isEditor(user.role) ? (
+                    <>
+                      <Link href="/admin" role="menuitem" className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary">
+                        Админка
+                      </Link>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-secondary"
+                        onClick={toggle}
+                      >
+                        {enabled ? "Режим правки" : "Править на сайте"}
+                      </button>
+                    </>
+                  ) : null}
+                  <Link href="/profile" role="menuitem" className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary">
+                    Профиль
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-secondary"
+                    onClick={handleLogout}
+                  >
+                    Выйти
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            guestActions(false)
+          )}
         </div>
 
         <div className="flex items-center gap-1 lg:hidden">
@@ -141,34 +193,54 @@ export function SiteHeader() {
             size="icon"
             aria-label={open ? "Закрыть меню" : "Открыть меню"}
             aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((value) => !value)}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
         </div>
       </div>
 
-      {open && (
+      {open ? (
         <div className="border-t border-border bg-background px-5 py-4 lg:hidden">
           <nav aria-label="Mobile" className="flex flex-col gap-1">
-            {SEARCH_CATEGORIES.map((item) => (
+            {PRIMARY_NAV.map((item) => (
               <Link
-                key={item.id}
-                href={getHref(item.id)}
+                key={item.href}
+                href={item.href}
                 className="rounded-md px-3 py-2.5 text-base font-medium text-foreground hover:bg-secondary"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="mt-4 flex flex-col gap-2">{mobileAuthControls}</div>
+          <div className="mt-4 flex flex-col gap-2">
+            {!isReady ? null : user ? (
+              <>
+                {isEditor(user.role) ? (
+                  <>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/admin">Админка</Link>
+                    </Button>
+                    <Button variant={enabled ? "default" : "outline"} className="w-full" onClick={toggle}>
+                      {enabled ? "Режим правки" : "Править на сайте"}
+                    </Button>
+                  </>
+                ) : null}
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/profile">Профиль</Link>
+                </Button>
+                <Button className="w-full" variant="outline" onClick={handleLogout}>
+                  Выйти
+                </Button>
+              </>
+            ) : (
+              guestActions(true)
+            )}
+          </div>
         </div>
-      )}
+      ) : null}
 
-      <SearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-      />
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
   )
 }

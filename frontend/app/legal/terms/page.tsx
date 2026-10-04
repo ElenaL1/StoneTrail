@@ -1,4 +1,5 @@
 import { LegalPage } from "@/components/legal-page"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 export const metadata = {
   title: "Условия использования — StoneTrail",
@@ -6,13 +7,19 @@ export const metadata = {
     "Пользовательское соглашение StoneTrail: правила доступа к сервисам, обязательства сторон, ответственность, возвраты.",
 }
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const copy = await loadCopy("legal/terms")
+  const body = copy.text("body", "")
   return (
     <LegalPage
       tag="Правовая информация"
-      title="Условия использования"
-      summary="Это пользовательское соглашение, определяющее правила предоставления сервисов StoneTrail: каталог, форум, статьи и коммерческие предложения. Регистрируясь или используя сайт, вы принимаете данные условия."
-      updated="12 марта 2025"
+      title={copy.text("title", "Условия использования")}
+      summary={copy.text(
+        "summary",
+        "Это пользовательское соглашение, определяющее правила предоставления сервисов StoneTrail: каталог, форум, статьи и коммерческие предложения. Регистрируясь или используя сайт, вы принимаете данные условия.",
+      )}
+      updated={copy.effectiveFrom ?? "12 марта 2025"}
+      markdown={body || undefined}
       related={[
         { name: "Политика конфиденциальности", href: "/legal/privacy" },
         { name: "Cookies-политика", href: "/legal/cookies" },

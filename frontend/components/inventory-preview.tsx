@@ -5,11 +5,11 @@ import { catalogApi } from "@/lib/catalog/api-client"
 import { MaterialCard } from "@/components/material-card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 
 export async function InventoryPreview() {
   await connection()
-  const isBannerEnabled = arePromotionsEnabled()
+  const isBannerEnabled = await hasActiveBanner()
   let materials: Awaited<ReturnType<typeof catalogApi.listStones>> = []
   try {
     materials = await catalogApi.listStones()

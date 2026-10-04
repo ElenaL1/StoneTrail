@@ -6,10 +6,13 @@ import { Inter, Manrope } from 'next/font/google'
 import { AuthModal } from '@/components/auth/auth-modal'
 import { AuthModalProvider } from '@/lib/auth-modal-context'
 import { AuthProvider } from '@/lib/auth-context'
+import { AdminModeProvider } from '@/lib/admin-mode'
 import { ClientErrorListener } from '@/components/client-error-listener'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { PromotionBanner } from '@/components/promotion-banner'
+import { loadActivePromotions } from '@/lib/promotions/load-active'
+import { PromoPresenceProvider } from '@/lib/promotions/presence'
 import './globals.css'
 
 // Apply the saved (or system) theme class to <html> before first paint
@@ -49,11 +52,12 @@ export const viewport: Viewport = {
   themeColor: '#23483A',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const activePromotions = await loadActivePromotions()
   return (
     <html
       lang="ru"
@@ -65,6 +69,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <ClientErrorListener />
         <AuthProvider>
+          <PromoPresenceProvider initial={activePromotions}>
+          <AdminModeProvider>
           <AuthModalProvider>
             <div className="flex min-h-screen flex-col bg-background">
               <SiteHeader />
@@ -78,6 +84,8 @@ export default function RootLayout({
             </div>
             <AuthModal />
           </AuthModalProvider>
+          </AdminModeProvider>
+          </PromoPresenceProvider>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
         {process.env.NODE_ENV === 'production' && (

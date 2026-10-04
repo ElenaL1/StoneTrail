@@ -4,7 +4,8 @@ import { services } from "@/lib/services-data"
 import { stats } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 export const metadata = {
   title: "Услуги StoneTrail — подбор, консультации, логистика, раскрой",
@@ -19,10 +20,12 @@ const highlights = [
   "Понятный контроль сроков на каждом шаге",
 ]
 
-export default function ServicesHomePage() {
+export default async function ServicesHomePage() {
+  const copy = await loadCopy("services")
+  const banner = await hasActiveBanner()
   return (
     <>
-      <section className={cn("relative overflow-hidden", !arePromotionsEnabled() && "bg-muted/30")}>
+      <section className={cn("relative overflow-hidden", !banner && "bg-muted/30")}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_85%_0%,var(--primary-soft),transparent)]"
@@ -32,14 +35,16 @@ export default function ServicesHomePage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-primary" />
-                Полный цикл работы с камнем
+                {copy.text("hero.kicker", "Полный цикл работы с камнем")}
               </span>
               <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Услуги StoneTrail. <span className="text-primary">От слэба до объекта.</span>
+                {copy.text("hero.title", "Услуги StoneTrail.")} <span className="text-primary">{copy.text("hero.titleAccent", "От слэба до объекта.")}</span>
               </h1>
               <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Четыре направления, закрывающие весь путь материала — от подбора и экспертной консультации на ранней
-                стадии проекта до промышленного раскроя и бережной доставки на объект.
+                {copy.text(
+                  "hero.lead",
+                  "Четыре направления, закрывающие весь путь материала — от подбора и экспертной консультации на ранней стадии проекта до промышленного раскроя и бережной доставки на объект.",
+                )}
               </p>
               <dl className="mt-10 grid max-w-xl grid-cols-2 gap-x-8 gap-y-6 border-t border-border pt-6">
                 {stats.map((s) => (

@@ -132,26 +132,59 @@ export type FinishedProduct = Product & {
   finish: string
 }
 
+export type NewsStatus = "draft" | "coming_soon" | "published"
+
+export type BannerTemplateId =
+  | "stone"
+  | "slab"
+  | "quarry"
+  | "vein"
+  | "ledger"
+  | "split"
+  | "band"
+  | "frame"
+  | "seal"
+  | "quiet"
+
 export type Promotion = {
   id: string
+  slug: string
   title: string
   description: string
   content: string
-  expiryDate: string
-  createdAt: string
+  template: BannerTemplateId
+  buttonLabel: string
   isEnabled: boolean
-  link: string
-  likes: string[]
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
+  likesCount: number
+  liked: boolean
+  deleted: boolean
+}
+
+export type ActivePromotion = {
+  slug: string
+  title: string
+  description: string
+  template: BannerTemplateId
+  buttonLabel: string
+  expiresAt: string
 }
 
 export type IndustryNews = {
   id: string
+  slug: string
   title: string
   excerpt: string
   content: string
-  date: string
-  status: "Скоро" | "В подготовке" | "Опубликовано"
-  likes: string[]
+  status: NewsStatus
+  publishedAt: string | null
+  createdAt: string
+  updatedAt: string
+  likesCount: number
+  liked: boolean
+  deleted: boolean
 }
 
 export type ForumPost = {

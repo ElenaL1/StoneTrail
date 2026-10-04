@@ -165,6 +165,25 @@ export const articlesApi = {
     )
   },
 
+  async listManaged(deleted = false): Promise<Article[]> {
+    const rows = await contentRequest<ArticleDto[]>(
+      `/api/articles/manage?deleted=${deleted ? "true" : "false"}`,
+    )
+    return rows.map(mapArticle)
+  },
+
+  async remove(slug: string): Promise<void> {
+    await contentRequest<null>(`/api/articles/${encodeURIComponent(slug)}`, { method: "DELETE" })
+  },
+
+  async restore(slug: string): Promise<Article> {
+    return mapArticle(
+      await contentRequest<ArticleDto>(`/api/articles/${encodeURIComponent(slug)}/restore`, {
+        method: "POST",
+      }),
+    )
+  },
+
   async addComment(slug: string, body: string, parentId?: string): Promise<ArticleComment> {
     return mapComment(
       await contentRequest<CommentDto>(`/api/articles/${encodeURIComponent(slug)}/comments`, {

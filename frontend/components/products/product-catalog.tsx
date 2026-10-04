@@ -28,7 +28,7 @@ import { ProductCard } from "@/components/products/product-card"
 import { ContentEnter } from "@/components/content-enter"
 import { Button } from "@/components/ui/button"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { cn } from "@/lib/utils"
 
 export function ProductCatalog({ products }: { products: Product[] }) {
@@ -40,6 +40,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const [filters, setFilters] = useState(EMPTY_PRODUCT_FILTERS)
   const [sort, setSort] = useState<ProductSortId>("relevance")
   const [visibleCount, setVisibleCount] = useState(PRODUCT_PAGE_SIZE)
+  const hasBanner = useHasBanner()
   const categoryMeta = PRODUCT_CATEGORY_META[category]
   const groupMeta = customGroup === CUSTOM_GROUP_ALL ? null : getCustomGroup(customGroup)
 
@@ -138,7 +139,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   ].filter(Boolean)
 
   return (
-    <div className={cn("min-h-screen overflow-x-hidden py-24 px-5 lg:px-8", !arePromotionsEnabled() ? "bg-muted/30" : "bg-background")}>
+    <div className={cn("min-h-screen overflow-x-hidden py-24 px-5 lg:px-8", !hasBanner ? "bg-muted/30" : "bg-background")}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 space-y-4">
           <Link

@@ -27,13 +27,13 @@ import type { StoneBlock } from "@/lib/types"
 import { getBlockCount, pluralBlocks, pluralLots } from "@/lib/block-utils"
 import { BlockCard } from "@/components/blocks/block-card"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { cn } from "@/lib/utils"
 
 export function BlocksIndex({ lots }: { lots: StoneBlock[] }) {
   const [search, setSearch] = useState("")
   const [stoneType, setStoneType] = useState("all")
-  const isBannerEnabled = arePromotionsEnabled()
+  const isBannerEnabled = useHasBanner()
 
   const allStoneTypes = useMemo(
     () => Array.from(new Set(lots.map((b) => b.stoneType))),

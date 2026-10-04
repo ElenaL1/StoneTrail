@@ -14,7 +14,7 @@ import {
 import { Search, Package, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { stoneOrigin } from "@/lib/stone-inventory"
 
 export function CatalogIndex({ materials }: { materials: Material[] }) {
@@ -22,7 +22,7 @@ export function CatalogIndex({ materials }: { materials: Material[] }) {
   const [typeFilter, setTypeFilter] = useState("all")
   const [originFilter, setOriginFilter] = useState("all")
   const [locationFilter, setLocationFilter] = useState("all")
-  const isBannerEnabled = arePromotionsEnabled()
+  const isBannerEnabled = useHasBanner()
 
   const origins = useMemo(
     () => Array.from(new Set(materials.map((m) => stoneOrigin(m)))),

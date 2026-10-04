@@ -1,20 +1,26 @@
 import { ArrowUpRight, Boxes, MessagesSquare, Network } from "lucide-react"
 import { pillars } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 
 const icons = [MessagesSquare, Boxes, Network]
 
-export function ValuePillars() {
-  const isBannerEnabled = arePromotionsEnabled();
+export async function ValuePillars({
+  kicker = "Принципы мастерства",
+  title = "Фундамент, построенный на десятилетиях практики.",
+}: {
+  kicker?: string
+  title?: string
+}) {
+  const isBannerEnabled = await hasActiveBanner()
 
   return (
     <section className={cn("border-t border-border", isBannerEnabled ? "bg-muted/40" : "bg-background")}>
       <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">Принципы мастерства</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent">{kicker}</p>
           <h2 className="mt-3 text-balance font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Фундамент, построенный на десятилетиях практики.
+            {title}
           </h2>
         </div>
 

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { FaqAccordions } from "@/components/faq/faq-accordion"
 import { faqGroups } from "@/lib/faq-data"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 const popular = [
   {
@@ -30,7 +31,9 @@ export const metadata = {
     "Частые вопросы о материалах, заказе, раскрое, доставке, уходе за камнем и работах с проектами StoneTrail.",
 }
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const copy = await loadCopy("faq")
+  const banner = await hasActiveBanner()
   const searchGroups: { name: string; description: string }[] = faqGroups.map((g) => ({
     name: g.group,
     description: `${g.items.length} вопросов`,
@@ -38,7 +41,7 @@ export default function FaqPage() {
 
   return (
     <>
-      <section className={cn("relative overflow-hidden", !arePromotionsEnabled() && "bg-muted/30")}>
+      <section className={cn("relative overflow-hidden", !banner && "bg-muted/30")}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_85%_0%,var(--primary-soft),transparent)]"
@@ -48,14 +51,16 @@ export default function FaqPage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-primary" />
-                Частые вопросы
+                {copy.text("hero.kicker", "Частые вопросы")}
               </span>
               <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Ответы, которые <span className="text-primary">экономят время.</span>
+                {copy.text("hero.title", "Ответы, которые")} <span className="text-primary">{copy.text("hero.titleAccent", "экономят время.")}</span>
               </h1>
               <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Собрали здесь вопросы, которые чаще всего приходят нам — от подбора камня до ухода за изделием. Не нашли
-                ответ? Напишите — отвечаем в течение рабочего дня.
+                {copy.text(
+                  "hero.lead",
+                  "Собрали здесь вопросы, которые чаще всего приходят нам — от подбора камня до ухода за изделием. Не нашли ответ? Напишите — отвечаем в течение рабочего дня.",
+                )}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/contacts" className="w-full sm:w-auto">

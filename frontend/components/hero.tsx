@@ -4,10 +4,20 @@ import { OpenAuthButton } from "@/components/auth/open-auth-button"
 import { Button } from "@/components/ui/button"
 import { stats } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 
-export function Hero() {
-  const isBannerEnabled = arePromotionsEnabled();
+export async function Hero({
+  kicker = "Наследие мастерства и эксклюзивный фонд",
+  title = "Искусство видеть камень.",
+  titleAccent = "До каждого слэба.",
+  lead = "Синтез более чем 25-летнего опыта в индустрии и коллекции редчайших материалов со всего мира. Мы создали пространство для тех, кто ценит техническое совершенство и подлинную эстетику натурального камня.",
+}: {
+  kicker?: string
+  title?: string
+  titleAccent?: string
+  lead?: string
+}) {
+  const isBannerEnabled = await hasActiveBanner()
 
   return (
     <section className={cn("relative overflow-hidden", !isBannerEnabled && "bg-muted/30")}>
@@ -21,16 +31,15 @@ export function Hero() {
         <div className="py-24 lg:py-0">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
-            Наследие мастерства и эксклюзивный фонд
+            {kicker}
           </span>
           
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Искусство видеть камень. <span className="text-primary">До каждого слэба.</span>
+            {title} <span className="text-primary">{titleAccent}</span>
           </h1>
           
           <p className="mt-5 max-w-lg text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Синтез более чем 25-летнего опыта в индустрии и коллекции редчайших материалов со всего мира. 
-            Мы создали пространство для тех, кто ценит техническое совершенство и подлинную эстетику натурального камня.
+            {lead}
           </p>
           
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

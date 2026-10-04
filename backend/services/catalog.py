@@ -20,6 +20,7 @@ from models.enums import (
 )
 from repositories.catalog import CatalogRepository
 from schemas.catalog import LotItemOut, MaterialOut, ProductOut, StoneBlockOut
+from services.catalog_admin import CatalogAdminMixin
 
 SUPPLIER = "StoneTrail"
 LOCATION = "склад"
@@ -178,8 +179,9 @@ def _product_item_out(
     )
 
 
-class CatalogService:
+class CatalogService(CatalogAdminMixin):
     def __init__(self, session: AsyncSession) -> None:
+        self._session = session
         self._repo = CatalogRepository(session)
 
     async def list_stones(self) -> list[MaterialOut]:

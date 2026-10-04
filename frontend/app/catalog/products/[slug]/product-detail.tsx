@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { StatusBadge as LotStatusBadge } from "@/components/blocks/status-badge"
 import { SlabLotTable } from "@/components/products/slab-lot-table"
 import { BlankLotTable } from "@/components/products/blank-lot-table"
@@ -161,7 +161,7 @@ export function FinishedProductDetailPage({
     <div
       className={cn(
         "min-h-screen py-24 px-5 lg:px-8",
-        !arePromotionsEnabled() ? "bg-muted/30" : "bg-background",
+        !useHasBanner() ? "bg-muted/30" : "bg-background",
       )}
     >
       <div className="mx-auto max-w-6xl">

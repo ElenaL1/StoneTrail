@@ -6,11 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.error_handlers import register_error_handlers
 from api.middleware import RequestContextMiddleware
+from api.routes.admin import router as admin_router
 from api.routes.articles import router as articles_router
 from api.routes.auth import router as auth_router
 from api.routes.catalog import router as catalog_router
 from api.routes.forum import router as forum_router
 from api.routes.health import router as health_router
+from api.routes.media import router as media_router
+from api.routes.news import router as news_router
+from api.routes.pages import router as pages_router
+from api.routes.promotions import router as promotions_router
 from api.routes.yandex_auth import router as yandex_auth_router
 from core.config import get_settings
 from core.db import engine
@@ -44,6 +49,11 @@ def create_app() -> FastAPI:
     application.include_router(catalog_router)
     application.include_router(forum_router)  # topics and comments
     application.include_router(articles_router)
+    application.include_router(news_router)
+    application.include_router(promotions_router)
+    application.include_router(admin_router)
+    application.include_router(media_router)
+    application.include_router(pages_router)
     register_error_handlers(application)
     return application
 

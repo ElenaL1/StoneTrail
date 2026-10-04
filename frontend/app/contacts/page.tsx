@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 import { cn } from "@/lib/utils"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 const channels = [
   {
@@ -46,10 +47,24 @@ export const metadata = {
     "Свяжитесь с командой StoneTrail: email, телефон, адрес офиса и склада. Приём заявок на подбор, раскрой и логистику.",
 }
 
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const copy = await loadCopy("contacts")
+  const banner = await hasActiveBanner()
+  const shown = channels.map((channel) => {
+    const key =
+      channel.label === "Email" ? "email"
+      : channel.label === "Телефон" ? "phone"
+      : channel.label === "Офис и склад" ? "address"
+      : "hours"
+    return {
+      ...channel,
+      title: copy.text(`${key}.title`, channel.title),
+      description: copy.text(`${key}.description`, channel.description),
+    }
+  })
   return (
     <>
-      <section className={cn("relative overflow-hidden", !arePromotionsEnabled() && "bg-muted/30")}>
+      <section className={cn("relative overflow-hidden", !banner && "bg-muted/30")}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_85%_0%,var(--primary-soft),transparent)]"
@@ -59,14 +74,16 @@ export default function ContactsPage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-primary" />
-                Контакты
+                {copy.text("hero.kicker", "Контакты")}
               </span>
               <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Давайте обсудим <span className="text-primary">ваш проект.</span>
+                {copy.text("hero.title", "Давайте обсудим")} <span className="text-primary">{copy.text("hero.titleAccent", "ваш проект.")}</span>
               </h1>
               <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Напишите — и вы получите ответ в течение одного рабочего дня. Для срочных запросов используйте
-                прямой контакт отдела.
+                {copy.text(
+                  "hero.lead",
+                  "Напишите — и вы получите ответ в течение одного рабочего дня. Для срочных запросов используйте прямой контакт отдела.",
+                )}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a href="mailto:info@stonetrail.ru">
@@ -132,7 +149,7 @@ export default function ContactsPage() {
             </h2>
           </header>
           <div className="grid gap-5 pb-24 sm:grid-cols-2 lg:grid-cols-4">
-            {channels.map((c) => {
+            {shown.map((c) => {
               const CIcon = c.icon
               return (
                 <article key={c.label} className="flex flex-col rounded-2xl border border-border bg-card p-6">

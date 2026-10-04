@@ -11,17 +11,22 @@ const points = [
   "Профессиональный консалтинг по подбору и обработке материалов",
 ]
 
-export function CtaSection() {
+export function CtaSection({
+  title = "Станьте частью закрытого профессионального сообщества.",
+  lead = "Получите доступ к знаниям, которые накапливались десятилетиями, и к фонду материалов, недоступных на открытом рынке. Мы объединяем тех, кто видит в камне не просто материал, а искусство.",
+}: {
+  title?: string
+  lead?: string
+}) {
   return (
     <section className="border-t border-border bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-7xl items-stretch gap-0 lg:grid-cols-2">
         <div className="flex flex-col justify-center px-5 py-16 lg:px-12 lg:py-24">
           <h2 className="text-balance font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-            Станьте частью закрытого профессионального сообщества.
+            {title}
           </h2>
           <p className="mt-4 max-w-md text-pretty leading-relaxed text-primary-foreground/75">
-            Получите доступ к знаниям, которые накапливались десятилетиями, и к фонду материалов, недоступных на открытом рынке. 
-            Мы объединяем тех, кто видит в камне не просто материал, а искусство.
+            {lead}
           </p>
           <ul className="mt-8 space-y-3">
             {points.map((point) => (

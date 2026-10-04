@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 import { cn } from "@/lib/utils"
 
 export type ServiceFeature = {
@@ -40,11 +40,12 @@ export type ServiceDetailProps = {
   related: ServiceRelated[]
 }
 
-export function ServiceDetailPage(props: ServiceDetailProps) {
+export async function ServiceDetailPage(props: ServiceDetailProps) {
   const { tag, title, intro, features, process, facts, related } = props
+  const banner = await hasActiveBanner()
   return (
     <>
-      <section className={cn("relative overflow-hidden", !arePromotionsEnabled() && "bg-muted/30")}>
+      <section className={cn("relative overflow-hidden", !banner && "bg-muted/30")}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_85%_0%,var(--primary-soft),transparent)]"
@@ -122,7 +123,7 @@ export function ServiceDetailPage(props: ServiceDetailProps) {
         </div>
       </section>
 
-      <section className={cn("border-t border-border", !arePromotionsEnabled() ? "bg-background" : "bg-muted/40")}>
+      <section className={cn("border-t border-border", !banner ? "bg-background" : "bg-muted/40")}>
         <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-widest text-accent">Как мы работаем</p>

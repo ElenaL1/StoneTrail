@@ -323,6 +323,15 @@ class Promotion(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
         CheckConstraint(SEO_DESC_LEN, name="promotions_seo_description_len"),
         CheckConstraint(CANONICAL_FORMAT, name="promotions_canonical_path_format"),
         CheckConstraint("char_length(title) >= 1", name="promotions_title_len"),
+        CheckConstraint(
+            "template IN ('stone', 'slab', 'quarry', 'vein', 'ledger', "
+            "'split', 'band', 'frame', 'seal', 'quiet')",
+            name="promotions_template_known",
+        ),
+        CheckConstraint(
+            "char_length(button_label) BETWEEN 1 AND 80",
+            name="promotions_button_label_len",
+        ),
         Index(
             "promotions_slug_alive_key",
             "slug",
@@ -343,6 +352,12 @@ class Promotion(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     title: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    template: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("'stone'")
+    )
+    button_label: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("'Узнать детали'")
+    )
     is_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )

@@ -1,4 +1,5 @@
 import { LegalPage } from "@/components/legal-page"
+import { loadCopy } from "@/lib/pages/load-copy"
 
 export const metadata = {
   title: "Политика конфиденциальности — StoneTrail",
@@ -6,13 +7,19 @@ export const metadata = {
     "Как компания StoneTrail обрабатывает персональные данные пользователей сайта, целей, категорий и сроков хранения.",
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const copy = await loadCopy("legal/privacy")
+  const body = copy.text("body", "")
   return (
     <LegalPage
       tag="Правовая информация"
-      title="Политика конфиденциальности"
-      summary="Это политика, описывающая, какие данные мы собираем, зачем, как храним, передаём и защищаем. Применяется к использованию сайта stonetrail.ru."
-      updated="12 марта 2025"
+      title={copy.text("title", "Политика конфиденциальности")}
+      summary={copy.text(
+        "summary",
+        "Это политика, описывающая, какие данные мы собираем, зачем, как храним, передаём и защищаем. Применяется к использованию сайта stonetrail.ru.",
+      )}
+      updated={copy.effectiveFrom ?? "12 марта 2025"}
+      markdown={body || undefined}
       related={[
         { name: "Условия использования", href: "/legal/terms" },
         { name: "Cookies-политика", href: "/legal/cookies" },

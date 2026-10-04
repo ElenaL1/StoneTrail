@@ -1,3 +1,4 @@
+from models.audit import AuditEvent
 from models.base import Base
 from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
 from models.content import (
@@ -22,6 +23,7 @@ from models.lookups import (
 )
 from models.media import Media, MediaLink
 from models.oauth import AuthIdentity, OauthState
+from models.pages import PageBlock
 from models.user import AuthToken, Session, User
 
 __all__ = [
@@ -30,6 +32,7 @@ __all__ = [
     "ArticleCategory",
     "ArticleComment",
     "ArticleLike",
+    "AuditEvent",
     "AuthIdentity",
     "AuthToken",
     "Base",
@@ -46,6 +49,7 @@ __all__ = [
     "NewsLike",
     "Notification",
     "OauthState",
+    "PageBlock",
     "Product",
     "ProductItem",
     "Promotion",

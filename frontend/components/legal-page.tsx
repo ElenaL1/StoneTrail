@@ -2,8 +2,9 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import { MarkdownContent } from "@/lib/markdown"
+import { hasActiveBanner } from "@/lib/promotions/load-active"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
 
 export type LegalItem =
   | { type: "paragraph"; content: ReactNode }
@@ -22,16 +23,18 @@ export type LegalPageProps = {
   updated: string
   related: { name: string; href: string }[]
   sections: LegalSection[]
+  markdown?: string
 }
 
 function Inline({ content }: { content: ReactNode }) {
   return <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">{content}</div>
 }
 
-export function LegalPage({ tag, title, summary, updated, related, sections }: LegalPageProps) {
+export async function LegalPage({ tag, title, summary, updated, related, sections, markdown }: LegalPageProps) {
+  const banner = await hasActiveBanner()
   return (
     <>
-      <section className={cn("relative overflow-hidden", !arePromotionsEnabled() && "bg-muted/30")}>
+      <section className={cn("relative overflow-hidden", !banner && "bg-muted/30")}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_85%_0%,var(--primary-soft),transparent)]"
@@ -74,6 +77,7 @@ export function LegalPage({ tag, title, summary, updated, related, sections }: L
           <aside className="hidden lg:block">
             <div className="sticky top-24">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Навигация по разделам</p>
+              {markdown ? null : (
               <nav className="mt-4 flex flex-col gap-1">
                 {sections.map((s, idx) => (
                   <a key={s.id} href={`#${s.id}`} className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
@@ -82,11 +86,12 @@ export function LegalPage({ tag, title, summary, updated, related, sections }: L
                   </a>
                 ))}
               </nav>
+              )}
             </div>
           </aside>
 
           <div className="space-y-12">
-            {sections.map((section) => (
+            {markdown ? <MarkdownContent value={markdown} /> : sections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-24">
                 <h2 className="text-balance font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {section.heading}

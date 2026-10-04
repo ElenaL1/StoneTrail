@@ -31,7 +31,7 @@ import {
   pluralBlocks,
 } from "@/lib/block-utils"
 import { cn } from "@/lib/utils"
-import { arePromotionsEnabled } from "@/lib/promo-utils"
+import { useHasBanner } from "@/lib/promotions/presence"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { BlockLightboxDialog } from "@/components/blocks/block-lightbox-dialog"
 
@@ -97,7 +97,7 @@ export function BlockDetailPage({
     <div
       className={cn(
         "min-h-screen py-24 px-5 lg:px-8",
-        !arePromotionsEnabled() ? "bg-muted/30" : "bg-background",
+        !useHasBanner() ? "bg-muted/30" : "bg-background",
       )}
     >
       <div className="mx-auto max-w-6xl">

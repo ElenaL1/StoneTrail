@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     yandex_client_secret: str = ""
     yandex_redirect_uri: str = ""
     log_level: Literal["debug", "info", "warning", "error"] = "info"
+    s3_endpoint: str = ""
+    s3_region: str = "us-east-1"
+    s3_bucket: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    s3_public_base_url: str = ""
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -67,6 +73,15 @@ class Settings(BaseSettings):
             self.yandex_client_id.strip()
             and self.yandex_client_secret
             and self.yandex_redirect_uri.strip()
+        )
+
+    @property
+    def s3_enabled(self) -> bool:
+        return bool(
+            self.s3_bucket.strip()
+            and self.s3_access_key.strip()
+            and self.s3_secret_key
+            and self.s3_public_base_url.strip()
         )
 
     @property

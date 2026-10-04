@@ -14,6 +14,7 @@ import { useRequireLogin } from "@/lib/auth/use-require-login"
 import { articlesApi } from "@/lib/articles/api-client"
 import { MarkdownContent } from "@/lib/markdown"
 import { ARTICLE_STATUS_LABELS } from "@/lib/content-utils"
+import { ArticleStaffActions } from "@/components/articles/article-staff-actions"
 import type { Article } from "@/lib/types"
 
 export default function ArticleDetailPage() {
@@ -69,6 +70,8 @@ export default function ArticleDetailPage() {
         <ArrowLeft className="size-4" />
         Назад к статьям
       </Link>
+
+      <ArticleStaffActions slug={article.slug} status={article.publicationStatus} onChanged={load} />
 
       {article.publicationStatus !== "published" ? (
         <p className="mb-6 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
