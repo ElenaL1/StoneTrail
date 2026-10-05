@@ -43,6 +43,7 @@ export default function AdminCatalogPage() {
   const [productForm, setProductForm] = useState({
     name: "",
     stoneSlug: "",
+    extraStoneSlugs: [] as string[],
     category: "slabs",
     description: "",
     priceType: "on_request",
@@ -182,6 +183,10 @@ export default function AdminCatalogPage() {
         ...base,
         name: productForm.name,
         stoneSlug: productForm.stoneSlug,
+        stoneSlugs: [
+          productForm.stoneSlug,
+          ...productForm.extraStoneSlugs.filter((slug) => slug && slug !== productForm.stoneSlug),
+        ],
         category: productForm.category,
         description: productForm.description,
         priceType: productForm.priceType,
@@ -203,9 +208,11 @@ export default function AdminCatalogPage() {
     setProductSlug(product.slug)
     setProductBase(product)
     setProductRest(product.items.slice(1))
+    const stoneSlugs = product.stoneSlugs?.length ? product.stoneSlugs : [product.stoneSlug]
     setProductForm({
       name: product.name,
-      stoneSlug: product.stoneSlug,
+      stoneSlug: stoneSlugs[0] ?? product.stoneSlug,
+      extraStoneSlugs: stoneSlugs.slice(1),
       category: product.category,
       description: product.description,
       priceType: product.priceType,
@@ -319,9 +326,36 @@ export default function AdminCatalogPage() {
           <form className="space-y-3 rounded-2xl border border-border p-4" onSubmit={(event) => { event.preventDefault(); void saveProduct() }}>
             <h2 className="font-semibold">{productSlug ? "Изменить изделие" : "Новое изделие"}</h2>
             <Input placeholder="Название" value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required />
-            <select className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" value={productForm.stoneSlug} onChange={(event) => setProductForm({ ...productForm, stoneSlug: event.target.value })}>
+            <select className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" value={productForm.stoneSlug} onChange={(event) => {
+              const stoneSlug = event.target.value
+              setProductForm({
+                ...productForm,
+                stoneSlug,
+                extraStoneSlugs: productForm.extraStoneSlugs.filter((slug) => slug !== stoneSlug),
+              })
+            }}>
               {stones.map((stone) => <option key={stone.id} value={stone.id}>{stone.name}</option>)}
             </select>
+            {stones.some((stone) => stone.id !== productForm.stoneSlug) ? (
+              <fieldset className="space-y-2">
+                <legend className="text-sm text-muted-foreground">Дополнительные сорта</legend>
+                {stones.filter((stone) => stone.id !== productForm.stoneSlug).map((stone) => (
+                  <label key={stone.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={productForm.extraStoneSlugs.includes(stone.id)}
+                      onChange={(event) => {
+                        const extraStoneSlugs = event.target.checked
+                          ? [...productForm.extraStoneSlugs, stone.id]
+                          : productForm.extraStoneSlugs.filter((slug) => slug !== stone.id)
+                        setProductForm({ ...productForm, extraStoneSlugs })
+                      }}
+                    />
+                    {stone.name}
+                  </label>
+                ))}
+              </fieldset>
+            ) : null}
             <select className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })}>
               <option value="slabs">Слэбы</option>
               <option value="blanks">Заготовки</option>

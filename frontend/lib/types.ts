@@ -16,6 +16,8 @@ export type Material = {
   updated: string
   /** Slug of a matching lot in the blocks catalog, if this stone exists as raw blocks. */
   blockSlug?: string
+  /** True when any catalog product, of any category, uses this stone. */
+  hasProducts?: boolean
 }
 
 export type BlockStatus = "В наличии" | "Зарезервирован" | "Под заказ"
@@ -56,6 +58,7 @@ export type Product = {
   category: ProductCategory
   name: string
   stoneName: string
+  stoneNames?: string[]
   stoneType: string
   description: string
   image: string

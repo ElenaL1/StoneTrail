@@ -25,6 +25,7 @@ from models.catalog import (  # noqa: E402
     BlockLot,
     Product,
     ProductItem,
+    ProductStone,
     Stone,
     product_applications,
 )
@@ -629,6 +630,12 @@ async def seed_catalog_data(session: AsyncSession, data: dict[str, Any]) -> None
         product.characteristics = raw.get("characteristics") or {}
         product.canonical_path = f"/catalog/products/{slug}"
         await session.flush()
+        await session.execute(
+            delete(ProductStone).where(ProductStone.product_id == product.id)
+        )
+        session.add(
+            ProductStone(product_id=product.id, stone_id=product.stone_id, sort_order=0)
+        )
 
         kind = KIND_BY_CATEGORY.get(category)
         nested_key = {

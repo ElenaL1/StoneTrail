@@ -303,6 +303,11 @@ class Product(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     )
 
     stone: Mapped[Stone] = relationship(back_populates="products")
+    stone_links: Mapped[list[ProductStone]] = relationship(
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="ProductStone.sort_order",
+    )
     items: Mapped[list[ProductItem]] = relationship(
         back_populates="product", cascade="all, delete-orphan"
     )
@@ -366,3 +371,28 @@ class ProductItem(TimestampMixin, Base):
 
     product: Mapped[Product] = relationship(back_populates="items")
     finish: Mapped[Finish] = relationship()
+
+
+class ProductStone(Base):
+    __tablename__ = "product_stones"
+    __table_args__ = (
+        CheckConstraint("sort_order >= 0", name="product_stones_sort_non_negative"),
+        Index("product_stones_stone_idx", "stone_id"),
+    )
+
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    stone_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("stones.id", ondelete="RESTRICT"),
+        primary_key=True,
+    )
+    sort_order: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+
+    product: Mapped[Product] = relationship(back_populates="stone_links")
+    stone: Mapped[Stone] = relationship()

@@ -153,6 +153,16 @@ def _origin(stone: Stone) -> str:
     return f"{stone.quarry}, {stone.country}"
 
 
+def _stone_names(product: Product) -> list[str]:
+    links = sorted(
+        product.stone_links, key=lambda row: (row.sort_order, row.stone.name)
+    )
+    names = [row.stone.name for row in links if row.stone is not None]
+    if names:
+        return names
+    return [product.stone.name]
+
+
 def _block_item_out(
     item: BlockItem, media: dict[UUID, tuple[str, list[str]]]
 ) -> LotItemOut:
@@ -248,6 +258,7 @@ class CatalogService(CatalogAdminMixin):
         products = await self._repo.living_products_for_stones(stone_ids)
         lots = await self._repo.living_lots_for_stones(stone_ids)
         media = await self._repo.media_for(MediaOwner.STONE, stone_ids)
+        with_products = await self._repo.stone_ids_with_products(stone_ids)
 
         products_by_stone: dict[UUID, list[Product]] = defaultdict(list)
         for product in products:
@@ -302,6 +313,7 @@ class CatalogService(CatalogAdminMixin):
                     tiles=tiles,
                     updated=stone.updated_at.isoformat(),
                     block_slug=block_slug,
+                    has_products=stone.id in with_products,
                 )
             )
         return out
@@ -357,6 +369,7 @@ class CatalogService(CatalogAdminMixin):
                 category=product.category.value,
                 name=product.name,
                 stone_name=product.stone.name,
+                stone_names=_stone_names(product),
                 stone_type=product.stone.stone_type.label,
                 description=product.description,
                 image=_cover(product_media, product.id),

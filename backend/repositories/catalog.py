@@ -5,12 +5,28 @@ from collections.abc import Sequence
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import attributes, selectinload
 
-from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
+from models.catalog import (
+    BlockItem,
+    BlockLot,
+    Product,
+    ProductItem,
+    ProductStone,
+    Stone,
+)
 from models.enums import CustomGroup, MediaOwner, MediaStatus, ProductCategory
 from models.lookups import Application, Finish, StoneType
 from models.media import Media, MediaLink
+
+
+def _product_load_options():
+    return (
+        selectinload(Product.stone).selectinload(Stone.stone_type),
+        selectinload(Product.stone_links).selectinload(ProductStone.stone),
+        selectinload(Product.items).selectinload(ProductItem.finish),
+        selectinload(Product.applications),
+    )
 
 
 class CatalogRepository:
@@ -86,11 +102,7 @@ class CatalogRepository:
         stmt = (
             select(Product)
             .where(Product.deleted_at.is_(None))
-            .options(
-                selectinload(Product.stone).selectinload(Stone.stone_type),
-                selectinload(Product.items).selectinload(ProductItem.finish),
-                selectinload(Product.applications),
-            )
+            .options(*_product_load_options())
             .order_by(Product.name, Product.slug)
         )
         if category is not None:
@@ -106,11 +118,7 @@ class CatalogRepository:
         stmt = (
             select(Product)
             .where(Product.slug == slug, Product.deleted_at.is_(None))
-            .options(
-                selectinload(Product.stone).selectinload(Stone.stone_type),
-                selectinload(Product.items).selectinload(ProductItem.finish),
-                selectinload(Product.applications),
-            )
+            .options(*_product_load_options())
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -197,11 +205,7 @@ class CatalogRepository:
         result = await self._session.execute(
             select(Product)
             .where(Product.slug == slug)
-            .options(
-                selectinload(Product.stone).selectinload(Stone.stone_type),
-                selectinload(Product.items).selectinload(ProductItem.finish),
-                selectinload(Product.applications),
-            )
+            .options(*_product_load_options())
         )
         return result.scalar_one_or_none()
 
@@ -225,7 +229,56 @@ class CatalogRepository:
             .select_from(Product)
             .where(Product.stone_id == stone_id, Product.deleted_at.is_(None))
         )
-        return int(lots.scalar_one()) > 0 or int(products.scalar_one()) > 0
+        links = await self._session.execute(
+            select(func.count())
+            .select_from(ProductStone)
+            .join(Product, Product.id == ProductStone.product_id)
+            .where(
+                ProductStone.stone_id == stone_id,
+                Product.deleted_at.is_(None),
+            )
+        )
+        return (
+            int(lots.scalar_one()) > 0
+            or int(products.scalar_one()) > 0
+            or int(links.scalar_one()) > 0
+        )
+
+    async def stone_ids_with_products(
+        self, stone_ids: Sequence[uuid.UUID]
+    ) -> set[uuid.UUID]:
+        if not stone_ids:
+            return set()
+        ids = list(stone_ids)
+        primary = select(Product.stone_id).where(
+            Product.deleted_at.is_(None), Product.stone_id.in_(ids)
+        )
+        linked = (
+            select(ProductStone.stone_id)
+            .join(Product, Product.id == ProductStone.product_id)
+            .where(Product.deleted_at.is_(None), ProductStone.stone_id.in_(ids))
+        )
+        result = await self._session.execute(primary.union(linked))
+        return set(result.scalars().all())
+
+    async def replace_product_stones(
+        self, product: Product, stones: list[Stone]
+    ) -> None:
+        existing = (
+            await self._session.scalars(
+                select(ProductStone).where(ProductStone.product_id == product.id)
+            )
+        ).all()
+        for row in existing:
+            await self._session.delete(row)
+        await self._session.flush()
+        attributes.set_committed_value(product, "stone_links", [])
+        for index, stone in enumerate(stones):
+            product.stone_links.append(
+                ProductStone(stone_id=stone.id, stone=stone, sort_order=index)
+            )
+        product.stone_id = stones[0].id
+        product.stone = stones[0]
 
     async def list_lookups(
         self,

@@ -11,6 +11,7 @@ import {
   getProductPriceLabel,
 } from "@/lib/custom-catalog"
 import { Button } from "@/components/ui/button"
+import { productStoneLabel } from "@/lib/stone-inventory"
 import { cn } from "@/lib/utils"
 
 function StatusBadge({ value }: { value: string }) {
@@ -63,12 +64,13 @@ export function ProductCard({ product }: { product: Product }) {
     : groupLabel
       ? `${groupLabel} · ${typeLabel}`
       : typeLabel
-  const imageAlt = `${title} из ${product.stoneType.toLowerCase()} ${product.stoneName}`
+  const stones = productStoneLabel(product)
+  const imageAlt = `${title} из ${product.stoneType.toLowerCase()} ${stones}`
 
   return (
     <article
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:shadow-[0_16px_40px_-24px_rgba(35,72,58,0.4)]"
-      aria-label={`${title}, ${chip}, ${product.stoneName}`}
+      aria-label={`${title}, ${chip}, ${stones}`}
     >
       <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
         <Link
@@ -98,8 +100,8 @@ export function ProductCard({ product }: { product: Product }) {
         <h3 className="mt-3 line-clamp-2 min-h-12 font-display text-lg font-bold leading-tight text-foreground">
           {title}
         </h3>
-        <p className="mt-1 truncate text-sm text-muted-foreground">
-          {product.stoneType} · {product.stoneName}
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+          {product.stoneType} · {stones}
         </p>
 
         {specs.length > 0 && (

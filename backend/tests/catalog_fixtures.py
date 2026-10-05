@@ -6,7 +6,14 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
+from models.catalog import (
+    BlockItem,
+    BlockLot,
+    Product,
+    ProductItem,
+    ProductStone,
+    Stone,
+)
 from models.enums import (
     LotItemStatus,
     MediaOwner,
@@ -160,6 +167,8 @@ async def add_product(
         color=color,
     )
     session.add(product)
+    await session.flush()
+    session.add(ProductStone(product_id=product.id, stone_id=stone.id, sort_order=0))
     await session.flush()
     return product
 

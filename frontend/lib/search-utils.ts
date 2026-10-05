@@ -58,6 +58,7 @@ export function filterResults(
         p.name.toLowerCase().includes(lowerQuery) ||
         getProductTypeLabel(p).toLowerCase().includes(lowerQuery) ||
         p.stoneName.toLowerCase().includes(lowerQuery) ||
+        (p.stoneNames ?? []).some((name) => name.toLowerCase().includes(lowerQuery)) ||
         p.stoneType.toLowerCase().includes(lowerQuery) ||
         p.origin?.toLowerCase().includes(lowerQuery) ||
         p.quarry?.toLowerCase().includes(lowerQuery) ||

@@ -40,6 +40,7 @@ class MaterialOut(CamelModel):
     tiles: int
     updated: str
     block_slug: str | None = None
+    has_products: bool = False
 
 
 class StoneBlockOut(CamelModel):
@@ -62,6 +63,7 @@ class ProductOut(CamelModel):
     category: ProductCategoryLabel
     name: str
     stone_name: str
+    stone_names: list[str] = []
     stone_type: str
     description: str
     image: str

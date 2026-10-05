@@ -113,6 +113,7 @@ async def test_list_and_get_stone_camel_case(client: AsyncClient) -> None:
     assert row["id"] == "calacatta-gold"
     assert row["name"] == "Calacatta Gold"
     assert row["description"] == "Описание сорта"
+    assert row["hasProducts"] is True
     assert row["type"] == "Мрамор"
     assert row["image"] == "/stone/calacatta.png"
     assert row["supplier"] == "StoneTrail"
@@ -213,6 +214,7 @@ async def test_sold_status_without_units(client: AsyncClient) -> None:
 
     data = (await client.get("/api/catalog/stones/carbon-soapstone")).json()
     assert data["status"] == "Продано"
+    assert data["hasProducts"] is False
     assert data["slabs"] == 0
     assert data["tiles"] == 0
     assert "blockSlug" not in data
@@ -311,6 +313,7 @@ async def test_blocks_and_products_filters(client: AsyncClient) -> None:
 
     detail = await client.get("/api/catalog/products/slab-verde-alpi")
     assert detail.status_code == 200
+    assert detail.json()["stoneNames"] == ["Verde Alpi"]
     assert_no_uuid(detail.json())
 
     gone = await client.get("/api/catalog/products/missing")

@@ -35,6 +35,7 @@ import {
   getProductPriceLabel,
 } from "@/lib/custom-catalog"
 import { getLotStatus } from "@/lib/block-utils"
+import { productStoneLabel } from "@/lib/stone-inventory"
 import {
   getProductBreadcrumbTitle,
   getProductSpecifications,
@@ -403,15 +404,15 @@ export function FinishedProductDetailPage({
                   <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
                     <Image
                       src={product.stoneImage ?? product.image}
-                      alt={product.stoneName}
+                      alt={productStoneLabel(product)}
                       fill
                       className="object-cover"
                       unoptimized
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-display text-lg font-bold text-foreground">
-                      {product.stoneName}
+                    <p className="font-display text-lg font-bold text-foreground">
+                      {productStoneLabel(product)}
                     </p>
                     <p className="text-sm text-muted-foreground">{product.stoneType}</p>
                   </div>
@@ -521,7 +522,7 @@ export function FinishedProductDetailPage({
           <dl className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {[
               { label: "Вид камня", value: product.stoneType, icon: Mountain },
-              { label: "Сорт", value: product.stoneName, icon: Layers },
+              { label: "Сорт", value: productStoneLabel(product), icon: Layers },
               ...getProductSpecifications(product)
                 .filter((row) => row.label !== "Вид камня" && row.label !== "Материал" && row.label !== "Сорт")
                 .map((row) => ({
@@ -631,7 +632,7 @@ export function FinishedProductDetailPage({
                       {getProductCardTitle(p)}
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {p.stoneType} · {p.stoneName}
+                      {p.stoneType} · {productStoneLabel(p)}
                     </p>
                   </div>
                 </Link>

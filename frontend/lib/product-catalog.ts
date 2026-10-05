@@ -1,4 +1,5 @@
 import type { FinishedProduct, Product, ProductCategory } from "@/lib/mock-data"
+import { productStoneLabel } from "@/lib/stone-inventory"
 import { pluralRu } from "@/lib/measure-utils"
 import {
   CUSTOM_GROUP_ALL,
@@ -471,7 +472,7 @@ export function getProductSpecifications(product: Product): { label: string; val
         { label: "Категория", value: groupLabel ?? "" },
         { label: "Тип изделия", value: product.productType ?? "" },
         { label: "Материал", value: product.stoneType },
-        { label: "Сорт", value: product.stoneName },
+        { label: "Сорт", value: productStoneLabel(product) },
         { label: "Происхождение", value: product.origin ?? "" },
         { label: "Месторождение", value: product.quarry ?? "" },
         { label: "Назначение", value: product.purpose ?? "" },

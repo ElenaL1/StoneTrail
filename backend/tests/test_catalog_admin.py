@@ -109,3 +109,71 @@ async def test_editor_creates_stone_and_lot_then_soft_deletes(
     assert removed.status_code == 204
     listed = await client.get("/api/catalog/stones")
     assert all(item["id"] != "talkohlorit" for item in listed.json())
+
+
+@pytest.mark.asyncio
+async def test_product_can_belong_to_several_stones(client: AsyncClient) -> None:
+    await _editor(client)
+
+    async def add_stone(name: str) -> dict:
+        created = await client.post(
+            "/api/catalog/stones",
+            json={
+                "name": name,
+                "stoneTypeCode": "marble",
+                "quarry": "Выборгский район",
+                "country": "Россия",
+                "description": "Сорт для изделия",
+            },
+        )
+        assert created.status_code == 200, created.text
+        return created.json()
+
+    first = await add_stone("Дымовский")
+    second = await add_stone("Возрождение")
+    created = await client.post(
+        "/api/catalog/products",
+        json={
+            "name": "Окол",
+            "stoneSlug": first["id"],
+            "stoneSlugs": [first["id"], second["id"]],
+            "category": "paving",
+            "description": "Два сорта в одном изделии",
+        },
+    )
+    assert created.status_code == 200, created.text
+    body = created.json()
+    assert body["stoneName"] == "Дымовский"
+    assert body["stoneNames"] == ["Дымовский", "Возрождение"]
+
+    listing = (await client.get("/api/catalog/stones")).json()
+    stones = {row["id"]: row for row in listing}
+    assert stones[first["id"]]["hasProducts"] is True
+    assert stones[second["id"]]["hasProducts"] is True
+
+    blocked = await client.delete(f"/api/catalog/stones/{second['id']}")
+    assert blocked.status_code == 409
+
+    edit = await client.get(f"/api/catalog/products/{body['slug']}/edit")
+    assert edit.status_code == 200, edit.text
+    assert edit.json()["stoneSlugs"] == [first["id"], second["id"]]
+
+    single = await client.patch(
+        f"/api/catalog/products/{body['slug']}",
+        json={
+            "name": "Окол",
+            "stoneSlug": first["id"],
+            "category": "paving",
+            "description": "Два сорта в одном изделии",
+        },
+    )
+    assert single.status_code == 200, single.text
+    assert single.json()["stoneNames"] == ["Дымовский"]
+
+    listing = (await client.get("/api/catalog/stones")).json()
+    stones = {row["id"]: row for row in listing}
+    assert stones[first["id"]]["hasProducts"] is True
+    assert stones[second["id"]]["hasProducts"] is False
+
+    removed = await client.delete(f"/api/catalog/stones/{second['id']}")
+    assert removed.status_code == 204

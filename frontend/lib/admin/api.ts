@@ -62,6 +62,7 @@ export type ProductEdit = {
   recordId: string
   name: string
   stoneSlug: string
+  stoneSlugs?: string[]
   category: string
   description: string
   productType: string | null

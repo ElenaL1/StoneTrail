@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -192,15 +193,17 @@ class CatalogAdminMixin:
         return _product_edit(product)
 
     async def create_product(self, payload: ProductWrite, actor: User) -> ProductOut:
+        stones = await self._resolve_product_stones(payload)
         product = Product(
             slug=await self._fresh_slug(Product, payload.slug, payload.name, "product"),
             updated_by=actor.id,
             characteristics={},
             currency="RUB",
         )
-        await self._apply_product(product, payload, actor)
+        await self._apply_product(product, payload, actor, stones)
         self._session.add(product)
         await self._session.flush()
+        await self._repo.replace_product_stones(product, stones)
         await self._replace_product_items(product, payload, actor)
         await self._session.commit()
         return await self.get_product(product.slug)
@@ -215,7 +218,9 @@ class CatalogAdminMixin:
             product.slug = await self._fresh_slug(
                 Product, payload.slug, payload.name, "product", exclude=product.id
             )
-        await self._apply_product(product, payload, actor)
+        stones = await self._resolve_product_stones(payload)
+        await self._apply_product(product, payload, actor, stones)
+        await self._repo.replace_product_stones(product, stones)
         if payload.items is not None:
             await self._replace_product_items(product, payload, actor)
         await self._session.commit()
@@ -240,14 +245,34 @@ class CatalogAdminMixin:
         await self._session.commit()
         return await self.get_product(product.slug)
 
-    async def _apply_product(
-        self, product: Product, payload: ProductWrite, actor: User
-    ) -> None:
-        stone = await self._repo.get_stone_by_slug(payload.stone_slug)
-        if stone is None:
+    async def _resolve_product_stones(self, payload: ProductWrite) -> list[Stone]:
+        slugs = payload.stone_slugs if payload.stone_slugs else [payload.stone_slug]
+        stones: list[Stone] = []
+        seen: set[uuid.UUID] = set()
+        for slug in slugs:
+            cleaned = slug.strip()
+            if not cleaned:
+                continue
+            stone = await self._repo.get_stone_by_slug(cleaned)
+            if stone is None:
+                raise AuthError.validation(
+                    messages.LOOKUP_INVALID,
+                    {"stoneSlugs": messages.LOOKUP_INVALID},
+                )
+            if stone.id in seen:
+                continue
+            seen.add(stone.id)
+            stones.append(stone)
+        if not stones:
             raise AuthError.validation(
                 messages.LOOKUP_INVALID, {"stoneSlug": messages.LOOKUP_INVALID}
             )
+        return stones
+
+    async def _apply_product(
+        self, product: Product, payload: ProductWrite, actor: User, stones: list[Stone]
+    ) -> None:
+        stone = stones[0]
         name = payload.name.strip()
         description = payload.description.strip()
         self._require_text(name, "name")
@@ -456,6 +481,16 @@ def _lot_edit(lot: BlockLot) -> BlockLotEditOut:
     )
 
 
+def _edit_stone_slugs(product: Product) -> list[str]:
+    links = sorted(
+        product.stone_links, key=lambda row: (row.sort_order, row.stone.slug)
+    )
+    slugs = [row.stone.slug for row in links if row.stone is not None]
+    if slugs:
+        return slugs
+    return [product.stone.slug]
+
+
 def _product_edit(product: Product) -> ProductEditOut:
     items = sorted(product.items, key=lambda item: (item.sort_order, item.label))
     return ProductEditOut(
@@ -463,6 +498,7 @@ def _product_edit(product: Product) -> ProductEditOut:
         slug=product.slug,
         name=product.name,
         stone_slug=product.stone.slug,
+        stone_slugs=_edit_stone_slugs(product),
         category=product.category,
         description=product.description,
         product_type=product.product_type,

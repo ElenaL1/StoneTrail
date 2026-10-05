@@ -91,6 +91,7 @@ class ProductItemWrite(CamelModel):
 class ProductWrite(CamelModel):
     name: str
     stone_slug: str
+    stone_slugs: list[str] | None = None
     category: ProductCategory
     description: str
     product_type: str | None = None

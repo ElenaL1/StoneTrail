@@ -13,7 +13,7 @@ export default async function StoneProductsPage({
   const { id } = await params
   const [material, products] = await Promise.all([
     catalogApi.getStone(id),
-    catalogApi.listProducts({ category: "custom" }),
+    catalogApi.listProducts(),
   ])
 
   if (!material) {

@@ -38,8 +38,21 @@ export function getStoneInventory(material: Material, lots: StoneBlock[] = []) {
     hasBlocks,
     hasSlabs,
     hasTiles,
-    hasProducts: hasBlocks || hasSlabs || hasTiles,
+    hasProducts: material.hasProducts === true,
   }
+}
+
+export function productStoneNames(
+  product: Pick<Product, "stoneName" | "stoneNames">,
+): string[] {
+  const names = (product.stoneNames ?? []).map((name) => name.trim()).filter(Boolean)
+  return names.length > 0 ? names : [product.stoneName]
+}
+
+export function productStoneLabel(
+  product: Pick<Product, "stoneName" | "stoneNames">,
+): string {
+  return productStoneNames(product).join(" · ")
 }
 
 export function stoneSectionHref(stoneId: string, kind: StoneInventoryKind): string {
@@ -47,9 +60,7 @@ export function stoneSectionHref(stoneId: string, kind: StoneInventoryKind): str
 }
 
 export function getFinishedProductsForStone(material: Material, products: Product[]) {
-  return products.filter(
-    (product) => product.category === "custom" && product.stoneName === material.name,
-  )
+  return products.filter((product) => productStoneNames(product).includes(material.name))
 }
 
 export function stoneOrigin(material: Pick<Material, "quarry" | "country">): string {
