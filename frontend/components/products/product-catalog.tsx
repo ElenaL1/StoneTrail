@@ -4,21 +4,23 @@ import { useEffect, useMemo, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, ArrowUpRight, Construction, Gem, PencilRuler, Truck } from "lucide-react"
-import type { Product, ProductCategory } from "@/lib/mock-data"
+import type { Product } from "@/lib/mock-data"
 import {
   CUSTOM_GROUP_ALL,
   getCustomGroup,
-  parseCustomGroup,
+  resolveCustomGroup,
 } from "@/lib/custom-catalog"
 import {
+  CATALOG_ALL,
   EMPTY_PRODUCT_FILTERS,
-  PRODUCT_CATEGORY_META,
   PRODUCT_PAGE_SIZE,
   filterCatalogProducts,
   formatProductCount,
+  getCatalogViewMeta,
   hasActiveProductFilters,
   parseProductCategory,
   sortCatalogProducts,
+  type CatalogView,
   type ProductSortId,
 } from "@/lib/product-catalog"
 import { ProductCategoryTabs } from "@/components/products/product-category-tabs"
@@ -36,22 +38,41 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const category = parseProductCategory(searchParams.get("category"))
-  const customGroup = category === "custom" ? parseCustomGroup(searchParams.get("group")) : CUSTOM_GROUP_ALL
+  const requestedGroup = searchParams.get("group")
+  const customGroup = category === "custom" ? resolveCustomGroup(requestedGroup, products) : CUSTOM_GROUP_ALL
   const [filters, setFilters] = useState(EMPTY_PRODUCT_FILTERS)
   const [sort, setSort] = useState<ProductSortId>("relevance")
+  const [shuffleSeed, setShuffleSeed] = useState(0)
   const [visibleCount, setVisibleCount] = useState(PRODUCT_PAGE_SIZE)
   const hasBanner = useHasBanner()
-  const categoryMeta = PRODUCT_CATEGORY_META[category]
+  const categoryMeta = getCatalogViewMeta(category)
   const groupMeta = customGroup === CUSTOM_GROUP_ALL ? null : getCustomGroup(customGroup)
+
+  useEffect(() => {
+    setShuffleSeed(Math.floor(Math.random() * 0x100000000))
+  }, [])
+
+  useEffect(() => {
+    if (category !== "custom" || !requestedGroup || requestedGroup === customGroup) return
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("group")
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }, [category, customGroup, pathname, requestedGroup, router, searchParams])
 
   useEffect(() => {
     setFilters(EMPTY_PRODUCT_FILTERS)
     setSort("relevance")
   }, [category])
 
+  function reshuffle() {
+    setShuffleSeed(Math.floor(Math.random() * 0x100000000))
+  }
+
   const selectionKey = [
     category,
     customGroup,
+    shuffleSeed,
     sort,
     filters.search,
     filters.productType,
@@ -76,7 +97,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const categoryProducts = useMemo(
     () =>
       products.filter((product) => {
-        if (product.category !== category) return false
+        if (category !== CATALOG_ALL && product.category !== category) return false
         if (category === "custom" && customGroup !== CUSTOM_GROUP_ALL && product.customGroup !== customGroup) {
           return false
         }
@@ -91,14 +112,16 @@ export function ProductCatalog({ products }: { products: Product[] }) {
         filterCatalogProducts(categoryProducts, category, filters, customGroup),
         sort,
         filters.search,
+        shuffleSeed,
       ),
-    [categoryProducts, category, filters, customGroup, sort],
+    [categoryProducts, category, filters, customGroup, sort, shuffleSeed],
   )
 
   const visible = filtered.slice(0, visibleCount)
   const hasMore = filtered.length > visibleCount
 
-  function selectCategory(next: ProductCategory) {
+  function selectCategory(next: CatalogView) {
+    reshuffle()
     const params = new URLSearchParams(searchParams.toString())
     params.set("category", next)
     params.delete("group")
@@ -106,6 +129,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   }
 
   function selectGroup(next: string) {
+    reshuffle()
     const params = new URLSearchParams(searchParams.toString())
     params.set("category", "custom")
     if (next === CUSTOM_GROUP_ALL) params.delete("group")
@@ -167,7 +191,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
           </p>
           {category === "custom" && (
             <>
-              <CustomGroupTabs value={customGroup} onChange={selectGroup} />
+              <CustomGroupTabs value={customGroup} products={products} onChange={selectGroup} />
               <p className="text-xs leading-relaxed text-muted-foreground">
                 Демонстрационный каталог: позиции приведены для навигации по типам изделий
                 и не подтверждают наличие на складе.

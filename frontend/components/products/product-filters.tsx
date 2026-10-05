@@ -2,14 +2,15 @@
 
 import { useMemo, useState } from "react"
 import { RotateCcw, SlidersHorizontal } from "lucide-react"
-import type { Product, ProductCategory } from "@/lib/mock-data"
+import type { Product } from "@/lib/mock-data"
 import {
   FILTER_DEFS,
   FILTER_STATE_KEY,
-  PRODUCT_CATEGORY_META,
   PRODUCT_SORT_OPTIONS,
   countActiveFilters,
   getCatalogFilterKeys,
+  getCatalogViewMeta,
+  type CatalogView,
   type ProductFilterState,
   type ProductSortId,
 } from "@/lib/product-catalog"
@@ -42,7 +43,7 @@ export function ProductFilters({
   onReset,
   canReset,
 }: {
-  category: ProductCategory
+  category: CatalogView
   products: Product[]
   filters: ProductFilterState
   onChange: (patch: Partial<ProductFilterState>) => void
@@ -53,7 +54,7 @@ export function ProductFilters({
   canReset: boolean
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const meta = PRODUCT_CATEGORY_META[category]
+  const meta = getCatalogViewMeta(category)
   const keys = useMemo(
     () => getCatalogFilterKeys(category, customGroup, filters.productType),
     [category, customGroup, filters.productType],
@@ -86,7 +87,8 @@ export function ProductFilters({
     return map
   }, [keys, products, optionProducts, customGroup])
 
-  const visibleKeys = keys.filter((key) => (optionMap[key] ?? []).length > 0)
+  const minOptions = category === "all" ? 2 : 1
+  const visibleKeys = keys.filter((key) => (optionMap[key] ?? []).length >= minOptions)
 
   const filterControls = (
     <div
@@ -99,7 +101,7 @@ export function ProductFilters({
         const def = FILTER_DEFS[key]
         const stateKey = FILTER_STATE_KEY[key]
         const options = optionMap[key] ?? []
-        if (options.length === 0) return null
+        if (options.length < minOptions) return null
         const typeGroups =
           key === "productType" && customGroup === CUSTOM_GROUP_ALL
             ? getProductTypeOptionGroups(products, customGroup)

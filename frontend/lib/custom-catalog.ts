@@ -149,6 +149,23 @@ export function getVisibleCustomGroups(): CustomGroup[] {
   return CUSTOM_GROUPS.filter((group) => !group.hidden).sort((a, b) => a.order - b.order)
 }
 
+export function getPopulatedCustomGroups(products: Product[]): CustomGroup[] {
+  const present = new Set(
+    products
+      .filter((product) => product.category === "custom")
+      .map((product) => product.customGroup)
+      .filter((value): value is string => Boolean(value)),
+  )
+  return getVisibleCustomGroups().filter((group) => present.has(group.id))
+}
+
+export function resolveCustomGroup(value: string | null | undefined, products: Product[]): string {
+  const parsed = parseCustomGroup(value)
+  if (parsed === CUSTOM_GROUP_ALL) return CUSTOM_GROUP_ALL
+  const populated = getPopulatedCustomGroups(products).some((group) => group.id === parsed)
+  return populated ? parsed : CUSTOM_GROUP_ALL
+}
+
 export function getCustomGroup(id: string | null | undefined): CustomGroup | undefined {
   return CUSTOM_GROUPS.find((group) => group.id === id)
 }

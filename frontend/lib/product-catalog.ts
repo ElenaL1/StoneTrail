@@ -39,9 +39,13 @@ import {
   getPavingThicknessRange,
 } from "@/lib/paving-utils"
 
-export const DEFAULT_PRODUCT_CATEGORY: ProductCategory = "custom"
+export const CATALOG_ALL = "all" as const
+
+export type CatalogView = typeof CATALOG_ALL | ProductCategory
 
 export const PRODUCT_CATEGORY_IDS: ProductCategory[] = ["slabs", "blanks", "tiles", "paving", "custom"]
+
+export const CATALOG_VIEW_IDS: CatalogView[] = [CATALOG_ALL, ...PRODUCT_CATEGORY_IDS]
 
 export const PRODUCT_PAGE_SIZE = 12
 
@@ -112,6 +116,20 @@ export const PRODUCT_CATEGORY_META: Record<
   },
 }
 
+export const ALL_CATALOG_META = {
+  id: CATALOG_ALL,
+  label: "Все",
+  description: "Слэбы, заготовки, плита, брусчатка и изделия под заказ.",
+  searchPlaceholder: "Название или камень…",
+  emptyTitle: "Ничего не найдено",
+  emptyDescription: "Измените фильтр или выберите направление.",
+}
+
+export function getCatalogViewMeta(view: CatalogView) {
+  if (view === CATALOG_ALL) return ALL_CATALOG_META
+  return PRODUCT_CATEGORY_META[view]
+}
+
 export type ProductFilterState = {
   search: string
   productType: string
@@ -161,7 +179,8 @@ export const FILTER_STATE_KEY: Record<ProductFilterKey, keyof ProductFilterState
   color: "color",
 }
 
-export function parseProductCategory(value: string | null | undefined): ProductCategory {
+export function parseProductCategory(value: string | null | undefined): CatalogView {
+  if (value === CATALOG_ALL) return CATALOG_ALL
   if (
     value === "slabs" ||
     value === "blanks" ||
@@ -171,7 +190,7 @@ export function parseProductCategory(value: string | null | undefined): ProductC
   ) {
     return value
   }
-  return DEFAULT_PRODUCT_CATEGORY
+  return CATALOG_ALL
 }
 
 export function isCustomProduct(product: Product): product is FinishedProduct {
@@ -207,11 +226,13 @@ export function getProductBreadcrumbTitle(product: Product): string {
 }
 
 export function getCatalogFilterKeys(
-  category: ProductCategory,
+  category: CatalogView,
   customGroup: string,
   productType: string,
 ): ProductFilterKey[] {
   switch (category) {
+    case "all":
+      return ["material"]
     case "slabs":
       return ["material", "color", "thickness", "finish", "status"]
     case "blanks":
@@ -234,7 +255,7 @@ export function countActiveFilters(filters: ProductFilterState, keys: ProductFil
 
 export function filterCatalogProducts(
   products: Product[],
-  category: ProductCategory,
+  category: CatalogView,
   filters: ProductFilterState,
   customGroup: string = CUSTOM_GROUP_ALL,
 ): Product[] {
@@ -242,7 +263,7 @@ export function filterCatalogProducts(
   const activeKeys = getCatalogFilterKeys(category, customGroup, filters.productType)
 
   return products.filter((product) => {
-    if (product.category !== category) return false
+    if (category !== CATALOG_ALL && product.category !== category) return false
     if (category === "custom" && customGroup !== CUSTOM_GROUP_ALL && product.customGroup !== customGroup) {
       return false
     }
@@ -294,10 +315,26 @@ export function filterCatalogProducts(
   })
 }
 
+function mixShuffleSeed(seed: number, id: string): number {
+  let hash = seed >>> 0
+  for (let index = 0; index < id.length; index += 1) {
+    hash = Math.imul(hash ^ id.charCodeAt(index), 0x01000193) >>> 0
+  }
+  return hash
+}
+
+export function shuffleCatalogProducts<T extends { id: string }>(items: T[], seed: number): T[] {
+  return [...items].sort((a, b) => {
+    const diff = mixShuffleSeed(seed, a.id) - mixShuffleSeed(seed, b.id)
+    return diff !== 0 ? diff : a.id.localeCompare(b.id)
+  })
+}
+
 export function sortCatalogProducts(
   products: Product[],
   sort: ProductSortId,
   query: string,
+  shuffleSeed?: number,
 ): Product[] {
   const copy = [...products]
   if (sort === "name") {
@@ -312,6 +349,7 @@ export function sortCatalogProducts(
   if (query.trim()) {
     return copy.sort((a, b) => relevanceScore(b, query) - relevanceScore(a, query))
   }
+  if (shuffleSeed !== undefined) return shuffleCatalogProducts(copy, shuffleSeed)
   return copy
 }
 
@@ -381,8 +419,11 @@ const CATEGORY_COUNT_FORMS: Record<ProductCategory, [string, string, string]> = 
   custom: ["изделие", "изделия", "изделий"],
 }
 
-export function formatProductCount(count: number, category: ProductCategory): string {
-  return `${count} ${pluralRu(count, CATEGORY_COUNT_FORMS[category])}`
+const ALL_COUNT_FORMS: [string, string, string] = ["позиция", "позиции", "позиций"]
+
+export function formatProductCount(count: number, category: CatalogView): string {
+  const forms = category === CATALOG_ALL ? ALL_COUNT_FORMS : CATEGORY_COUNT_FORMS[category]
+  return `${count} ${pluralRu(count, forms)}`
 }
 
 export function getProductSpecifications(product: Product): { label: string; value: string }[] {

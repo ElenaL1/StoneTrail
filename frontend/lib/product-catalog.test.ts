@@ -1,9 +1,14 @@
 import { describe, expect, test } from "vitest"
+import { getPopulatedCustomGroups, resolveCustomGroup } from "@/lib/custom-catalog"
 import type { Product } from "@/lib/mock-data"
 import {
   countActiveFilters,
   EMPTY_PRODUCT_FILTERS,
   filterCatalogProducts,
+  formatProductCount,
+  getCatalogFilterKeys,
+  parseProductCategory,
+  shuffleCatalogProducts,
   sortCatalogProducts,
 } from "@/lib/product-catalog"
 
@@ -78,6 +83,106 @@ describe("sortCatalogProducts", () => {
     const result = sortCatalogProducts([yashta, granite, agat], "name", "")
 
     expect(result.map((item) => item.name)).toEqual(["Агат", "Гранит", "Яшма"])
+  })
+
+  test("одно зерно даёт один и тот же случайный порядок", () => {
+    const items = [slabBlack, slabWhite, tileBlack]
+    const first = shuffleCatalogProducts(items, 42).map((item) => item.id)
+    const second = sortCatalogProducts(items, "relevance", "", 42).map((item) => item.id)
+
+    expect(second).toEqual(first)
+    expect(new Set(first)).toEqual(new Set(["slab-black", "slab-white", "tile-black"]))
+  })
+
+  test("другое зерно может изменить порядок", () => {
+    const items = [slabBlack, slabWhite, tileBlack]
+    const orders = [1, 2, 3, 4, 5].map((seed) =>
+      sortCatalogProducts(items, "relevance", "", seed)
+        .map((item) => item.id)
+        .join(","),
+    )
+
+    expect(new Set(orders).size).toBeGreaterThan(1)
+  })
+
+  test("поиск и явная сортировка не перемешивают выдачу", () => {
+    const items = [slabWhite, slabBlack, tileBlack]
+
+    expect(sortCatalogProducts(items, "name", "", 7).map((item) => item.id)).toEqual(
+      sortCatalogProducts(items, "name", "").map((item) => item.id),
+    )
+    expect(sortCatalogProducts(items, "relevance", "bianco", 7).map((item) => item.id)).toEqual(
+      sortCatalogProducts(items, "relevance", "bianco").map((item) => item.id),
+    )
+    expect(sortCatalogProducts(items, "relevance", "bianco")[0]?.id).toBe("slab-white")
+  })
+})
+
+describe("parseProductCategory", () => {
+  test("открывает все изделия по category=all", () => {
+    expect(parseProductCategory("all")).toBe("all")
+  })
+
+  test("без параметра открывает все изделия", () => {
+    expect(parseProductCategory(null)).toBe("all")
+    expect(parseProductCategory("unknown")).toBe("all")
+  })
+
+  test("явная категория изделий под заказ сохраняется", () => {
+    expect(parseProductCategory("custom")).toBe("custom")
+  })
+})
+
+describe("каталог «Все»", () => {
+  test("показывает изделия всех направлений", () => {
+    const result = filterCatalogProducts(catalog, "all", EMPTY_PRODUCT_FILTERS)
+
+    expect(result.map((item) => item.id)).toEqual(["slab-black", "slab-white", "tile-black"])
+  })
+
+  test("фильтрует смешанную выдачу по материалу", () => {
+    const result = filterCatalogProducts(catalog, "all", {
+      ...EMPTY_PRODUCT_FILTERS,
+      stoneType: "Мрамор",
+    })
+
+    expect(result.map((item) => item.id)).toEqual(["slab-white"])
+  })
+
+  test("оставляет только фильтр материала", () => {
+    expect(getCatalogFilterKeys("all", "all", "all")).toEqual(["material"])
+  })
+
+  test("считает позиции", () => {
+    expect(formatProductCount(1, "all")).toBe("1 позиция")
+    expect(formatProductCount(2, "all")).toBe("2 позиции")
+    expect(formatProductCount(5, "all")).toBe("5 позиций")
+  })
+})
+
+describe("живые группы изделий", () => {
+  test("скрывает группу без позиций", () => {
+    const interior = product({
+      id: "countertop",
+      category: "custom",
+      name: "Столешница",
+      customGroup: "interior",
+    })
+    const slab = product({ id: "slab", category: "slabs", name: "Слэб", customGroup: "memorial" })
+
+    expect(getPopulatedCustomGroups([interior, slab]).map((group) => group.id)).toEqual(["interior"])
+  })
+
+  test("пустая группа в адресе открывает все изделия под заказ", () => {
+    const interior = product({
+      id: "countertop",
+      category: "custom",
+      name: "Столешница",
+      customGroup: "interior",
+    })
+
+    expect(resolveCustomGroup("memorial", [interior])).toBe("all")
+    expect(resolveCustomGroup("interior", [interior])).toBe("interior")
   })
 })
 

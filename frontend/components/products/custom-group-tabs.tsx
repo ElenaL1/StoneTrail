@@ -1,19 +1,22 @@
 "use client"
 
 import { useRef, type KeyboardEvent } from "react"
-import { CUSTOM_GROUP_ALL, getVisibleCustomGroups } from "@/lib/custom-catalog"
+import type { Product } from "@/lib/mock-data"
+import { CUSTOM_GROUP_ALL, getPopulatedCustomGroups } from "@/lib/custom-catalog"
 import { cn } from "@/lib/utils"
 
 const ALL_TAB = { id: CUSTOM_GROUP_ALL, label: "Все" }
 
 export function CustomGroupTabs({
   value,
+  products,
   onChange,
 }: {
   value: string
+  products: Product[]
   onChange: (groupId: string) => void
 }) {
-  const groups = [ALL_TAB, ...getVisibleCustomGroups()]
+  const groups = [ALL_TAB, ...getPopulatedCustomGroups(products)]
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   function focusTab(index: number) {

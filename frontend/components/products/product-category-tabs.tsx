@@ -1,13 +1,17 @@
 "use client"
 
 import { useRef, type KeyboardEvent } from "react"
-import { Box, Grid3x3, Hammer, Layers, LayoutGrid } from "lucide-react"
+import { Box, Boxes, Grid3x3, Hammer, Layers, LayoutGrid } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import type { ProductCategory } from "@/lib/mock-data"
-import { PRODUCT_CATEGORY_IDS, PRODUCT_CATEGORY_META } from "@/lib/product-catalog"
+import {
+  CATALOG_VIEW_IDS,
+  getCatalogViewMeta,
+  type CatalogView,
+} from "@/lib/product-catalog"
 import { cn } from "@/lib/utils"
 
-const CATEGORY_ICONS: Record<ProductCategory, LucideIcon> = {
+const CATEGORY_ICONS: Record<CatalogView, LucideIcon> = {
+  all: Boxes,
   slabs: Layers,
   blanks: Box,
   tiles: LayoutGrid,
@@ -19,13 +23,13 @@ export function ProductCategoryTabs({
   value,
   onChange,
 }: {
-  value: ProductCategory
-  onChange: (category: ProductCategory) => void
+  value: CatalogView
+  onChange: (category: CatalogView) => void
 }) {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   function focusTab(index: number) {
-    const next = (index + PRODUCT_CATEGORY_IDS.length) % PRODUCT_CATEGORY_IDS.length
+    const next = (index + CATALOG_VIEW_IDS.length) % CATALOG_VIEW_IDS.length
     tabRefs.current[next]?.focus()
   }
 
@@ -41,10 +45,10 @@ export function ProductCategoryTabs({
       focusTab(0)
     } else if (event.key === "End") {
       event.preventDefault()
-      focusTab(PRODUCT_CATEGORY_IDS.length - 1)
+      focusTab(CATALOG_VIEW_IDS.length - 1)
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault()
-      onChange(PRODUCT_CATEGORY_IDS[index])
+      onChange(CATALOG_VIEW_IDS[index])
     }
   }
 
@@ -54,8 +58,8 @@ export function ProductCategoryTabs({
       aria-label="Основные направления"
       className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0"
     >
-      {PRODUCT_CATEGORY_IDS.map((id, index) => {
-        const meta = PRODUCT_CATEGORY_META[id]
+      {CATALOG_VIEW_IDS.map((id, index) => {
+        const meta = getCatalogViewMeta(id)
         const Icon = CATEGORY_ICONS[id]
         const selected = value === id
 
