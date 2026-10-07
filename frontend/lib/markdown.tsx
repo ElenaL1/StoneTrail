@@ -1,5 +1,7 @@
 import type { ReactNode } from "react"
 
+type ColumnAlign = "left" | "center" | "right"
+
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = []
   const pattern = /(!?\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
@@ -49,6 +51,78 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
   return nodes
 }
 
+function isTableRow(line: string): boolean {
+  const trimmed = line.trim()
+  return trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.length > 1
+}
+
+function splitCells(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim())
+}
+
+function isSeparatorRow(line: string): boolean {
+  if (!isTableRow(line)) return false
+  const cells = splitCells(line)
+  return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell))
+}
+
+function columnAlignments(line: string): ColumnAlign[] {
+  return splitCells(line).map((cell) => {
+    const left = cell.startsWith(":")
+    const right = cell.endsWith(":")
+    if (left && right) return "center"
+    if (right) return "right"
+    return "left"
+  })
+}
+
+function alignClass(align: ColumnAlign | undefined): string {
+  if (align === "center") return "text-center"
+  if (align === "right") return "text-right"
+  return "text-left"
+}
+
+function renderTable(header: string[], align: ColumnAlign[], rows: string[][], index: number): ReactNode {
+  return (
+    <div key={`table-${index}`} className="my-6 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full border-collapse text-left text-base">
+        <thead>
+          <tr className="border-b border-border bg-muted/50">
+            {header.map((cell, cellIndex) => (
+              <th
+                key={`th-${index}-${cellIndex}`}
+                scope="col"
+                className={`px-4 py-3 font-semibold text-foreground ${alignClass(align[cellIndex])}`}
+              >
+                {renderInline(cell, `th-${index}-${cellIndex}`)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={`tr-${index}-${rowIndex}`} className="border-b border-border last:border-b-0">
+              {row.map((cell, cellIndex) => (
+                <td
+                  key={`td-${index}-${rowIndex}-${cellIndex}`}
+                  className={`px-4 py-3 text-muted-foreground ${alignClass(align[cellIndex])}`}
+                >
+                  {renderInline(cell, `td-${index}-${rowIndex}-${cellIndex}`)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export function MarkdownContent({ value }: { value: string }) {
   const lines = value.replace(/\r\n/g, "\n").split("\n")
   const blocks: ReactNode[] = []
@@ -72,7 +146,8 @@ export function MarkdownContent({ value }: { value: string }) {
     listType = null
   }
 
-  for (const line of lines) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const line = lines[lineIndex]
     const heading = /^(#{2,3})\s+(.+)$/.exec(line)
     const quote = /^>\s?(.*)$/.exec(line)
     const ul = /^[-*]\s+(.+)$/.exec(line)
@@ -86,6 +161,20 @@ export function MarkdownContent({ value }: { value: string }) {
     }
     flushList()
     if (!line.trim()) {
+      continue
+    }
+    if (isTableRow(line) && lineIndex + 1 < lines.length && isSeparatorRow(lines[lineIndex + 1])) {
+      const header = splitCells(line)
+      const align = columnAlignments(lines[lineIndex + 1])
+      const rows: string[][] = []
+      lineIndex += 2
+      while (lineIndex < lines.length && isTableRow(lines[lineIndex]) && !isSeparatorRow(lines[lineIndex])) {
+        rows.push(splitCells(lines[lineIndex]))
+        lineIndex += 1
+      }
+      lineIndex -= 1
+      blocks.push(renderTable(header, align, rows, index))
+      index += 1
       continue
     }
     if (heading) {
