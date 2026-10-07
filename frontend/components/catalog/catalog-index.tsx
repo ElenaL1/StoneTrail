@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, useState } from "react"
-import type { Material, StoneBlock } from "@/lib/types"
+import type { Material, Product, StoneBlock } from "@/lib/types"
 import { MaterialCard } from "@/components/material-card"
 import { Input } from "@/components/ui/input"
 import {
@@ -28,9 +28,11 @@ const warehouseOptions: { id: WarehouseFormat; label: string }[] = [
 export function CatalogIndex({
   materials,
   lots = [],
+  products = [],
 }: {
   materials: Material[]
   lots?: StoneBlock[]
+  products?: Product[]
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
@@ -165,7 +167,7 @@ export function CatalogIndex({
         {filteredMaterials.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredMaterials.map((material) => (
-              <MaterialCard key={material.id} material={material} lots={lots} />
+              <MaterialCard key={material.id} material={material} lots={lots} products={products} />
             ))}
           </div>
         ) : (

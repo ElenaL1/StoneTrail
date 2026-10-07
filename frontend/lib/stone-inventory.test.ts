@@ -4,7 +4,11 @@ import {
   getFinishedProductsForStone,
   getStoneInventory,
   productStoneLabel,
+  stoneCategoryProduct,
+  stoneMadeProducts,
+  stoneMadeProductsHref,
   stoneMatchesWarehouse,
+  stoneProductHref,
   stoneSectionHref,
 } from "@/lib/stone-inventory"
 
@@ -69,11 +73,82 @@ describe("getStoneInventory", () => {
 })
 
 describe("stoneSectionHref", () => {
-  test("плита открывает каталог изделий, остальные форматы остаются на странице сорта", () => {
-    expect(stoneSectionHref("dymovsky", "tiles")).toBe("/catalog/products?category=tiles")
+  test("блоки остаются на странице сорта", () => {
     expect(stoneSectionHref("dymovsky", "blocks")).toBe("/catalog/dymovsky/blocks")
-    expect(stoneSectionHref("dymovsky", "slabs")).toBe("/catalog/dymovsky/slabs")
-    expect(stoneSectionHref("dymovsky", "products")).toBe("/catalog/dymovsky/products")
+  })
+})
+
+describe("stoneCategoryProduct", () => {
+  const gabbro = material({ id: "gabbro-diabaz", name: "Габбро-диабаз" })
+
+  test("слэб и плита открывают изделие этого камня", () => {
+    const slab = product({
+      name: "Слэб",
+      slug: "gabbro-slab",
+      category: "slabs",
+      stoneName: "Габбро-диабаз",
+    })
+    const tile = product({
+      name: "Плиты с торцевыми пропилами",
+      slug: "plity-s-tortsevymi-propilami-gabbro-diabaz",
+      category: "tiles",
+      stoneName: "Габбро-диабаз",
+    })
+    const other = product({
+      name: "Облицовочные плиты",
+      slug: "dymovsky-cladding-tiles",
+      category: "tiles",
+      stoneName: "Дымовский",
+    })
+    expect(stoneProductHref(stoneCategoryProduct(gabbro, [other, slab], "slabs")!)).toBe(
+      "/catalog/products/gabbro-slab",
+    )
+    expect(stoneProductHref(stoneCategoryProduct(gabbro, [other, tile], "tiles")!)).toBe(
+      "/catalog/products/plity-s-tortsevymi-propilami-gabbro-diabaz",
+    )
+    expect(stoneCategoryProduct(gabbro, [], "slabs")).toBeUndefined()
+  })
+
+  test("основной камень изделия важнее упоминания в списке", () => {
+    const shared = product({
+      name: "Смесь",
+      slug: "shared-tiles",
+      category: "tiles",
+      stoneName: "Другой",
+      stoneNames: ["Другой", "Габбро-диабаз"],
+    })
+    const own = product({
+      name: "Плиты",
+      slug: "gabbro-tiles",
+      category: "tiles",
+      stoneName: "Габбро-диабаз",
+    })
+    expect(stoneCategoryProduct(gabbro, [shared, own], "tiles")?.slug).toBe("gabbro-tiles")
+  })
+})
+
+describe("stoneMadeProducts", () => {
+  const gabbro = material({ id: "gabbro-diabaz", name: "Габбро-диабаз" })
+
+  test("заготовка и брусчатка входят в изделия из камня, слэб и плита нет", () => {
+    const blank = product({ name: "Заготовка", slug: "gabbro-blank", category: "blanks", stoneName: "Габбро-диабаз" })
+    const paving = product({ name: "Брусчатка", slug: "gabbro-paving", category: "paving", stoneName: "Габбро-диабаз" })
+    const custom = product({ name: "Столешница", slug: "gabbro-top", category: "custom", stoneName: "Габбро-диабаз" })
+    const slab = product({ name: "Слэб", slug: "gabbro-slab", category: "slabs", stoneName: "Габбро-диабаз" })
+    const tile = product({ name: "Плита", slug: "gabbro-tile", category: "tiles", stoneName: "Габбро-диабаз" })
+    expect(stoneMadeProducts(gabbro, [slab, blank, tile, paving, custom]).map((item) => item.slug)).toEqual([
+      "gabbro-blank",
+      "gabbro-paving",
+      "gabbro-top",
+    ])
+  })
+
+  test("одно изделие открывается само, несколько открывают список сорта", () => {
+    const blank = product({ name: "Заготовка", slug: "gabbro-blank", category: "blanks", stoneName: "Габбро-диабаз" })
+    const paving = product({ name: "Брусчатка", slug: "gabbro-paving", category: "paving", stoneName: "Габбро-диабаз" })
+    expect(stoneMadeProductsHref(gabbro, [blank])).toBe("/catalog/products/gabbro-blank")
+    expect(stoneMadeProductsHref(gabbro, [blank, paving])).toBe("/catalog/gabbro-diabaz/products")
+    expect(stoneMadeProductsHref(gabbro, [])).toBeNull()
   })
 })
 

@@ -1,29 +1,42 @@
 import Link from "next/link"
-import type { Material, StoneBlock } from "@/lib/types"
+import type { Material, Product, StoneBlock } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { getStoneInventory, stoneSectionHref, type StoneInventoryKind } from "@/lib/stone-inventory"
+import {
+  getStoneInventory,
+  stoneCategoryProduct,
+  stoneMadeProductsHref,
+  stoneProductHref,
+  stoneSectionHref,
+  type StoneInventoryKind,
+} from "@/lib/stone-inventory"
 
-const inventoryActions: {
-  kind: StoneInventoryKind
-  label: string
-  availabilityKey: "hasBlocks" | "hasSlabs" | "hasTiles" | "hasProducts"
-}[] = [
-  { kind: "blocks", label: "Блоки", availabilityKey: "hasBlocks" },
-  { kind: "slabs", label: "Слэбы", availabilityKey: "hasSlabs" },
-  { kind: "tiles", label: "Плита", availabilityKey: "hasTiles" },
-  { kind: "products", label: "Изделия из камня", availabilityKey: "hasProducts" },
+const inventoryActions: { kind: StoneInventoryKind; label: string }[] = [
+  { kind: "blocks", label: "Блоки" },
+  { kind: "slabs", label: "Слэбы" },
+  { kind: "tiles", label: "Плита" },
+  { kind: "products", label: "Изделия из камня" },
 ]
 
 export function StoneInventoryLinks({
   material,
   lots = [],
+  products = [],
   className,
 }: {
   material: Material
   lots?: StoneBlock[]
+  products?: Product[]
   className?: string
 }) {
   const inventory = getStoneInventory(material, lots)
+  const slab = stoneCategoryProduct(material, products, "slabs")
+  const tile = stoneCategoryProduct(material, products, "tiles")
+  const hrefByKind: Record<StoneInventoryKind, string | null> = {
+    blocks: stoneSectionHref(material.id, "blocks"),
+    slabs: slab ? stoneProductHref(slab) : null,
+    tiles: tile ? stoneProductHref(tile) : null,
+    products: stoneMadeProductsHref(material, products),
+  }
 
   return (
     <nav
@@ -31,8 +44,8 @@ export function StoneInventoryLinks({
       className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm", className)}
     >
       {inventoryActions.map((action, index) => {
-        const enabled = inventory[action.availabilityKey]
-        const href = stoneSectionHref(material.id, action.kind)
+        const href = hrefByKind[action.kind]
+        const enabled = action.kind === "blocks" ? inventory.hasBlocks : href != null
 
         return (
           <span key={action.kind} className="inline-flex items-center gap-x-1.5">
@@ -41,7 +54,7 @@ export function StoneInventoryLinks({
                 ·
               </span>
             )}
-            {enabled ? (
+            {enabled && href ? (
               <Link href={href} className="font-medium text-primary transition-colors hover:text-primary/80">
                 {action.label}
               </Link>

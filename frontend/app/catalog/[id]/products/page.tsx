@@ -3,7 +3,7 @@ import { Package } from "lucide-react"
 import { FinishedProductCard } from "@/components/products/finished-product-card"
 import { StoneSectionHeader } from "@/components/catalog/stone-section-header"
 import { catalogApi } from "@/lib/catalog/api-client"
-import { getFinishedProductsForStone } from "@/lib/stone-inventory"
+import { stoneMadeProducts } from "@/lib/stone-inventory"
 
 export default async function StoneProductsPage({
   params,
@@ -20,7 +20,7 @@ export default async function StoneProductsPage({
     notFound()
   }
 
-  const finished = getFinishedProductsForStone(material, products)
+  const finished = stoneMadeProducts(material, products)
 
   return (
     <div className="min-h-screen bg-background py-24 px-5 lg:px-8">

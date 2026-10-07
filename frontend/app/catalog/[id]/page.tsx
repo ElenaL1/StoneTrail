@@ -8,10 +8,11 @@ export default async function Page({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [material, lots] = await Promise.all([
+  const [material, lots, products] = await Promise.all([
     catalogApi.getStone(id),
     catalogApi.listBlocks(),
+    catalogApi.listProducts(),
   ])
   if (!material) notFound()
-  return <MaterialDetailPage material={material} lots={lots} />
+  return <MaterialDetailPage material={material} lots={lots} products={products} />
 }

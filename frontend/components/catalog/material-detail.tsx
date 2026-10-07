@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import type { Material, StoneBlock } from "@/lib/types"
+import type { Material, Product, StoneBlock } from "@/lib/types"
 import { useCatalog } from "@/lib/catalog-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,9 +13,11 @@ import Link from "next/link"
 export function MaterialDetailPage({
   material,
   lots,
+  products = [],
 }: {
   material: Material
   lots: StoneBlock[]
+  products?: Product[]
 }) {
   const { addToSelection, selection } = useCatalog()
   const isSelected = selection.some((m) => m.id === material.id)
@@ -48,7 +50,7 @@ export function MaterialDetailPage({
               {material.description ? (
                 <p className="text-lg text-muted-foreground leading-relaxed">{material.description}</p>
               ) : null}
-              <StoneInventoryLinks material={material} lots={lots} className="mt-5" />
+              <StoneInventoryLinks material={material} lots={lots} products={products} className="mt-5" />
             </div>
 
             <div className="grid grid-cols-2 gap-6 mb-8 p-6 rounded-2xl bg-secondary/30 border border-border">

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { Material, StoneBlock } from "@/lib/types"
+import type { Material, Product, StoneBlock } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StoneInventoryLinks } from "@/components/catalog/stone-inventory-links"
@@ -8,9 +8,11 @@ import { stoneOrigin } from "@/lib/stone-inventory"
 export function MaterialCard({
   material,
   lots = [],
+  products = [],
 }: {
   material: Material
   lots?: StoneBlock[]
+  products?: Product[]
 }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:shadow-[0_16px_40px_-24px_rgba(35,72,58,0.4)]">
@@ -35,7 +37,7 @@ export function MaterialCard({
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{stoneOrigin(material)}</p>
 
-        <StoneInventoryLinks material={material} lots={lots} className="mt-4" />
+        <StoneInventoryLinks material={material} lots={lots} products={products} className="mt-4" />
 
         <div className="mt-5 border-t border-border pt-4">
           <Button asChild variant="outline" className="h-9 w-full text-sm">

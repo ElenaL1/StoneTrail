@@ -11,10 +11,16 @@ export async function InventoryPreview() {
   await connection()
   const isBannerEnabled = await hasActiveBanner()
   let materials: Awaited<ReturnType<typeof catalogApi.listStones>> = []
+  let products: Awaited<ReturnType<typeof catalogApi.listProducts>> = []
   try {
     materials = await catalogApi.listStones()
   } catch {
     materials = []
+  }
+  try {
+    products = await catalogApi.listProducts()
+  } catch {
+    products = []
   }
 
   return (
@@ -37,7 +43,7 @@ export async function InventoryPreview() {
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {materials.map((material) => (
-            <MaterialCard key={material.id} material={material} />
+            <MaterialCard key={material.id} material={material} products={products} />
           ))}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { Material, Product, StoneBlock } from "@/lib/types"
+import type { Material, Product, ProductCategory, StoneBlock } from "@/lib/types"
 
 export type StoneInventoryKind = "blocks" | "slabs" | "tiles" | "products"
 
@@ -71,8 +71,45 @@ export function productStoneLabel(
 }
 
 export function stoneSectionHref(stoneId: string, kind: StoneInventoryKind): string {
-  if (kind === "tiles") return "/catalog/products?category=tiles"
   return `/catalog/${stoneId}/${kind}`
+}
+
+export function stoneCategoryProduct(
+  material: Pick<Material, "name">,
+  products: Product[],
+  category: ProductCategory,
+): Product | undefined {
+  const name = material.name.trim()
+  const matches = products.filter(
+    (product) => product.category === category && productStoneNames(product).includes(name),
+  )
+  return matches.find((product) => product.stoneName.trim() === name) ?? matches[0]
+}
+
+export function stoneProductHref(product: Pick<Product, "slug">): string {
+  return `/catalog/products/${product.slug}`
+}
+
+const STONE_MADE_CATEGORIES = new Set<ProductCategory>(["blanks", "paving", "custom"])
+
+export function stoneMadeProducts(
+  material: Pick<Material, "name">,
+  products: Product[],
+): Product[] {
+  const name = material.name.trim()
+  return products.filter(
+    (product) => STONE_MADE_CATEGORIES.has(product.category) && productStoneNames(product).includes(name),
+  )
+}
+
+export function stoneMadeProductsHref(
+  material: Pick<Material, "id" | "name">,
+  products: Product[],
+): string | null {
+  const made = stoneMadeProducts(material, products)
+  if (made.length === 0) return null
+  if (made.length === 1) return stoneProductHref(made[0])
+  return `/catalog/${material.id}/products`
 }
 
 export function getFinishedProductsForStone(material: Material, products: Product[]) {
