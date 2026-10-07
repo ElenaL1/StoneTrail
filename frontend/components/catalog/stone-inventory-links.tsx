@@ -10,7 +10,7 @@ const inventoryActions: {
 }[] = [
   { kind: "blocks", label: "Блоки", availabilityKey: "hasBlocks" },
   { kind: "slabs", label: "Слэбы", availabilityKey: "hasSlabs" },
-  { kind: "tiles", label: "Плитка", availabilityKey: "hasTiles" },
+  { kind: "tiles", label: "Плита", availabilityKey: "hasTiles" },
   { kind: "products", label: "Изделия из камня", availabilityKey: "hasProducts" },
 ]
 

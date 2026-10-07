@@ -5,6 +5,7 @@ import {
   getStoneInventory,
   productStoneLabel,
   stoneMatchesWarehouse,
+  stoneSectionHref,
 } from "@/lib/stone-inventory"
 
 function material(overrides: Partial<Material> = {}): Material {
@@ -64,6 +65,15 @@ describe("getStoneInventory", () => {
     }
     const inventory = getStoneInventory(material({ blockSlug: "lot" }), [lot])
     expect(inventory.hasBlocks).toBe(true)
+  })
+})
+
+describe("stoneSectionHref", () => {
+  test("плита открывает каталог изделий, остальные форматы остаются на странице сорта", () => {
+    expect(stoneSectionHref("dymovsky", "tiles")).toBe("/catalog/products?category=tiles")
+    expect(stoneSectionHref("dymovsky", "blocks")).toBe("/catalog/dymovsky/blocks")
+    expect(stoneSectionHref("dymovsky", "slabs")).toBe("/catalog/dymovsky/slabs")
+    expect(stoneSectionHref("dymovsky", "products")).toBe("/catalog/dymovsky/products")
   })
 })
 

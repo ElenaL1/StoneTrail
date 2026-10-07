@@ -71,6 +71,7 @@ export function productStoneLabel(
 }
 
 export function stoneSectionHref(stoneId: string, kind: StoneInventoryKind): string {
+  if (kind === "tiles") return "/catalog/products?category=tiles"
   return `/catalog/${stoneId}/${kind}`
 }
 
