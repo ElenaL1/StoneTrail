@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { BANNER_TEMPLATES, PromoBanner, type BannerTemplateId } from "@/components/promo-banner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,8 +49,10 @@ export default function AdminPromotionsPage() {
   const [choices, setChoices] = useState<Record<string, StoneChoice>>({})
   const [sheetImage, setSheetImage] = useState<File | null>(null)
   const [sheetPdf, setSheetPdf] = useState<File | null>(null)
+  const [sheetStatus, setSheetStatus] = useState<"idle" | "reading" | "ready" | "failed">("idle")
   const [editing, setEditing] = useState<string | null>(null)
   const [error, setError] = useState("")
+  const importToken = useRef(0)
 
   const load = async () => {
     const [nextItems, nextDeleted] = await Promise.all([
@@ -89,6 +91,8 @@ export default function AdminPromotionsPage() {
     setChoices(choicesFromLines(full.lines ?? []))
     setSheetImage(null)
     setSheetPdf(null)
+    setSheetStatus("idle")
+    importToken.current += 1
     setForm({
       title: full.title,
       description: full.description,
@@ -108,6 +112,14 @@ export default function AdminPromotionsPage() {
     setError("")
     if (!form.expiresAt) {
       setError("Укажите дату окончания.")
+      return
+    }
+    if (sheetStatus === "reading") {
+      setError("Подождите, прайс ещё читается.")
+      return
+    }
+    if (sheetStatus === "failed" || (sheetStatus === "ready" && lines.length === 0)) {
+      setError("Файл выбран, но строки прайса не разобраны.")
       return
     }
     const payload: PromotionInput = {
@@ -137,6 +149,8 @@ export default function AdminPromotionsPage() {
       setChoices({})
       setSheetImage(null)
       setSheetPdf(null)
+      setSheetStatus("idle")
+      importToken.current += 1
       setEditing(null)
       await load()
     } catch (err) {
@@ -187,11 +201,25 @@ export default function AdminPromotionsPage() {
             onChange={(event) => {
               const file = event.target.files?.[0]
               if (!file) return
+              const token = importToken.current + 1
+              importToken.current = token
+              setSheetStatus("reading")
+              setError("")
               void promotionsApi.importSheet(file).then((preview) => {
+                if (importToken.current !== token) return
                 setLines(preview.lines)
                 setChoices(choicesFromLines(preview.lines))
                 if (preview.offerNote) setForm((current) => ({ ...current, offerNote: preview.offerNote }))
+                if (preview.lines.length === 0) {
+                  setSheetStatus("failed")
+                  setError("В файле нет строк прайса.")
+                  return
+                }
+                setSheetStatus("ready")
               }).catch((err: unknown) => {
+                if (importToken.current !== token) return
+                setSheetStatus("failed")
+                setLines([])
                 setError(err instanceof ContentRequestError ? err.message : "Не удалось разобрать файл.")
               })
             }}
@@ -252,10 +280,11 @@ export default function AdminPromotionsPage() {
             buttonLabel={form.buttonLabel || "Узнать детали"}
           />
         </div>
+        {sheetStatus === "reading" ? <p className="text-sm text-muted-foreground">Читаем прайс…</p> : null}
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => void save()}>{editing ? "Сохранить" : "Создать"}</Button>
+          <Button disabled={sheetStatus === "reading"} onClick={() => void save()}>{editing ? "Сохранить" : "Создать"}</Button>
           {editing ? (
-            <Button variant="outline" onClick={() => { setEditing(null); setForm(emptyForm); setLines([]); setChoices({}) }}>Сбросить</Button>
+            <Button variant="outline" onClick={() => { importToken.current += 1; setEditing(null); setForm(emptyForm); setLines([]); setChoices({}); setSheetStatus("idle") }}>Сбросить</Button>
           ) : null}
         </div>
       </section>

@@ -247,6 +247,19 @@ class PromotionOfferService:
                     actor,
                 )
 
+    async def _matching_products(
+        self, stone_id: uuid.UUID, category: ProductCategory
+    ) -> list[Product]:
+        products = await self._catalog.living_products_for_stones([stone_id])
+        return sorted(
+            (row for row in products if row.category == category),
+            key=lambda row: row.slug,
+        )
+
+    async def _matching_lots(self, stone_id: uuid.UUID) -> list[BlockLot]:
+        lots = await self._catalog.living_lots_for_stones([stone_id])
+        return sorted(lots, key=lambda row: row.slug)
+
     async def _publish_product(
         self,
         promotion: Promotion,
@@ -266,61 +279,103 @@ class PromotionOfferService:
         stone = await self._session.get(Stone, rows[0].stone_id)
         if stone is None:
             return
-        product = None
+        product = await self._product_for_group(
+            promotion, group_name, category, stone, reused, rows[0], actor
+        )
+        await self._bind_product_rows(product, rows, item_kind, finish, actor)
+
+    async def _product_for_group(
+        self,
+        promotion: Promotion,
+        group_name: str,
+        category: ProductCategory,
+        stone: Stone,
+        reused: dict[str, uuid.UUID],
+        sample: PromotionLine,
+        actor: User,
+    ) -> Product:
         existing_id = reused.get(group_name)
-        if existing_id is not None:
-            product = await self._session.get(Product, existing_id)
-        if product is None:
-            product = Product(
-                slug=await self._fresh_slug(Product, group_name, "product"),
-                category=category,
-                stone_id=stone.id,
-                name=group_name,
-                description=_description(promotion),
-                price_type=PriceType.ON_REQUEST,
-                currency="RUB",
-                characteristics={},
-                updated_by=actor.id,
-            )
-            product.canonical_path = f"/catalog/products/{product.slug}"
-            self._session.add(product)
-            await self._session.flush()
-            await self._catalog.replace_product_stones(product, [stone])
-        else:
-            product.deleted_at = None
-            product.name = group_name
-            product.category = category
-            product.stone_id = stone.id
-            product.description = _description(promotion)
-            product.price_type = PriceType.ON_REQUEST
-            product.amount = None
-            product.updated_by = actor.id
-            await self._catalog.replace_product_stones(product, [stone])
-        product.finish = rows[0].finish
-        if rows[0].thickness_mm:
-            product.thickness = f"{rows[0].thickness_mm} мм"
-        await self._catalog.clear_product_items(product.id)
+        owned = (
+            await self._session.get(Product, existing_id)
+            if existing_id is not None
+            else None
+        )
+        if (
+            owned is not None
+            and owned.category == category
+            and owned.stone_id == stone.id
+        ):
+            if owned.deleted_at is not None:
+                owned.deleted_at = None
+                owned.updated_by = actor.id
+            return owned
+        matches = await self._matching_products(stone.id, category)
+        if matches:
+            return matches[0]
+        product = Product(
+            slug=await self._fresh_slug(Product, group_name, "product"),
+            category=category,
+            stone_id=stone.id,
+            name=group_name,
+            description=_description(promotion),
+            price_type=PriceType.ON_REQUEST,
+            currency="RUB",
+            characteristics={},
+            finish=sample.finish,
+            thickness=(f"{sample.thickness_mm} мм" if sample.thickness_mm else None),
+            updated_by=actor.id,
+        )
+        product.canonical_path = f"/catalog/products/{product.slug}"
+        self._session.add(product)
         await self._session.flush()
-        used: set[str] = set()
-        for index, row in enumerate(rows):
-            label = _unique_label(row.label, used)
-            row.label = label
-            item = ProductItem(
-                product_id=product.id,
-                kind=item_kind,
-                label=label,
-                length_mm=row.length_mm,
-                width_mm=row.width_mm,
-                thickness_mm=row.thickness_mm,
-                weight_kg=row.weight_kg,
-                finish_id=finish.id,
-                status=LotItemStatus.IN_STOCK,
-                note=_area_note(row.area_m2),
-                sort_order=index,
-                updated_by=actor.id,
+        await self._catalog.replace_product_stones(product, [stone])
+        return product
+
+    async def _bind_product_rows(
+        self,
+        product: Product,
+        rows: list[PromotionLine],
+        item_kind: ProductItemKind,
+        finish: Finish,
+        actor: User,
+    ) -> None:
+        items = list(
+            await self._session.scalars(
+                select(ProductItem).where(ProductItem.product_id == product.id)
             )
-            self._session.add(item)
-            await self._session.flush()
+        )
+        by_label = {item.label: item for item in items}
+        taken = set(by_label)
+        claimed: set[str] = set()
+        order = max((item.sort_order for item in items), default=-1) + 1
+        for row in rows:
+            raw = row.label.strip() or "Позиция"
+            item = by_label.get(raw) if raw not in claimed else None
+            if item is None:
+                label = _unique_label(raw, taken)
+                item = ProductItem(
+                    product_id=product.id,
+                    kind=item_kind,
+                    label=label,
+                    length_mm=row.length_mm,
+                    width_mm=row.width_mm,
+                    thickness_mm=row.thickness_mm,
+                    weight_kg=row.weight_kg,
+                    finish_id=finish.id,
+                    status=LotItemStatus.IN_STOCK,
+                    note=_area_note(row.area_m2),
+                    sort_order=order,
+                    updated_by=actor.id,
+                )
+                order += 1
+                self._session.add(item)
+                await self._session.flush()
+                by_label[label] = item
+                row.label = label
+                claimed.add(label)
+            else:
+                row.label = item.label
+                claimed.add(item.label)
             row.catalog_product_id = product.id
             row.catalog_product_item_id = item.id
 
@@ -335,45 +390,80 @@ class PromotionOfferService:
         stone = await self._session.get(Stone, rows[0].stone_id)
         if stone is None:
             return
-        lot = None
+        lot = await self._lot_for_group(promotion, group_name, stone, reused, actor)
+        await self._bind_block_rows(lot, rows, actor)
+
+    async def _lot_for_group(
+        self,
+        promotion: Promotion,
+        group_name: str,
+        stone: Stone,
+        reused: dict[str, uuid.UUID],
+        actor: User,
+    ) -> BlockLot:
         existing_id = reused.get(group_name)
-        if existing_id is not None:
-            lot = await self._session.get(BlockLot, existing_id)
-        if lot is None:
-            lot = BlockLot(
-                slug=await self._fresh_slug(BlockLot, group_name, "lot"),
-                stone_id=stone.id,
-                description=_description(promotion),
-                expert_note="",
-                updated_by=actor.id,
-            )
-            lot.canonical_path = f"/catalog/blocks/{lot.slug}"
-            self._session.add(lot)
-            await self._session.flush()
-        else:
-            lot.deleted_at = None
-            lot.stone_id = stone.id
-            lot.description = _description(promotion)
-            lot.updated_by = actor.id
-        await self._catalog.clear_block_items(lot.id)
+        owned = (
+            await self._session.get(BlockLot, existing_id)
+            if existing_id is not None
+            else None
+        )
+        if owned is not None and owned.stone_id == stone.id:
+            if owned.deleted_at is not None:
+                owned.deleted_at = None
+                owned.updated_by = actor.id
+            return owned
+        matches = await self._matching_lots(stone.id)
+        if matches:
+            return matches[0]
+        lot = BlockLot(
+            slug=await self._fresh_slug(BlockLot, group_name, "lot"),
+            stone_id=stone.id,
+            description=_description(promotion),
+            expert_note="",
+            updated_by=actor.id,
+        )
+        lot.canonical_path = f"/catalog/blocks/{lot.slug}"
+        self._session.add(lot)
         await self._session.flush()
-        used: set[str] = set()
-        for index, row in enumerate(rows):
-            label = _unique_label(row.label, used)
-            row.label = label
-            item = BlockItem(
-                lot_id=lot.id,
-                label=label,
-                length_mm=row.length_mm,
-                width_mm=row.width_mm,
-                height_mm=row.height_mm,
-                weight_kg=row.weight_kg,
-                status=LotItemStatus.IN_STOCK,
-                sort_order=index,
-                updated_by=actor.id,
+        return lot
+
+    async def _bind_block_rows(
+        self, lot: BlockLot, rows: list[PromotionLine], actor: User
+    ) -> None:
+        items = list(
+            await self._session.scalars(
+                select(BlockItem).where(BlockItem.lot_id == lot.id)
             )
-            self._session.add(item)
-            await self._session.flush()
+        )
+        by_label = {item.label: item for item in items}
+        taken = set(by_label)
+        claimed: set[str] = set()
+        order = max((item.sort_order for item in items), default=-1) + 1
+        for row in rows:
+            raw = row.label.strip() or "Позиция"
+            item = by_label.get(raw) if raw not in claimed else None
+            if item is None:
+                label = _unique_label(raw, taken)
+                item = BlockItem(
+                    lot_id=lot.id,
+                    label=label,
+                    length_mm=row.length_mm,
+                    width_mm=row.width_mm,
+                    height_mm=row.height_mm,
+                    weight_kg=row.weight_kg,
+                    status=LotItemStatus.IN_STOCK,
+                    sort_order=order,
+                    updated_by=actor.id,
+                )
+                order += 1
+                self._session.add(item)
+                await self._session.flush()
+                by_label[label] = item
+                row.label = label
+                claimed.add(label)
+            else:
+                row.label = item.label
+                claimed.add(item.label)
             row.catalog_block_lot_id = lot.id
             row.catalog_block_item_id = item.id
 

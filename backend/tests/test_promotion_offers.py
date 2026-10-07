@@ -176,3 +176,108 @@ async def test_catalog_price_lasts_until_expiry(client: AsyncClient) -> None:
 
     await client.delete(f"/api/catalog/products/{product_slug}")
     await client.delete(f"/api/catalog/stones/{stone_slug}")
+
+
+@pytest.mark.asyncio
+async def test_offer_appends_to_existing_tile_card(client: AsyncClient) -> None:
+    account = await register_verified(
+        client, email="offer-card@example.com", nickname="offer-card"
+    )
+    await set_role(str(account["email"]), UserRole.EDITOR)
+    await login(client, str(account["email"]))
+    stone = await client.post(
+        "/api/catalog/stones",
+        json={
+            "name": "Карточный гранит",
+            "stoneTypeCode": "marble",
+            "quarry": "Карелия",
+            "country": "Россия",
+        },
+    )
+    assert stone.status_code == 200, stone.text
+    stone_slug = stone.json()["id"]
+    created = await client.post(
+        "/api/catalog/products",
+        json={
+            "name": "Плитка карточного гранита",
+            "stoneSlug": stone_slug,
+            "category": "tiles",
+            "description": "Старая карточка",
+            "items": [
+                {
+                    "label": "400×400",
+                    "finishCode": "polished",
+                    "lengthMm": 400,
+                    "widthMm": 400,
+                    "thicknessMm": 20,
+                }
+            ],
+        },
+    )
+    assert created.status_code == 200, created.text
+    product_slug = created.json()["slug"]
+    promotion = await client.post(
+        "/api/promotions",
+        json={
+            "title": "Прайс в карточку",
+            "description": "Размеры добавляются в существующую плитку.",
+            "content": "Таблица на странице акции.",
+            "buttonLabel": "Посмотрите цены тут",
+            "inquiryLabel": "Запросить",
+            "expiresAt": _future(),
+            "isEnabled": True,
+        },
+    )
+    assert promotion.status_code == 200, promotion.text
+    slug = promotion.json()["slug"]
+    saved = await client.put(
+        f"/api/promotions/{slug}/lines",
+        json={
+            "publishToCatalog": True,
+            "offerNote": "Цены на ящик.",
+            "lines": [
+                {
+                    "kind": "tile",
+                    "groupName": "гр. Карточный гранит полированный 30 мм",
+                    "stoneName": "Карточный гранит",
+                    "label": "600×300",
+                    "stoneSlug": stone_slug,
+                    "finish": "полированный",
+                    "lengthMm": 600,
+                    "widthMm": 300,
+                    "thicknessMm": 30,
+                    "priceAmount": "2897",
+                    "priceUnit": "m2",
+                }
+            ],
+        },
+    )
+    assert saved.status_code == 200, saved.text
+
+    detail = await client.get(f"/api/catalog/products/{product_slug}")
+    assert detail.status_code == 200, detail.text
+    body = detail.json()
+    assert body["name"] == "Плитка карточного гранита"
+    assert body["description"] == "Старая карточка"
+    assert body["price"] == "от 2 897 ₽/м²"
+    tiles = {row["label"]: row for row in body["tiles"]}
+    assert "price" not in tiles["400×400"]
+    assert tiles["600×300"]["price"] == "2 897 ₽/м²"
+
+    listed = await client.get("/api/catalog/products", params={"category": "tiles"})
+    matches = [
+        item for item in listed.json() if item["stoneName"] == "Карточный гранит"
+    ]
+    assert [item["slug"] for item in matches] == [product_slug]
+
+    expired = await client.patch(f"/api/promotions/{slug}", json={"expiresAt": _past()})
+    assert expired.status_code == 200, expired.text
+    again = await client.get(f"/api/catalog/products/{product_slug}")
+    assert again.status_code == 200, again.text
+    after = {row["label"]: row for row in again.json()["tiles"]}
+    assert set(after) == {"400×400", "600×300"}
+    assert "price" not in after["600×300"]
+    assert again.json()["priceType"] == "on_request"
+
+    await client.delete(f"/api/catalog/products/{product_slug}")
+    await client.delete(f"/api/catalog/stones/{stone_slug}")
