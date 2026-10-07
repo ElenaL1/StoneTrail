@@ -13,9 +13,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "ALTER TABLE media_links ADD COLUMN caption TEXT NOT NULL DEFAULT ''"
-    )
+    op.execute("ALTER TABLE media_links ADD COLUMN caption TEXT NOT NULL DEFAULT ''")
 
 
 def downgrade() -> None:

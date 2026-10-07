@@ -13,25 +13,20 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE promotions
             ADD COLUMN inquiry_label TEXT NOT NULL DEFAULT 'Запросить',
             ADD COLUMN publish_to_catalog BOOLEAN NOT NULL DEFAULT false,
             ADD COLUMN offer_note TEXT NOT NULL DEFAULT '',
             ADD COLUMN sheet_image_url TEXT NOT NULL DEFAULT '',
             ADD COLUMN sheet_pdf_url TEXT NOT NULL DEFAULT ''
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         ALTER TABLE promotions
             ADD CONSTRAINT promotions_inquiry_label_len
             CHECK (char_length(inquiry_label) BETWEEN 1 AND 80)
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         CREATE TABLE promotion_lines (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             promotion_id UUID NOT NULL REFERENCES promotions (id) ON DELETE CASCADE,
@@ -71,32 +66,24 @@ def upgrade() -> None:
             CONSTRAINT promotion_lines_price_non_negative
                 CHECK (price_amount IS NULL OR price_amount >= 0)
         )
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         CREATE INDEX promotion_lines_promotion_idx
             ON promotion_lines (promotion_id, sort_order)
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         CREATE INDEX promotion_lines_product_idx
             ON promotion_lines (catalog_product_id)
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         CREATE INDEX promotion_lines_lot_idx
             ON promotion_lines (catalog_block_lot_id)
-        """
-    )
+        """)
 
 
 def downgrade() -> None:
     op.execute("DROP TABLE promotion_lines")
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE promotions
             DROP CONSTRAINT promotions_inquiry_label_len,
             DROP COLUMN inquiry_label,
@@ -104,5 +91,4 @@ def downgrade() -> None:
             DROP COLUMN offer_note,
             DROP COLUMN sheet_image_url,
             DROP COLUMN sheet_pdf_url
-        """
-    )
+        """)

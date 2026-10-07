@@ -271,9 +271,7 @@ def _has_measure(cells: dict[str, Any]) -> bool:
 
 def _loose_text(row: list[Any]) -> str:
     parts = [
-        str(value).strip()
-        for value in row
-        if isinstance(value, str) and value.strip()
+        str(value).strip() for value in row if isinstance(value, str) and value.strip()
     ]
     text = " ".join(parts)
     if len(text) < 12:
@@ -392,8 +390,7 @@ def _mark_issue(line: ParsedLine) -> None:
         line.kind = "tile"
         return
     sized = any(
-        value is not None
-        for value in (line.length_mm, line.width_mm, line.height_mm)
+        value is not None for value in (line.length_mm, line.width_mm, line.height_mm)
     )
     if line.kind == "block" and not sized:
         line.unresolved = True

@@ -161,9 +161,7 @@ async def test_catalog_price_lasts_until_expiry(client: AsyncClient) -> None:
     assert product["tiles"][0]["price"] == "4 468 ₽/м²"
     product_slug = product["slug"]
 
-    expired = await client.patch(
-        f"/api/promotions/{slug}", json={"expiresAt": _past()}
-    )
+    expired = await client.patch(f"/api/promotions/{slug}", json={"expiresAt": _past()})
     assert expired.status_code == 200, expired.text
     again = await client.get(f"/api/catalog/products/{product_slug}")
     assert again.status_code == 200, again.text

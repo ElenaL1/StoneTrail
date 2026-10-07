@@ -224,8 +224,7 @@ class PromotionOfferService:
         actor: User,
     ) -> None:
         finishes = {
-            row.code: row
-            for row in await self._session.scalars(select(Finish))
+            row.code: row for row in await self._session.scalars(select(Finish))
         }
         grouped: dict[tuple[str, str], list[PromotionLine]] = {}
         for row in rows:
@@ -388,9 +387,7 @@ class PromotionOfferService:
         return candidate
 
 
-def _preview_line(
-    row: ParsedLine, index: int, stone: Stone | None
-) -> PromotionLineOut:
+def _preview_line(row: ParsedLine, index: int, stone: Stone | None) -> PromotionLineOut:
     return PromotionLineOut(
         kind=row.kind or "tile",
         group_name=row.group_name,
