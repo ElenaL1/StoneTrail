@@ -67,12 +67,12 @@ pnpm build
 
 Прод — `infra/docker-compose.yaml`. Nginx в контейнере слушает **8080** и проксирует `/` на фронт, а `/auth`, `/api` и `/health` на backend. Postgres в той же сети, порт **5432 наружу не публикуется**. Браузер ходит same-origin; серверный рендер Next.js использует `API_URL=http://backend:8000`. Миграции выполняет entrypoint образа backend.
 
-Образы публикует CI в GitHub Container Registry (`ghcr.io`, теги `:${GITHUB_SHA}` и `:latest`). Self-hosted runner копирует compose в `~/stonetrail/infra`, логинится в `ghcr.io` и поднимает SHA-теги frontend и backend.
+Образы публикует CI в GitHub Container Registry (`ghcr.io`, теги `:${GITHUB_SHA}` и `:latest`). Self-hosted runner копирует compose в `/home/github-runner/stonetrail/infra`, логинится в `ghcr.io` и поднимает SHA-теги frontend и backend. Ручной `docker compose` тоже только из этого каталога. `/root/stonetrail/infra` не используется: там старый compose с образом Docker Hub.
 
 Один раз на VPS:
 
 ```bash
-cd ~/stonetrail/infra
+cd /home/github-runner/stonetrail/infra
 cp .env.example .env
 # задать POSTGRES_PASSWORD и при необходимости SMTP_*
 ```
@@ -82,7 +82,7 @@ cp .env.example .env
 После **первого** поднятия каталог сидируется вручную (не на каждый deploy):
 
 ```bash
-cd ~/stonetrail/infra
+cd /home/github-runner/stonetrail/infra
 docker compose exec backend python scripts/seed_catalog.py
 ```
 

@@ -74,7 +74,7 @@ API и сайт на одном домене. Отдельный health-роут
 
 ## Если что-то упало
 
-- База: `docker compose ps` в `~/stonetrail/infra`, затем `docker compose logs --tail=120 db backend`. Проверка с сервера: `curl -sf http://127.0.0.1:8080/health/ready`.
+- База: `docker compose ps` в `/home/github-runner/stonetrail/infra`, затем `docker compose logs --tail=120 db backend`. Проверка с сервера: `curl -sf http://127.0.0.1:8080/health/ready`.
 - Backend: `docker compose logs --tail=120 backend`. Если контейнер вышел, `docker compose ps -a`.
 - Frontend или nginx: монитор главной красный, а `/health/ready` ещё отвечает. Смотреть `docker compose logs --tail=120 frontend nginx` и системный nginx на 443.
 - SMTP или Яндекс: `/health/ready` с `"status":"degraded"`. В логе backend строка `health_check_failed` и имя компонента. Секреты и адрес SMTP туда не пишутся.
