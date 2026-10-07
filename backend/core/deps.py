@@ -17,6 +17,7 @@ from services.forum import ForumService
 from services.media import MediaService
 from services.media_storage import ObjectStorage, S3Storage, UnconfiguredStorage
 from services.news import NewsService
+from services.notifications import NotificationService
 from services.pages import PageContentService
 from services.promotions import PromotionService
 
@@ -113,6 +114,12 @@ async def get_news_service(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> NewsService:
     return NewsService(session)
+
+
+async def get_notification_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> NotificationService:
+    return NotificationService(session)
 
 
 async def get_promotion_service(

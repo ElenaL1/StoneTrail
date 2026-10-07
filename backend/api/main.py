@@ -14,6 +14,7 @@ from api.routes.forum import router as forum_router
 from api.routes.health import router as health_router
 from api.routes.media import router as media_router
 from api.routes.news import router as news_router
+from api.routes.notifications import router as notifications_router
 from api.routes.pages import router as pages_router
 from api.routes.promotions import router as promotions_router
 from api.routes.yandex_auth import router as yandex_auth_router
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
     application.include_router(forum_router)  # topics and comments
     application.include_router(articles_router)
     application.include_router(news_router)
+    application.include_router(notifications_router)
     application.include_router(promotions_router)
     application.include_router(admin_router)
     application.include_router(media_router)

@@ -1,5 +1,5 @@
 import { contentRequest } from "@/lib/content-request"
-import type { ActivePromotion, IndustryNews, NewsStatus, Promotion } from "@/lib/types"
+import type { ActivePromotion, IndustryNews, NewsStatus, Notification, Promotion } from "@/lib/types"
 import type { BannerTemplateId } from "@/components/promo-banner"
 
 export type NewsInput = {
@@ -83,5 +83,19 @@ export const promotionsApi = {
     return contentRequest<{ liked: boolean; likesCount: number }>(`/api/promotions/${slug}/likes`, {
       method: "POST",
     })
+  },
+}
+
+export const notificationsApi = {
+  list() {
+    return contentRequest<Notification[]>("/api/notifications")
+  },
+  markRead(id: string) {
+    return contentRequest<Notification>(`/api/notifications/${encodeURIComponent(id)}/read`, {
+      method: "POST",
+    })
+  },
+  markAllRead() {
+    return contentRequest<void>("/api/notifications/read", { method: "POST" })
   },
 }

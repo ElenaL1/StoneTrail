@@ -1,14 +1,20 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Bell, MessageSquare, Package, Info, CheckCheck, Building2, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { mockNotifications, type Notification } from "@/lib/mock-data"
+import { useAuth } from "@/lib/auth-context"
+import { notificationsApi } from "@/lib/feed/api-client"
+import { formatRelativeTime } from "@/lib/feed/format"
+import type { Notification } from "@/lib/types"
 
 export function NotificationDropdown() {
+  const { isReady, user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState("")
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,14 +27,58 @@ export function NotificationDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length
+  useEffect(() => {
+    if (!isReady) return
+    if (!user) {
+      setNotifications([])
+      setError("")
+      setLoaded(true)
+      return
+    }
+
+    let cancelled = false
+    setLoaded(false)
+    setError("")
+    void notificationsApi
+      .list()
+      .then((items) => {
+        if (!cancelled) setNotifications(items)
+      })
+      .catch(() => {
+        if (!cancelled) setError("Не удалось загрузить уведомления.")
+      })
+      .finally(() => {
+        if (!cancelled) setLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isReady, user])
+
+  const unreadCount = notifications.filter((item) => !item.isRead).length
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+    if (!user || unreadCount === 0) return
+    setError("")
+    void notificationsApi
+      .markAllRead()
+      .then(() => {
+        setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })))
+      })
+      .catch(() => setError("Не удалось обновить уведомления."))
   }
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
+    const current = notifications.find((item) => item.id === id)
+    if (!user || !current || current.isRead) return
+    setError("")
+    void notificationsApi
+      .markRead(id)
+      .then(() => {
+        setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, isRead: true } : item)))
+      })
+      .catch(() => setError("Не удалось обновить уведомление."))
   }
 
   const getIcon = (type: Notification["type"]) => {
@@ -51,6 +101,10 @@ export function NotificationDropdown() {
     }
   }
 
+  const emptyMessage = user
+    ? "У вас пока нет новых уведомлений"
+    : "Войдите, чтобы видеть уведомления"
+
   return (
     <div className="relative" ref={containerRef}>
       <Button
@@ -62,7 +116,10 @@ export function NotificationDropdown() {
       >
         <Bell className="size-[18px]" />
         {unreadCount > 0 && (
-          <span className="absolute right-2 top-2 flex size-2 rounded-full bg-red-500 ring-2 ring-background" />
+          <span
+            data-testid="notification-unread"
+            className="absolute right-2 top-2 flex size-2 rounded-full bg-red-500 ring-2 ring-background"
+          />
         )}
       </Button>
 
@@ -82,16 +139,18 @@ export function NotificationDropdown() {
           </div>
 
           <div className="max-h-96 overflow-y-auto p-2">
-            {notifications.length === 0 ? (
+            {error ? <p className="px-3 py-2 text-xs text-destructive">{error}</p> : null}
+            {loaded && !error && notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted">
                   <Bell className="size-5 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">У вас пока нет новых уведомлений</p>
+                <p className="text-sm text-muted-foreground">{emptyMessage}</p>
               </div>
             ) : (
               <div className="space-y-1">
                 {notifications
+                  .slice()
                   .sort((a, b) => (a.isRead === b.isRead ? 0 : a.isRead ? 1 : -1))
                   .map((notification) => (
                     <div
@@ -120,7 +179,7 @@ export function NotificationDropdown() {
                             {notification.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
-                            {notification.time}
+                            {formatRelativeTime(notification.createdAt)}
                           </span>
                         </div>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
@@ -135,14 +194,6 @@ export function NotificationDropdown() {
               </div>
             )}
           </div>
-
-          {notifications.length > 0 && (
-            <div className="border-t border-border p-3 text-center">
-              <button className="text-xs font-medium text-primary hover:underline">
-                Все уведомления
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

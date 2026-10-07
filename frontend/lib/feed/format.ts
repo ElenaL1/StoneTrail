@@ -5,6 +5,20 @@ const dateFormat = new Intl.DateTimeFormat("ru-RU", {
   timeZone: "Europe/Moscow",
 })
 
+export function formatRelativeTime(value: string, now = new Date()): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  const elapsed = now.getTime() - date.getTime()
+  if (elapsed < 60_000) return "только что"
+  const minutes = Math.floor(elapsed / 60_000)
+  if (minutes < 60) return `${minutes} мин назад`
+  const hours = Math.floor(elapsed / 3_600_000)
+  if (hours < 24) return `${hours} ч назад`
+  const days = Math.floor(elapsed / 86_400_000)
+  if (days < 7) return `${days} д назад`
+  return formatFeedDate(value)
+}
+
 export function formatFeedDate(value: string | null | undefined): string {
   if (!value) return ""
   const date = new Date(value)

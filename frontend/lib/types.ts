@@ -289,6 +289,8 @@ export type Notification = {
   type: NotificationType
   title: string
   message: string
-  time: string
+  createdAt: string
   isRead: boolean
+  entityType: string | null
+  entityId: string | null
 }
