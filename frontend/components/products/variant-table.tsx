@@ -16,6 +16,7 @@ export type VariantRow = {
   thickness: string
   finish: string
   status: BlockStatus | LotStatus
+  price?: string
 }
 
 type VariantFilterKey = "size" | "thickness" | "finish" | "status"
@@ -67,6 +68,7 @@ export function VariantTable<T extends VariantRow>({
     return map
   }, [filterOptions, items, filters, visibleKeys])
   const canReset = hasActiveFilters(filters)
+  const showPrice = items.some((item) => Boolean(item.price))
 
   function resetFilters() {
     setFilters(emptyFilters)
@@ -161,6 +163,11 @@ export function VariantTable<T extends VariantRow>({
               <th scope="col" className="px-5 py-3">
                 {headerCell("status")}
               </th>
+              {showPrice ? (
+                <th scope="col" className="px-5 py-3">
+                  Цена
+                </th>
+              ) : null}
               <th scope="col" className="px-5 py-3 text-right">
                 {resetControl() ?? <span className="sr-only">Действие</span>}
               </th>
@@ -169,7 +176,7 @@ export function VariantTable<T extends VariantRow>({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center">
+                <td colSpan={showPrice ? 7 : 6} className="px-5 py-12 text-center">
                   <p className="text-foreground">{copy.emptyTitle}</p>
                   <p className="mt-2 text-sm font-normal normal-case tracking-normal text-muted-foreground">
                     {copy.emptyHint}
@@ -201,6 +208,11 @@ export function VariantTable<T extends VariantRow>({
                   <td className="px-5 py-4 align-middle">
                     <StatusBadge status={item.status} />
                   </td>
+                  {showPrice ? (
+                    <td className="px-5 py-4 align-middle font-medium text-foreground">
+                      {item.price ?? "—"}
+                    </td>
+                  ) : null}
                   <td className="px-5 py-4 align-middle text-right">
                     <Button asChild variant="outline" size="sm" className="gap-1.5">
                       <Link href={contactsHref(product, item)}>
@@ -251,6 +263,12 @@ export function VariantTable<T extends VariantRow>({
                   </dt>
                   <dd className="mt-0.5 font-semibold text-foreground">{item.finish}</dd>
                 </div>
+                {item.price ? (
+                  <div className="col-span-2">
+                    <dt className="text-xs uppercase tracking-widest text-muted-foreground">Цена</dt>
+                    <dd className="mt-0.5 font-semibold text-foreground">{item.price}</dd>
+                  </div>
+                ) : null}
               </dl>
               <Button asChild size="sm" className="mt-3 w-full gap-1.5">
                 <Link href={contactsHref(product, item)}>

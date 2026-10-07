@@ -21,6 +21,7 @@ class LotItemOut(CamelModel):
     finish: str | None = None
     dimensions: str | None = None
     weight: str | None = None
+    price: str | None = None
 
 
 class MaterialOut(CamelModel):
@@ -55,6 +56,7 @@ class StoneBlockOut(CamelModel):
     description: str
     expert_note: str
     block_stone_id: str | None = None
+    price: str | None = None
 
 
 class ProductOut(CamelModel):

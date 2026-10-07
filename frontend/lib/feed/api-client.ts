@@ -1,5 +1,12 @@
 import { contentRequest } from "@/lib/content-request"
-import type { ActivePromotion, IndustryNews, NewsStatus, Notification, Promotion } from "@/lib/types"
+import type {
+  ActivePromotion,
+  IndustryNews,
+  NewsStatus,
+  Notification,
+  Promotion,
+  PromotionLine,
+} from "@/lib/types"
 import type { BannerTemplateId } from "@/components/promo-banner"
 
 export type NewsInput = {
@@ -16,9 +23,27 @@ export type PromotionInput = {
   content: string
   template: BannerTemplateId
   buttonLabel: string
+  inquiryLabel: string
   isEnabled: boolean
+  publishToCatalog: boolean
+  offerNote: string
   expiresAt: string
   slug?: string
+}
+
+export type OfferPreview = {
+  offerNote: string
+  lines: PromotionLine[]
+}
+
+export type PromotionLinesInput = {
+  offerNote: string
+  publishToCatalog: boolean
+  lines: Array<
+    Omit<PromotionLine, "id" | "sortOrder"> & {
+      createStone?: { stoneTypeCode: string; quarry: string; country: string } | null
+    }
+  >
 }
 
 export const newsApi = {
@@ -83,6 +108,22 @@ export const promotionsApi = {
     return contentRequest<{ liked: boolean; likesCount: number }>(`/api/promotions/${slug}/likes`, {
       method: "POST",
     })
+  },
+  importSheet(file: File) {
+    const body = new FormData()
+    body.append("file", file)
+    return contentRequest<OfferPreview>("/api/promotions/import", { method: "POST", body })
+  },
+  replaceLines(slug: string, input: PromotionLinesInput) {
+    return contentRequest<Promotion>(`/api/promotions/${slug}/lines`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    })
+  },
+  attachSheet(slug: string, file: File) {
+    const body = new FormData()
+    body.append("file", file)
+    return contentRequest<Promotion>(`/api/promotions/${slug}/sheet`, { method: "POST", body })
   },
 }
 

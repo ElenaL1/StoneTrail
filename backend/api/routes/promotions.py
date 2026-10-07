@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, File, Response, UploadFile
 
 from core.deps import (
     get_admin_user,
@@ -13,6 +13,8 @@ from models.user import User
 from schemas.feed import (
     ActivePromotionOut,
     LikeOut,
+    OfferPreviewOut,
+    PromotionLinesIn,
     PromotionOut,
     PromotionUpdate,
     PromotionWrite,
@@ -46,6 +48,16 @@ async def list_managed(
     return await service.list_managed(deleted=deleted)
 
 
+@router.post("/import", response_model=OfferPreviewOut)
+async def import_sheet(
+    service: Annotated[PromotionService, Depends(get_promotion_service)],
+    _editor: Annotated[User, Depends(get_editor_user)],
+    file: Annotated[UploadFile, File()],
+) -> OfferPreviewOut:
+    data = await file.read()
+    return await service.preview_sheet(data, file.filename or "offer.xlsx")
+
+
 @router.post("", response_model=PromotionOut)
 async def create_promotion(
     payload: PromotionWrite,
@@ -62,6 +74,29 @@ async def get_promotion(
     viewer: Annotated[User | None, Depends(get_optional_user)],
 ) -> PromotionOut:
     return await service.get(slug, viewer)
+
+
+@router.put("/{slug}/lines", response_model=PromotionOut)
+async def replace_lines(
+    slug: str,
+    payload: PromotionLinesIn,
+    service: Annotated[PromotionService, Depends(get_promotion_service)],
+    editor: Annotated[User, Depends(get_editor_user)],
+) -> PromotionOut:
+    return await service.replace_lines(slug, payload, editor)
+
+
+@router.post("/{slug}/sheet", response_model=PromotionOut)
+async def attach_sheet(
+    slug: str,
+    service: Annotated[PromotionService, Depends(get_promotion_service)],
+    editor: Annotated[User, Depends(get_editor_user)],
+    file: Annotated[UploadFile, File()],
+) -> PromotionOut:
+    data = await file.read()
+    return await service.attach_sheet(
+        slug, data, file.content_type or "", file.filename or "sheet", editor
+    )
 
 
 @router.patch("/{slug}", response_model=PromotionOut)

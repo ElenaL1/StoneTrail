@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.content import Promotion, PromotionLike
+from models.content import Promotion, PromotionLike, PromotionLine
 
 
 class PromotionRepository:
@@ -65,6 +65,31 @@ class PromotionRepository:
             stmt = stmt.where(Promotion.id != exclude_id)
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none() is not None
+
+    async def line_counts(self, ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, int]:
+        if not ids:
+            return {}
+        result = await self._session.execute(
+            select(PromotionLine.promotion_id, func.count())
+            .where(PromotionLine.promotion_id.in_(ids))
+            .group_by(PromotionLine.promotion_id)
+        )
+        return {row[0]: int(row[1]) for row in result.all()}
+
+    async def lines_for(
+        self, ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, list[PromotionLine]]:
+        grouped: dict[uuid.UUID, list[PromotionLine]] = {item: [] for item in ids}
+        if not ids:
+            return grouped
+        result = await self._session.scalars(
+            select(PromotionLine)
+            .where(PromotionLine.promotion_id.in_(ids))
+            .order_by(PromotionLine.sort_order)
+        )
+        for row in result.all():
+            grouped.setdefault(row.promotion_id, []).append(row)
+        return grouped
 
     async def like_counts(self, ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, int]:
         if not ids:

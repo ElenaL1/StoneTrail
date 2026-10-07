@@ -49,6 +49,7 @@ export function BlockDetailPage({
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   const items = block.blocks ?? []
+  const showPrice = items.some((item) => Boolean(item.price))
 
   const related = useMemo(() => {
     return lots
@@ -273,8 +274,9 @@ export function BlockDetailPage({
             <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-[var(--primary-soft)] text-primary text-sm border border-border/60">
               <Quote className="size-5 shrink-0" />
               <p className="leading-relaxed">
-                Цена по запросу. Зависит от веса, маршрута доставки и условий
-                складирования. Паспорт качества и фото граней — перед отгрузкой.
+                {block.price
+                  ? `${block.price}. Цена действует, пока идёт акция.`
+                  : "Цена по запросу. Зависит от веса, маршрута доставки и условий складирования. Паспорт качества и фото граней — перед отгрузкой."}
               </p>
             </div>
           </div>
@@ -316,6 +318,11 @@ export function BlockDetailPage({
                   <th scope="col" className="px-5 py-4">
                     Вес
                   </th>
+                  {showPrice ? (
+                    <th scope="col" className="px-5 py-4">
+                      Цена
+                    </th>
+                  ) : null}
                   <th scope="col" className="px-5 py-4">
                     Статус
                   </th>
@@ -364,6 +371,11 @@ export function BlockDetailPage({
                     <td className="px-5 py-4 align-middle font-medium text-foreground">
                       {displayMeasure(ib.weight)}
                     </td>
+                    {showPrice ? (
+                      <td className="px-5 py-4 align-middle font-medium text-foreground">
+                        {ib.price ?? "—"}
+                      </td>
+                    ) : null}
                     <td className="px-5 py-4 align-middle">
                       <StatusBadge status={ib.status} />
                     </td>
@@ -437,6 +449,14 @@ export function BlockDetailPage({
                       {displayMeasure(ib.weight)}
                     </dd>
                   </div>
+                  {ib.price ? (
+                    <div className="col-span-2">
+                      <dt className="text-xs uppercase tracking-widest text-muted-foreground">
+                        Цена
+                      </dt>
+                      <dd className="mt-0.5 font-semibold text-foreground">{ib.price}</dd>
+                    </div>
+                  ) : null}
                 </dl>
                 <Button
                   asChild

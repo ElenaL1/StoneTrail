@@ -42,6 +42,9 @@ class ObjectStorage:
     def delete(self, key: str) -> None:
         raise NotImplementedError
 
+    def put(self, key: str, data: bytes, content_type: str) -> None:
+        raise NotImplementedError
+
     def public_url(self, key: str) -> str:
         raise NotImplementedError
 
@@ -62,6 +65,9 @@ class UnconfiguredStorage(ObjectStorage):
         raise ApiError.unavailable(messages.MEDIA_UNAVAILABLE)
 
     def delete(self, key: str) -> None:
+        raise ApiError.unavailable(messages.MEDIA_UNAVAILABLE)
+
+    def put(self, key: str, data: bytes, content_type: str) -> None:
         raise ApiError.unavailable(messages.MEDIA_UNAVAILABLE)
 
     def public_url(self, key: str) -> str:
@@ -198,6 +204,14 @@ class S3Storage(ObjectStorage):
 
     def delete(self, key: str) -> None:
         self._client.delete_object(Bucket=self._bucket, Key=key)
+
+    def put(self, key: str, data: bytes, content_type: str) -> None:
+        self._client.put_object(
+            Bucket=self._bucket,
+            Key=key,
+            Body=data,
+            ContentType=content_type,
+        )
 
     def public_url(self, key: str) -> str:
         return f"{self._public_base}/{key}"

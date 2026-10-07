@@ -59,6 +59,7 @@ export function LotTable({
     return map
   }, [items, filters, visibleKeys])
   const canReset = hasActiveSlabLotFilters(filters)
+  const showPrice = items.some((item) => Boolean(item.price))
   const activeIndex = activeLabel ? filtered.findIndex((item) => item.label === activeLabel) : -1
 
   useEffect(() => {
@@ -169,6 +170,11 @@ export function LotTable({
               <th scope="col" className="px-5 py-3">
                 {headerCell("status")}
               </th>
+              {showPrice ? (
+                <th scope="col" className="px-5 py-4">
+                  Цена
+                </th>
+              ) : null}
               <th scope="col" className="px-5 py-3 text-right">
                 {resetControl() ?? <span className="sr-only">Действие</span>}
               </th>
@@ -177,7 +183,7 @@ export function LotTable({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-5 py-12 text-center">
+                <td colSpan={showPrice ? 9 : 8} className="px-5 py-12 text-center">
                   <p className="text-foreground">{copy.emptyTitle}</p>
                   <p className="mt-2 text-sm font-normal normal-case tracking-normal text-muted-foreground">
                     Сбросьте фильтры, чтобы снова увидеть всю партию.
@@ -236,6 +242,11 @@ export function LotTable({
                   <td className="px-5 py-4 align-middle">
                     <StatusBadge status={item.status} />
                   </td>
+                  {showPrice ? (
+                    <td className="px-5 py-4 align-middle font-medium text-foreground">
+                      {item.price ?? "—"}
+                    </td>
+                  ) : null}
                   <td className="px-5 py-4 align-middle text-right">
                     <Button
                       asChild
@@ -316,6 +327,12 @@ export function LotTable({
                   </dt>
                   <dd className="mt-0.5 font-semibold text-foreground">{item.finish}</dd>
                 </div>
+                {item.price ? (
+                  <div className="col-span-2">
+                    <dt className="text-xs uppercase tracking-widest text-muted-foreground">Цена</dt>
+                    <dd className="mt-0.5 font-semibold text-foreground">{item.price}</dd>
+                  </div>
+                ) : null}
               </dl>
               <Button asChild size="sm" className="mt-3 w-full gap-1.5">
                 <Link href={contactsHref(product, item)}>

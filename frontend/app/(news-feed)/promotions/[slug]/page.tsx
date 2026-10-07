@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { ArrowLeft, Calendar, Sparkles } from "lucide-react"
@@ -10,7 +11,8 @@ import { FeedLikeButton } from "@/components/news/feed-like-button"
 import { promotionsApi } from "@/lib/feed/api-client"
 import { formatFeedDate } from "@/lib/feed/format"
 import { isNotFound } from "@/lib/content-request"
-import type { Promotion } from "@/lib/types"
+import { formatOfferPrice } from "@/lib/promotions/offer-price"
+import type { Promotion, PromotionLine } from "@/lib/types"
 
 export default function PromotionDetailPage() {
   const params = useParams<{ slug: string }>()
@@ -72,14 +74,78 @@ export default function PromotionDetailPage() {
             ДЕТАЛИ ПРЕДЛОЖЕНИЯ
           </div>
           <div className="whitespace-pre-wrap text-lg leading-relaxed text-foreground">{item.content}</div>
+          {item.sheetImageUrl ? (
+            <Image
+              src={item.sheetImageUrl}
+              alt={item.title}
+              width={1200}
+              height={800}
+              className="h-auto w-full rounded-2xl border border-border"
+              unoptimized
+            />
+          ) : null}
+          <OfferTable lines={item.lines ?? []} />
+          {item.offerNote ? (
+            <p className="text-sm leading-relaxed text-muted-foreground">{item.offerNote}</p>
+          ) : null}
           <div className="flex flex-col justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
             <p className="text-sm italic text-muted-foreground">Срок действия: до {formatFeedDate(item.expiresAt)}</p>
-            <Button asChild className="gap-2 px-8">
-              <Link href="/contacts">{item.buttonLabel}</Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {item.sheetPdfUrl ? (
+                <Button asChild variant="outline">
+                  <a href={item.sheetPdfUrl} target="_blank" rel="noreferrer">Скачать PDF</a>
+                </Button>
+              ) : null}
+              <Button asChild className="gap-2 px-8">
+                <Link href="/contacts">{item.inquiryLabel || "Запросить"}</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </article>
+    </div>
+  )
+}
+
+function OfferTable({ lines }: { lines: PromotionLine[] }) {
+  if (lines.length === 0) return null
+  const groups = new Map<string, PromotionLine[]>()
+  for (const line of lines) {
+    const bucket = groups.get(line.groupName) ?? []
+    bucket.push(line)
+    groups.set(line.groupName, bucket)
+  }
+  return (
+    <div className="space-y-6 overflow-x-auto">
+      {[...groups.entries()].map(([name, rows]) => (
+        <table key={name} className="w-full min-w-[640px] border-collapse text-left text-sm">
+          <caption className="mb-2 text-left font-display text-lg font-semibold text-foreground">
+            {name}
+          </caption>
+          <thead>
+            <tr className="border-b border-border text-xs uppercase tracking-widest text-muted-foreground">
+              <th className="py-2 pr-3 font-semibold">Размер</th>
+              <th className="py-2 pr-3 font-semibold">Толщина</th>
+              <th className="py-2 pr-3 font-semibold">Фактура</th>
+              <th className="py-2 pr-3 font-semibold">м²</th>
+              <th className="py-2 font-semibold">Цена</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={`${row.sortOrder}-${row.label}`} className="border-b border-border/60">
+                <td className="py-2 pr-3 font-medium text-foreground">{row.label}</td>
+                <td className="py-2 pr-3 text-foreground">
+                  {row.thicknessMm ? `${row.thicknessMm} мм` : row.heightMm ? `${row.heightMm} мм` : "—"}
+                </td>
+                <td className="py-2 pr-3 text-foreground">{row.finish || "—"}</td>
+                <td className="py-2 pr-3 text-foreground">{row.areaM2 ?? "—"}</td>
+                <td className="py-2 text-foreground">{formatOfferPrice(row.priceAmount, row.priceUnit)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ))}
     </div>
   )
 }

@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     Text,
     text,
 )
@@ -332,6 +333,10 @@ class Promotion(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
             "char_length(button_label) BETWEEN 1 AND 80",
             name="promotions_button_label_len",
         ),
+        CheckConstraint(
+            "char_length(inquiry_label) BETWEEN 1 AND 80",
+            name="promotions_inquiry_label_len",
+        ),
         Index(
             "promotions_slug_alive_key",
             "slug",
@@ -358,6 +363,21 @@ class Promotion(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     button_label: Mapped[str] = mapped_column(
         Text, nullable=False, server_default=text("'Узнать детали'")
     )
+    inquiry_label: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("'Запросить'"), default="Запросить"
+    )
+    publish_to_catalog: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), default=False
+    )
+    offer_note: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''"), default=""
+    )
+    sheet_image_url: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''"), default=""
+    )
+    sheet_pdf_url: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''"), default=""
+    )
     is_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
@@ -369,6 +389,11 @@ class Promotion(SeoMixin, TimestampMixin, SoftDeleteMixin, Base):
     )
 
     likes: Mapped[list[PromotionLike]] = relationship(back_populates="promotion")
+    lines: Mapped[list[PromotionLine]] = relationship(
+        back_populates="promotion",
+        cascade="all, delete-orphan",
+        order_by="PromotionLine.sort_order",
+    )
 
 
 class ArticleLike(Base):
@@ -432,6 +457,77 @@ class PromotionLike(Base):
     )
 
     promotion: Mapped[Promotion] = relationship(back_populates="likes")
+
+
+class PromotionLine(Base):
+    __tablename__ = "promotion_lines"
+    __table_args__ = (
+        CheckConstraint(
+            "kind IN ('tile', 'slab', 'block')",
+            name="promotion_lines_kind_known",
+        ),
+        CheckConstraint(
+            "price_unit IS NULL OR price_unit IN ('m2', 'slab', 'ton', 'piece')",
+            name="promotion_lines_price_unit_known",
+        ),
+        CheckConstraint(
+            "char_length(group_name) >= 1",
+            name="promotion_lines_group_name_len",
+        ),
+        CheckConstraint("char_length(label) >= 1", name="promotion_lines_label_len"),
+        CheckConstraint(
+            "price_amount IS NULL OR price_amount >= 0",
+            name="promotion_lines_price_non_negative",
+        ),
+        Index("promotion_lines_promotion_idx", "promotion_id", "sort_order"),
+        Index("promotion_lines_product_idx", "catalog_product_id"),
+        Index("promotion_lines_lot_idx", "catalog_block_lot_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    promotion_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("promotions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    group_name: Mapped[str] = mapped_column(Text, nullable=False)
+    stone_name: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    stone_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("stones.id", ondelete="SET NULL")
+    )
+    finish: Mapped[str | None] = mapped_column(Text)
+    length_mm: Mapped[int | None] = mapped_column(Integer)
+    width_mm: Mapped[int | None] = mapped_column(Integer)
+    thickness_mm: Mapped[int | None] = mapped_column(Integer)
+    height_mm: Mapped[int | None] = mapped_column(Integer)
+    weight_kg: Mapped[object | None] = mapped_column(Numeric(10, 2))
+    area_m2: Mapped[object | None] = mapped_column(Numeric(12, 2))
+    price_amount: Mapped[object | None] = mapped_column(Numeric(12, 2))
+    price_unit: Mapped[str | None] = mapped_column(Text)
+    unresolved: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), default=False
+    )
+    sort_order: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    catalog_product_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("products.id", ondelete="SET NULL")
+    )
+    catalog_block_lot_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("block_lots.id", ondelete="SET NULL")
+    )
+    catalog_product_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("product_items.id", ondelete="SET NULL")
+    )
+    catalog_block_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("block_items.id", ondelete="SET NULL")
+    )
+
+    promotion: Mapped[Promotion] = relationship(back_populates="lines")
 
 
 class Notification(Base):

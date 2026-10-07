@@ -122,12 +122,6 @@ async def get_notification_service(
     return NotificationService(session)
 
 
-async def get_promotion_service(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> PromotionService:
-    return PromotionService(session)
-
-
 def get_object_storage() -> ObjectStorage:
     settings = get_settings()
     if settings.s3_enabled:
@@ -147,6 +141,13 @@ async def get_media_service(
     storage: Annotated[ObjectStorage, Depends(get_object_storage)],
 ) -> MediaService:
     return MediaService(session, storage)
+
+
+async def get_promotion_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+) -> PromotionService:
+    return PromotionService(session, storage)
 
 
 async def get_admin_user_service(

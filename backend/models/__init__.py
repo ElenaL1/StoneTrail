@@ -13,6 +13,7 @@ from models.content import (
     Notification,
     Promotion,
     PromotionLike,
+    PromotionLine,
 )
 from models.lookups import (
     Application,
@@ -54,6 +55,7 @@ __all__ = [
     "ProductItem",
     "Promotion",
     "PromotionLike",
+    "PromotionLine",
     "Session",
     "Stone",
     "StoneType",

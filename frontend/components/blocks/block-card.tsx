@@ -83,7 +83,7 @@ export function BlockCard({ block }: { block: StoneBlock }) {
           </div>
         </dl>
 
-        <p className="mt-4 text-xs text-muted-foreground">Цена по запросу</p>
+        <p className="mt-4 text-xs text-muted-foreground">{block.price ?? "Цена по запросу"}</p>
 
         <div className="mt-5 flex items-center gap-2 border-t border-border pt-4">
           <Link href={`/catalog/blocks/${block.slug}`} className="flex-1">

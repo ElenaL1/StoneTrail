@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.errors import ApiError
 from models.catalog import BlockItem, BlockLot, Product, ProductItem, Stone
+from models.content import Promotion, PromotionLine
 from models.enums import (
     CustomGroup,
     FinishedStatus,
@@ -164,7 +167,9 @@ def _stone_names(product: Product) -> list[str]:
 
 
 def _block_item_out(
-    item: BlockItem, media: dict[UUID, tuple[str, list[str]]]
+    item: BlockItem,
+    media: dict[UUID, tuple[str, list[str]]],
+    price: str | None = None,
 ) -> LotItemOut:
     return LotItemOut(
         label=item.label,
@@ -172,11 +177,14 @@ def _block_item_out(
         image=_item_image(media, item.id),
         dimensions=_format_block_dims(item) or None,
         weight=_format_weight(item.weight_kg) or None,
+        price=price,
     )
 
 
 def _product_item_out(
-    item: ProductItem, media: dict[UUID, tuple[str, list[str]]]
+    item: ProductItem,
+    media: dict[UUID, tuple[str, list[str]]],
+    price: str | None = None,
 ) -> LotItemOut:
     return LotItemOut(
         label=item.label,
@@ -186,7 +194,48 @@ def _product_item_out(
         size=_format_size(item.length_mm, item.width_mm) or None,
         thickness=_format_thickness(item.thickness_mm) or None,
         finish=item.finish.label if item.finish is not None else None,
+        price=price,
     )
+
+
+_UNIT_SUFFIX = {
+    "m2": "₽/м²",
+    "slab": "₽/слэб",
+    "ton": "₽/т",
+    "piece": "₽/шт",
+}
+
+
+class _OfferPrices:
+    def __init__(self) -> None:
+        self.parents: dict[UUID, str] = {}
+        self.items: dict[UUID, str] = {}
+        self._amounts: dict[UUID, Decimal] = {}
+
+    def add(
+        self,
+        parent_id: UUID,
+        item_id: UUID | None,
+        amount: Decimal,
+        unit: str | None,
+    ) -> None:
+        if item_id is not None:
+            self.items[item_id] = _offer_text(amount, unit, minimum=False)
+        current = self._amounts.get(parent_id)
+        if current is None or amount < current:
+            self._amounts[parent_id] = amount
+            self.parents[parent_id] = _offer_text(amount, unit, minimum=True)
+
+
+def _offer_text(amount: Decimal, unit: str | None, *, minimum: bool) -> str:
+    if amount == amount.to_integral():
+        money = f"{int(amount):,}".replace(",", " ")
+    else:
+        money = f"{amount:.2f}".replace(".", ",")
+    suffix = _UNIT_SUFFIX.get(unit or "", "₽")
+    if minimum:
+        return f"от {money} {suffix}"
+    return f"{money} {suffix}"
 
 
 class CatalogService(CatalogAdminMixin):
@@ -229,6 +278,33 @@ class CatalogService(CatalogAdminMixin):
             category=parsed_category, group=parsed_group
         )
         return await self._products(products)
+
+    async def _active_offers(self) -> _OfferPrices:
+        now = datetime.now(UTC)
+        result = await self._session.scalars(
+            select(PromotionLine)
+            .join(Promotion, Promotion.id == PromotionLine.promotion_id)
+            .where(
+                Promotion.deleted_at.is_(None),
+                Promotion.is_enabled.is_(True),
+                Promotion.publish_to_catalog.is_(True),
+                Promotion.expires_at > now,
+                PromotionLine.unresolved.is_(False),
+                PromotionLine.price_amount.is_not(None),
+            )
+        )
+        prices = _OfferPrices()
+        for line in result.all():
+            parent = line.catalog_product_id or line.catalog_block_lot_id
+            if parent is None or line.price_amount is None:
+                continue
+            prices.add(
+                parent,
+                line.catalog_product_item_id or line.catalog_block_item_id,
+                Decimal(line.price_amount),
+                line.price_unit,
+            )
+        return prices
 
     async def get_product(self, slug: str) -> ProductOut:
         product = await self._repo.get_product_by_slug(slug)
@@ -323,10 +399,12 @@ class CatalogService(CatalogAdminMixin):
         lot_ids = [lot.id for lot in lots]
         lot_media = await self._repo.media_for(MediaOwner.BLOCK_LOT, lot_ids)
         item_media = await self._repo.media_for(MediaOwner.BLOCK_ITEM, item_ids)
+        offers = await self._active_offers()
         out: list[StoneBlockOut] = []
         for lot in lots:
             items = [
-                _block_item_out(item, item_media) for item in _sorted_items(lot.items)
+                _block_item_out(item, item_media, offers.items.get(item.id))
+                for item in _sorted_items(lot.items)
             ]
             out.append(
                 StoneBlockOut(
@@ -341,6 +419,7 @@ class CatalogService(CatalogAdminMixin):
                     description=lot.description,
                     expert_note=lot.expert_note,
                     block_stone_id=lot.stone.slug,
+                    price=offers.parents.get(lot.id),
                 )
             )
         return out
@@ -352,12 +431,16 @@ class CatalogService(CatalogAdminMixin):
         product_media = await self._repo.media_for(MediaOwner.PRODUCT, product_ids)
         item_media = await self._repo.media_for(MediaOwner.PRODUCT_ITEM, item_ids)
         stone_media = await self._repo.media_for(MediaOwner.STONE, stone_ids)
+        offers = await self._active_offers()
         out: list[ProductOut] = []
         for product in products:
             items = _sorted_items(product.items)
             kind = ITEM_KIND_BY_CATEGORY.get(product.category)
             typed_items = [item for item in items if kind is None or item.kind == kind]
-            lot_out = [_product_item_out(item, item_media) for item in typed_items]
+            lot_out = [
+                _product_item_out(item, item_media, offers.items.get(item.id))
+                for item in typed_items
+            ]
             images = _gallery(product_media, product.id)
             characteristics = {
                 str(key): str(value)
@@ -380,8 +463,12 @@ class CatalogService(CatalogAdminMixin):
                 origin=_origin(product.stone),
                 quarry=product.stone.quarry,
                 purpose=product.purpose,
-                price=_format_price(product),
-                price_type=product.price_type.value,
+                price=offers.parents.get(product.id, _format_price(product)),
+                price_type=(
+                    "fixed"
+                    if product.id in offers.parents
+                    else product.price_type.value
+                ),
                 images=images or None,
                 characteristics=characteristics or None,
                 applications=[app.label for app in product.applications] or None,

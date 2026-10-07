@@ -28,6 +28,7 @@ export type IndividualBlock = {
   weight?: string
   status: BlockStatus
   image?: string
+  price?: string
 }
 
 export type StoneBlock = {
@@ -42,6 +43,7 @@ export type StoneBlock = {
   description: string
   expertNote: string
   blockStoneId?: string
+  price?: string
 }
 
 export type ProductCategory = "slabs" | "blanks" | "tiles" | "paving" | "custom"
@@ -98,6 +100,7 @@ export type IndividualSlab = {
   status: BlockStatus
   image?: string
   note?: string
+  price?: string
 }
 
 export type IndividualTile = {
@@ -107,6 +110,7 @@ export type IndividualTile = {
   finish: string
   status: BlockStatus
   image?: string
+  price?: string
 }
 
 export type IndividualBlank = {
@@ -117,6 +121,7 @@ export type IndividualBlank = {
   status: BlockStatus
   image?: string
   note?: string
+  price?: string
 }
 
 export type IndividualPaving = {
@@ -126,6 +131,7 @@ export type IndividualPaving = {
   finish: string
   status: BlockStatus
   image?: string
+  price?: string
 }
 
 export type FinishedProduct = Product & {
@@ -158,13 +164,41 @@ export type Promotion = {
   content: string
   template: BannerTemplateId
   buttonLabel: string
+  inquiryLabel: string
   isEnabled: boolean
+  publishToCatalog: boolean
+  offerNote: string
+  sheetImageUrl: string
+  sheetPdfUrl: string
+  lineCount: number
+  lines: PromotionLine[]
   expiresAt: string
   createdAt: string
   updatedAt: string
   likesCount: number
   liked: boolean
   deleted: boolean
+}
+
+export type PromotionLine = {
+  id?: string
+  kind: "tile" | "slab" | "block"
+  groupName: string
+  stoneName: string
+  label: string
+  stoneSlug?: string | null
+  finish?: string | null
+  lengthMm?: number | null
+  widthMm?: number | null
+  thicknessMm?: number | null
+  heightMm?: number | null
+  weightKg?: string | number | null
+  areaM2?: string | number | null
+  priceAmount?: string | number | null
+  priceUnit?: "m2" | "slab" | "ton" | "piece" | null
+  unresolved: boolean
+  issue?: string | null
+  sortOrder: number
 }
 
 export type ActivePromotion = {
