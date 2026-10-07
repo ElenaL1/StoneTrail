@@ -1,8 +1,8 @@
-import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, Box, MapPin, Package, Scale } from "lucide-react"
 import type { StoneBlock } from "@/lib/mock-data"
 import {
+  displayMeasure,
   getBlockCount,
   getDimensionsRange,
   getLotStatus,
@@ -10,6 +10,7 @@ import {
   pluralBlocks,
 } from "@/lib/block-utils"
 import { Button } from "@/components/ui/button"
+import { BlockPhoto } from "./block-photo"
 import { StatusBadge } from "./status-badge"
 
 export function BlockCard({ block }: { block: StoneBlock }) {
@@ -30,12 +31,10 @@ export function BlockCard({ block }: { block: StoneBlock }) {
           aria-label={block.stoneName}
           className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         >
-          <Image
+          <BlockPhoto
             src={block.image}
-            alt={`Лот: ${block.stoneName} из ${block.stoneType.toLowerCase()}, ${block.country}`}
-            fill
+            alt={`Лот: ${block.stoneName} из ${block.stoneType?.toLowerCase() ?? ""}, ${block.country}`}
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            unoptimized
           />
         </Link>
         <div className="pointer-events-none absolute left-3 top-3">
@@ -65,14 +64,14 @@ export function BlockCard({ block }: { block: StoneBlock }) {
             <Box className="mt-0.5 size-3.5 shrink-0" />
             <div>
               <dt className="sr-only">Габариты</dt>
-              <dd>{dimensionsRange}</dd>
+              <dd>{displayMeasure(dimensionsRange)}</dd>
             </div>
           </div>
           <div className="flex items-start gap-2 text-muted-foreground">
             <Scale className="mt-0.5 size-3.5 shrink-0" />
             <div>
               <dt className="sr-only">Вес</dt>
-              <dd>{weightRange}</dd>
+              <dd>{displayMeasure(weightRange)}</dd>
             </div>
           </div>
           <div className="flex items-start gap-2 text-muted-foreground">

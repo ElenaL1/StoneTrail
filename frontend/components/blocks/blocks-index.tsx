@@ -26,38 +26,51 @@ import { Button } from "@/components/ui/button"
 import type { StoneBlock } from "@/lib/types"
 import { getBlockCount, pluralBlocks, pluralLots } from "@/lib/block-utils"
 import { BlockCard } from "@/components/blocks/block-card"
+import { BlockCardBoundary } from "@/components/blocks/block-card-boundary"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
 import { useHasBanner } from "@/lib/promotions/presence"
 import { cn } from "@/lib/utils"
+
+function includesQuery(value: string | null | undefined, query: string) {
+  return (value ?? "").toLowerCase().includes(query)
+}
 
 export function BlocksIndex({ lots }: { lots: StoneBlock[] }) {
   const [search, setSearch] = useState("")
   const [stoneType, setStoneType] = useState("all")
   const isBannerEnabled = useHasBanner()
 
-  const allStoneTypes = useMemo(
-    () => Array.from(new Set(lots.map((b) => b.stoneType))),
+  const catalogLots = useMemo(
+    () => lots.filter((lot) => lot.stoneName?.trim()),
     [lots],
   )
 
+  const allStoneTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(catalogLots.map((b) => b.stoneType).filter((type): type is string => Boolean(type?.trim()))),
+      ),
+    [catalogLots],
+  )
+
   const totalBlocksInCatalog = useMemo(
-    () => lots.reduce((s, b) => s + getBlockCount(b.blocks), 0),
-    [lots],
+    () => catalogLots.reduce((s, b) => s + getBlockCount(b.blocks), 0),
+    [catalogLots],
   )
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return lots.filter((b) => {
+    return catalogLots.filter((b) => {
       const matchesType = stoneType === "all" || b.stoneType === stoneType
       const matchesSearch =
         q.length === 0 ||
-        b.stoneName.toLowerCase().includes(q) ||
-        b.stoneType.toLowerCase().includes(q) ||
-        b.quarry.toLowerCase().includes(q) ||
-        b.country.toLowerCase().includes(q)
+        includesQuery(b.stoneName, q) ||
+        includesQuery(b.stoneType, q) ||
+        includesQuery(b.quarry, q) ||
+        includesQuery(b.country, q)
       return matchesType && matchesSearch
     })
-  }, [lots, search, stoneType])
+  }, [catalogLots, search, stoneType])
 
   const filteredBlockCount = useMemo(
     () => filtered.reduce((s, b) => s + getBlockCount(b.blocks), 0),
@@ -145,7 +158,7 @@ export function BlocksIndex({ lots }: { lots: StoneBlock[] }) {
               <span>
                 {filteredBlockCount} {pluralBlocks(filteredBlockCount)} в{" "}
                 {filtered.length} {pluralLots(filtered.length)}
-                {filtered.length !== lots.length
+                {filtered.length !== catalogLots.length
                   ? ` (из ${totalBlocksInCatalog} в каталоге)`
                   : " в каталоге"}
               </span>
@@ -157,7 +170,9 @@ export function BlocksIndex({ lots }: { lots: StoneBlock[] }) {
         {filtered.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((block) => (
-              <BlockCard key={block.id} block={block} />
+              <BlockCardBoundary key={block.id}>
+                <BlockCard block={block} />
+              </BlockCardBoundary>
             ))}
           </div>
         ) : (

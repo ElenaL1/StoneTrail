@@ -24,8 +24,8 @@ export type BlockStatus = "В наличии" | "Зарезервирован" |
 
 export type IndividualBlock = {
   label: string
-  dimensions: string
-  weight: string
+  dimensions?: string
+  weight?: string
   status: BlockStatus
   image?: string
 }

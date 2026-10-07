@@ -4,14 +4,23 @@ import { pluralRu } from "./measure-utils"
 
 // ── Русский plural ───────────────────────────────────────────────────────────
 // 1 блок, 2/3/4 блока, 5 блоков, 11–14/21–24 блока, 15/25/31 блока…
-export function getBlockBreadcrumbTitle(stoneName: string): string {
-  const name = stoneName.trim()
+export function getBlockBreadcrumbTitle(stoneName: string | null | undefined): string {
+  const name = stoneName?.trim() ?? ""
+  if (!name) return "Блок"
   if (name.toLocaleLowerCase("ru").includes("блок")) return name
   return `Блок ${name}`
 }
 
-export function getBlockLotSectionTitle(stoneType: string, stoneName: string): string {
-  return `Блоки ${stoneTypeGenitive(stoneType)} ${stoneName.trim()}`
+export function getBlockLotSectionTitle(
+  stoneType: string | null | undefined,
+  stoneName: string | null | undefined,
+): string {
+  return `Блоки ${stoneTypeGenitive(stoneType ?? "")} ${(stoneName ?? "").trim()}`
+}
+
+export function displayMeasure(value: string | null | undefined): string {
+  const text = value?.trim()
+  return text ? text : "Уточняется"
 }
 
 export function pluralBlocks(n: number): string {
@@ -30,9 +39,11 @@ export type StatusBreakdown = {
   onOrder: number
 }
 
-export function getStatusBreakdown(items: { status: BlockStatus }[]): StatusBreakdown {
+export function getStatusBreakdown(
+  items: { status: BlockStatus }[] | null | undefined,
+): StatusBreakdown {
   const s = { inStock: 0, reserved: 0, onOrder: 0 }
-  for (const item of items) {
+  for (const item of items ?? []) {
     if (item.status === "В наличии") s.inStock++
     else if (item.status === "Зарезервирован") s.reserved++
     else if (item.status === "Под заказ") s.onOrder++
@@ -49,10 +60,13 @@ export type LotStatus =
   | "Зарезервирован"
   | "Под заказ"
 
-export function getLotStatus(items: { status: BlockStatus }[]): LotStatus {
-  if (items.length === 0) return "В наличии"
-  const { inStock, reserved, onOrder } = getStatusBreakdown(items)
-  const total = items.length
+export function getLotStatus(
+  items: { status: BlockStatus }[] | null | undefined,
+): LotStatus {
+  const list = items ?? []
+  if (list.length === 0) return "В наличии"
+  const { inStock, reserved, onOrder } = getStatusBreakdown(list)
+  const total = list.length
 
   if (onOrder === total) return "Под заказ"
   if (reserved === 0) return "В наличии"
@@ -60,8 +74,8 @@ export function getLotStatus(items: { status: BlockStatus }[]): LotStatus {
   return "Частично в наличии"
 }
 
-export function getBlockCount(blocks: IndividualBlock[]): number {
-  return blocks.length
+export function getBlockCount(blocks: IndividualBlock[] | null | undefined): number {
+  return blocks?.length ?? 0
 }
 
 // ── Диапазон габаритов ───────────────────────────────────────────────────────
@@ -72,7 +86,8 @@ export function getBlockCount(blocks: IndividualBlock[]): number {
 type Measurement = { value: number, raw: string }
 type ParsedDims = [Measurement, Measurement, Measurement, string]
 
-function parseDimensions(s: string): ParsedDims | null {
+function parseDimensions(s: string | null | undefined): ParsedDims | null {
+  if (!s?.trim()) return null
   const tokens = s
     .replace(/[,\s]+/g, " ")
     .trim()
@@ -104,13 +119,18 @@ function formatAxisPair(axes: Measurement[]): string {
   return `${axes.find((a) => a.value === min)!.raw}–${axes.find((a) => a.value === max)!.raw}`
 }
 
-export function getDimensionsRange(blocks: IndividualBlock[]): string {
-  const parsed = blocks
+export function getDimensionsRange(blocks: IndividualBlock[] | null | undefined): string {
+  const items = blocks ?? []
+  const parsed = items
     .map((b) => parseDimensions(b.dimensions))
     .filter((p): p is ParsedDims => p !== null)
 
-  if (parsed.length === 0) return blocks[0]?.dimensions ?? ""
-  if (parsed.length === 1) return blocks[0].dimensions
+  if (parsed.length === 0) {
+    return items.find((b) => b.dimensions?.trim())?.dimensions?.trim() ?? ""
+  }
+  if (parsed.length === 1) {
+    return items.find((b) => parseDimensions(b.dimensions))?.dimensions?.trim() ?? ""
+  }
 
   const [d, w, h, unit] = parsed[0]
   const dimRange = formatAxisPair(parsed.map((p) => p[0]))
@@ -131,7 +151,8 @@ export function getDimensionsRange(blocks: IndividualBlock[]): string {
 // Формат исходной строки: "~27,9 т"
 // Диапазон: "~25,0–27,9 т"
 
-function parseWeight(s: string): { value: number, unit: string } | null {
+function parseWeight(s: string | null | undefined): { value: number, unit: string } | null {
+  if (!s?.trim()) return null
   const tokens = s.replace(/[,\s]+/g, " ").trim().split(" ").filter(Boolean)
   if (tokens.length < 1) return null
   const firstToken = tokens[0].replace(/^\D+/, "")
@@ -149,16 +170,21 @@ function formatWeightAxis(values: number[]): string {
   return `${fmt(min)}–${fmt(max)}`
 }
 
-export function getWeightRange(blocks: IndividualBlock[]): string {
-  const parsed = blocks
+export function getWeightRange(blocks: IndividualBlock[] | null | undefined): string {
+  const items = blocks ?? []
+  const parsed = items
     .map((b) => parseWeight(b.weight))
     .filter((p): p is { value: number; unit: string } => p !== null)
 
-  if (parsed.length === 0) return blocks[0]?.weight ?? ""
-  if (parsed.length === 1) return blocks[0].weight
+  if (parsed.length === 0) {
+    return items.find((b) => b.weight?.trim())?.weight?.trim() ?? ""
+  }
+  if (parsed.length === 1) {
+    return items.find((b) => parseWeight(b.weight))?.weight?.trim() ?? ""
+  }
 
   const values = parsed.map((p) => p.value)
   const unit = parsed[0].unit
-  const hasTilde = blocks.some((b) => b.weight.startsWith("~"))
+  const hasTilde = items.some((b) => b.weight?.startsWith("~"))
   return `${hasTilde ? "~" : ""}${formatWeightAxis(values)} ${unit}`.trim()
 }

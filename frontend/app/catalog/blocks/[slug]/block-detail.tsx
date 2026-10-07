@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -21,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Material, StoneBlock } from "@/lib/types"
 import {
+  displayMeasure,
   getBlockCount,
   getBlockBreadcrumbTitle,
   getBlockLotSectionTitle,
@@ -32,6 +32,8 @@ import {
 } from "@/lib/block-utils"
 import { cn } from "@/lib/utils"
 import { useHasBanner } from "@/lib/promotions/presence"
+import { BlockCardBoundary } from "@/components/blocks/block-card-boundary"
+import { BlockPhoto } from "@/components/blocks/block-photo"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { BlockLightboxDialog } from "@/components/blocks/block-lightbox-dialog"
 
@@ -46,9 +48,11 @@ export function BlockDetailPage({
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
+  const items = block.blocks ?? []
+
   const related = useMemo(() => {
     return lots
-      .filter((b) => b.id !== block.id)
+      .filter((b) => b.id !== block.id && b.stoneName?.trim())
       .sort((a, b) => {
         const score = (x: StoneBlock) =>
           (x.stoneType === block.stoneType ? 2 : 0) +
@@ -58,12 +62,12 @@ export function BlockDetailPage({
       .slice(0, 3)
   }, [block, lots])
 
-  const blockCount = getBlockCount(block.blocks)
+  const blockCount = getBlockCount(items)
   const plural = pluralBlocks(blockCount)
-  const lotStatus = getLotStatus(block.blocks)
-  const breakdown = getStatusBreakdown(block.blocks)
-  const dimensionsRange = getDimensionsRange(block.blocks)
-  const weightRange = getWeightRange(block.blocks)
+  const lotStatus = getLotStatus(items)
+  const breakdown = getStatusBreakdown(items)
+  const dimensionsRange = displayMeasure(getDimensionsRange(items))
+  const weightRange = displayMeasure(getWeightRange(items))
 
   const breakdownParts: string[] = []
   if (breakdown.inStock > 0) {
@@ -87,10 +91,10 @@ export function BlockDetailPage({
   const openLightboxAt = (i: number) => setActiveIndex(i)
 
   const contactsHref = (index: number) => {
-    const ib = block.blocks[index]
+    const ib = items[index]
     return `/contacts?block=${encodeURIComponent(
       block.slug,
-    )}&ref=${encodeURIComponent(ib.label)}`
+    )}&ref=${encodeURIComponent(ib?.label ?? "")}`
   }
 
   return (
@@ -130,12 +134,10 @@ export function BlockDetailPage({
           {/* Visual column */}
           <div className="space-y-4">
             <div className="relative h-[60vw] max-h-[520px] min-h-[240px] overflow-hidden rounded-3xl border border-border bg-secondary sm:h-[45vw] lg:h-[420px] xl:h-[480px]">
-              <Image
+              <BlockPhoto
                 src={block.image}
                 alt={`Блок: ${block.stoneName}, ${block.stoneType}, ${block.quarry}, ${block.country}`}
-                fill
                 className="object-cover"
-                unoptimized
               />
               <div className="absolute left-4 top-4">
                 <StatusBadge status={lotStatus} />
@@ -149,36 +151,30 @@ export function BlockDetailPage({
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
-                <Image
+                <BlockPhoto
                   src={block.image}
                   alt={`Фас A: ${block.stoneName}`}
-                  fill
                   className="object-cover"
-                  unoptimized
                 />
                 <span className="absolute bottom-2 left-2 rounded bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground">
                   Фас A
                 </span>
               </div>
               <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
-                <Image
+                <BlockPhoto
                   src={block.image}
                   alt={`Фас B: ${block.stoneName}`}
-                  fill
                   className="object-cover"
-                  unoptimized
                 />
                 <span className="absolute bottom-2 left-2 rounded bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground">
                   Фас B
                 </span>
               </div>
               <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
-                <Image
+                <BlockPhoto
                   src={block.image}
                   alt={`Кромка: ${block.stoneName}`}
-                  fill
                   className="object-cover"
-                  unoptimized
                 />
                 <span className="absolute bottom-2 left-2 rounded bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground">
                   Кромка
@@ -247,7 +243,7 @@ export function BlockDetailPage({
               </div>
             </div>
 
-            {block.blocks.length > 1 && (
+            {items.length > 1 && (
               <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-secondary/20 p-4 text-sm">
                 <Box className="mt-0.5 size-4 shrink-0 text-primary" />
                 <p className="text-foreground/90 leading-relaxed">
@@ -285,6 +281,7 @@ export function BlockDetailPage({
         </div>
 
         {/* Individual blocks — table (desktop) / cards (mobile) */}
+        {items.length > 0 && (
         <section className="mt-20" aria-labelledby="blocks-list-heading">
           <div className="mb-8">
             <h2
@@ -328,7 +325,7 @@ export function BlockDetailPage({
                 </tr>
               </thead>
               <tbody>
-                {block.blocks.map((ib, i) => (
+                {items.map((ib, i) => (
                   <tr
                     key={ib.label}
                     onClick={() => openLightboxAt(i)}
@@ -354,20 +351,18 @@ export function BlockDetailPage({
                     </td>
                     <td className="px-5 py-4 align-middle">
                       <div className="relative h-14 w-20 overflow-hidden rounded-lg border border-border bg-muted">
-                        <Image
-                          src={ib.image ?? block.image}
+                        <BlockPhoto
+                          src={ib.image || block.image}
                           alt={`Миниатюра: ${block.stoneName} — ${ib.label}`}
-                          fill
                           className="object-cover"
-                          unoptimized
                         />
                       </div>
                     </td>
                     <td className="px-5 py-4 align-middle font-medium text-foreground">
-                      {ib.dimensions}
+                      {displayMeasure(ib.dimensions)}
                     </td>
                     <td className="px-5 py-4 align-middle font-medium text-foreground">
-                      {ib.weight}
+                      {displayMeasure(ib.weight)}
                     </td>
                     <td className="px-5 py-4 align-middle">
                       <StatusBadge status={ib.status} />
@@ -397,7 +392,7 @@ export function BlockDetailPage({
 
           {/* Mobile: cards */}
           <ul className="space-y-4 md:hidden">
-            {block.blocks.map((ib, i) => (
+            {items.map((ib, i) => (
               <li
                 key={ib.label}
                 className="rounded-2xl border border-border bg-card p-4"
@@ -410,12 +405,10 @@ export function BlockDetailPage({
                     aria-label={`Показать блок ${ib.label}`}
                   >
                     <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                      <Image
-                        src={ib.image ?? block.image}
+                      <BlockPhoto
+                        src={ib.image || block.image}
                         alt={`Миниатюра: ${block.stoneName} — ${ib.label}`}
-                        fill
                         className="object-cover"
-                        unoptimized
                       />
                     </span>
                     <span className="flex min-w-0 flex-col items-start gap-1">
@@ -433,7 +426,7 @@ export function BlockDetailPage({
                       Габариты
                     </dt>
                     <dd className="mt-0.5 font-semibold text-foreground">
-                      {ib.dimensions}
+                      {displayMeasure(ib.dimensions)}
                     </dd>
                   </div>
                   <div>
@@ -441,7 +434,7 @@ export function BlockDetailPage({
                       Вес
                     </dt>
                     <dd className="mt-0.5 font-semibold text-foreground">
-                      {ib.weight}
+                      {displayMeasure(ib.weight)}
                     </dd>
                   </div>
                 </dl>
@@ -459,6 +452,7 @@ export function BlockDetailPage({
             ))}
           </ul>
         </section>
+        )}
 
         {/* Expert note */}
         <section className="mt-20" aria-labelledby="expert-note">
@@ -496,12 +490,10 @@ export function BlockDetailPage({
               className="mt-6 grid gap-6 overflow-hidden rounded-3xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:shadow-[0_16px_40px_-24px_rgba(35,72,58,0.35)] md:grid-cols-[220px_1fr]"
             >
               <div className="relative aspect-[5/4] overflow-hidden rounded-2xl border border-border bg-secondary md:aspect-auto">
-                <Image
+                <BlockPhoto
                   src={relatedMaterial.image}
                   alt={`Слэб ${relatedMaterial.name}`}
-                  fill
                   className="object-cover"
-                  unoptimized
                 />
               </div>
               <div className="flex flex-col justify-center gap-3 md:pl-4">
@@ -554,18 +546,16 @@ export function BlockDetailPage({
               {related.map((b) => {
                 const plural2 = pluralBlocks(getBlockCount(b.blocks))
                 return (
+                  <BlockCardBoundary key={b.id}>
                   <Link
-                    key={b.id}
                     href={`/catalog/blocks/${b.slug}`}
                     className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:shadow-[0_16px_40px_-24px_rgba(35,72,58,0.4)]"
                   >
                     <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
-                      <Image
+                      <BlockPhoto
                         src={b.image}
                         alt={`Блок: ${b.stoneName}, ${b.quarry}, ${b.country}`}
-                        fill
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                        unoptimized
                       />
                       <div className="absolute left-3 top-3">
                         <StatusBadge status={getLotStatus(b.blocks)} />
@@ -579,11 +569,12 @@ export function BlockDetailPage({
                         {b.stoneName}
                       </h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {b.quarry}, {b.country} · {getDimensionsRange(b.blocks)}{" "}
+                        {b.quarry}, {b.country} · {displayMeasure(getDimensionsRange(b.blocks))}{" "}
                         · {getBlockCount(b.blocks)} {plural2}
                       </p>
                     </div>
                   </Link>
+                  </BlockCardBoundary>
                 )
               })}
             </div>
@@ -606,9 +597,9 @@ export function BlockDetailPage({
         <BlockLightboxDialog
           block={block}
           index={activeIndex}
-          total={block.blocks.length}
+          total={items.length}
           onClose={closeLightbox}
-          onNavigate={(n) => setActiveIndex(Math.max(0, Math.min(n, block.blocks.length - 1)))}
+          onNavigate={(n) => setActiveIndex(Math.max(0, Math.min(n, items.length - 1)))}
         />
       )}
     </div>

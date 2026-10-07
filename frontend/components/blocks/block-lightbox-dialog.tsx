@@ -1,11 +1,12 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { BlockPhoto } from "@/components/blocks/block-photo"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { CatalogLightboxShell } from "@/components/catalog/catalog-lightbox-shell"
+import { displayMeasure } from "@/lib/block-utils"
 import type { StoneBlock } from "@/lib/mock-data"
 
 type Props = {
@@ -23,7 +24,7 @@ export function BlockLightboxDialog({
   onClose,
   onNavigate,
 }: Props) {
-  const ib = block.blocks[index]
+  const ib = block.blocks?.[index]
   if (!ib) return null
 
   const contactsHref = `/contacts?block=${encodeURIComponent(block.slug)}&ref=${encodeURIComponent(ib.label)}`
@@ -39,12 +40,10 @@ export function BlockLightboxDialog({
       nextAriaLabel="Следующий блок"
     >
       <div className="relative aspect-[16/10] w-full bg-muted">
-        <Image
-          src={ib.image ?? block.image}
+        <BlockPhoto
+          src={ib.image || block.image}
           alt={`${block.stoneName} — ${ib.label}`}
-          fill
           className="object-cover"
-          unoptimized
         />
       </div>
 
@@ -61,11 +60,11 @@ export function BlockLightboxDialog({
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-y border-border/60 py-4 text-sm">
           <div>
             <span className="mr-2 text-muted-foreground">Габариты</span>
-            <span className="font-semibold text-foreground">{ib.dimensions}</span>
+            <span className="font-semibold text-foreground">{displayMeasure(ib.dimensions)}</span>
           </div>
           <div>
             <span className="mr-2 text-muted-foreground">Вес</span>
-            <span className="font-semibold text-foreground">{ib.weight}</span>
+            <span className="font-semibold text-foreground">{displayMeasure(ib.weight)}</span>
           </div>
           <StatusBadge status={ib.status} />
         </div>
