@@ -12,6 +12,7 @@ from api.routes.auth import router as auth_router
 from api.routes.catalog import router as catalog_router
 from api.routes.forum import router as forum_router
 from api.routes.health import router as health_router
+from api.routes.inquiries import router as inquiries_router
 from api.routes.media import router as media_router
 from api.routes.news import router as news_router
 from api.routes.notifications import router as notifications_router
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     application.include_router(health_router)
+    application.include_router(inquiries_router)
     application.include_router(auth_router)
     application.include_router(yandex_auth_router)
     application.include_router(catalog_router)

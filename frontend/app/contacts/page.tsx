@@ -1,7 +1,6 @@
-import { ArrowUpRight, Building, Clock, Mail, MapPin, Phone, Send } from "lucide-react"
+import { ArrowUpRight, Building, Clock, Mail, MapPin, Phone } from "lucide-react"
+import { InquiryForm } from "@/components/contacts/inquiry-form"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
 import { hasActiveBanner } from "@/lib/promotions/load-active"
 import { cn } from "@/lib/utils"
@@ -100,42 +99,7 @@ export default async function ContactsPage() {
               </div>
             </div>
 
-            <form className="rounded-2xl border border-border bg-card p-7" action="#" method="post">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Быстрая заявка
-              </p>
-              <div className="mt-5 space-y-4">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="contacts-name">
-                    Имя и компания
-                  </label>
-                  <Input id="contacts-name" type="text" placeholder="Иванова Иванна · Studio Lux" className="h-11" />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="contacts-email">
-                    Email
-                  </label>
-                  <Input id="contacts-email" type="email" placeholder="you@company.ru" className="h-11" />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="contacts-message">
-                    Опишите задачу
-                  </label>
-                  <Textarea id="contacts-message" rows={4} placeholder="Проект, материал, сроки…" />
-                </div>
-                <Button type="submit" className="h-11 w-full gap-2 text-sm">
-                  Отправить
-                  <Send className="size-4" />
-                </Button>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  Нажимая «Отправить», вы соглашаетесь с обработкой данных согласно{" "}
-                  <a href="/legal/privacy" className="text-primary hover:underline">
-                    Политике конфиденциальности
-                  </a>
-                  .
-                </p>
-              </div>
-            </form>
+            <InquiryForm />
           </div>
         </div>
       </section>

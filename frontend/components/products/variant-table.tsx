@@ -1,11 +1,12 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
 import { Layers, RotateCcw, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { ColumnHeaderFilter } from "@/components/products/column-header-filter"
+import { productInquiryLine } from "@/lib/inquiry-draft"
+import { useRequestInquiry } from "@/lib/use-request-inquiry"
 import type { BlockStatus, Product } from "@/lib/mock-data"
 import type { LotStatus } from "@/lib/block-utils"
 import type { LotFilterDef } from "@/lib/lot-filter-utils"
@@ -42,7 +43,6 @@ export function VariantTable<T extends VariantRow>({
   pruneFilters,
   filterOptions,
   hasActiveFilters,
-  contactsHref,
 }: {
   product: Product
   items: T[]
@@ -54,9 +54,9 @@ export function VariantTable<T extends VariantRow>({
   pruneFilters: (items: T[], filters: VariantFilterState) => VariantFilterState
   filterOptions: (items: T[], filters: VariantFilterState, key: VariantFilterKey) => string[]
   hasActiveFilters: (filters: VariantFilterState) => boolean
-  contactsHref: (product: Product, item: T) => string
 }) {
   const [filters, setFilters] = useState<VariantFilterState>(emptyFilters)
+  const requestInquiry = useRequestInquiry()
 
   const visibleKeys = useMemo(() => getVisibleKeys(items), [getVisibleKeys, items])
   const filtered = useMemo(() => filterItems(items, filters), [filterItems, items, filters])
@@ -214,11 +214,15 @@ export function VariantTable<T extends VariantRow>({
                     </td>
                   ) : null}
                   <td className="px-5 py-4 align-middle text-right">
-                    <Button asChild variant="outline" size="sm" className="gap-1.5">
-                      <Link href={contactsHref(product, item)}>
-                        <Send className="size-3.5" />
-                        Запросить
-                      </Link>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => requestInquiry(productInquiryLine(product, item))}
+                    >
+                      <Send className="size-3.5" />
+                      Запросить
                     </Button>
                   </td>
                 </tr>
@@ -270,11 +274,14 @@ export function VariantTable<T extends VariantRow>({
                   </div>
                 ) : null}
               </dl>
-              <Button asChild size="sm" className="mt-3 w-full gap-1.5">
-                <Link href={contactsHref(product, item)}>
-                  <Send className="size-3.5" />
-                  Запросить
-                </Link>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3 w-full gap-1.5"
+                onClick={() => requestInquiry(productInquiryLine(product, item))}
+              >
+                <Send className="size-3.5" />
+                Запросить
               </Button>
             </li>
           ))}

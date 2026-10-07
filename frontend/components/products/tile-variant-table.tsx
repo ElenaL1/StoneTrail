@@ -6,7 +6,6 @@ import {
   EMPTY_TILE_VARIANT_FILTERS,
   TILE_VARIANT_FILTER_DEFS,
   filterTileVariants,
-  getTileContactsHref,
   getTileVariantSectionTitle,
   getVisibleTileVariantFilterKeys,
   hasActiveTileVariantFilters,
@@ -32,7 +31,6 @@ export function TileVariantTable({
       pruneFilters={pruneTileVariantFilters}
       filterOptions={tileVariantFilterOptions}
       hasActiveFilters={hasActiveTileVariantFilters}
-      contactsHref={getTileContactsHref}
       copy={{
         headingId: "tiles-list-heading",
         title: getTileVariantSectionTitle(product.stoneType, product.stoneName),

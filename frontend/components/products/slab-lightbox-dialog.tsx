@@ -1,13 +1,14 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
 import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { CatalogLightboxShell } from "@/components/catalog/catalog-lightbox-shell"
 import type { IndividualSlab, Product } from "@/lib/mock-data"
-import { getSlabContactsHref, getSlabPageTitle } from "@/lib/slab-utils"
+import { productInquiryLine } from "@/lib/inquiry-draft"
+import { getSlabPageTitle } from "@/lib/slab-utils"
+import { useRequestInquiry } from "@/lib/use-request-inquiry"
 
 type Props = {
   product: Product
@@ -16,7 +17,6 @@ type Props = {
   onClose: () => void
   onNavigate: (next: number) => void
   pageTitle?: string
-  contactsHref?: (product: Product, item: IndividualSlab) => string
   requestLabel?: string
   hint?: string
   itemNoun?: string
@@ -29,12 +29,12 @@ export function SlabLightboxDialog({
   onClose,
   onNavigate,
   pageTitle,
-  contactsHref = getSlabContactsHref,
   requestLabel = "Запросить слэб",
   hint = "Подбор по конкретной плите: фото рисунка и карта раскроя — перед отгрузкой.",
   itemNoun = "слэб",
 }: Props) {
   const slab = slabs[index]
+  const requestInquiry = useRequestInquiry()
   if (!slab) return null
 
   const title = pageTitle ?? getSlabPageTitle(product.stoneName)
@@ -87,11 +87,13 @@ export function SlabLightboxDialog({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <Button asChild className="h-12 gap-2 text-base">
-            <Link href={contactsHref(product, slab)}>
-              {requestLabel}
-              <Send className="size-4" />
-            </Link>
+          <Button
+            type="button"
+            className="h-12 gap-2 text-base"
+            onClick={() => requestInquiry(productInquiryLine(product, slab))}
+          >
+            {requestLabel}
+            <Send className="size-4" />
           </Button>
           <p className="text-xs text-muted-foreground sm:max-w-xs sm:text-right">{hint}</p>
         </div>

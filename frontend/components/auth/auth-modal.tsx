@@ -1,17 +1,23 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { X } from "lucide-react"
 import { LoginForm } from "@/components/auth/login-form"
 import { RegisterFooter, RegisterForm } from "@/components/auth/register-form"
 import { Button } from "@/components/ui/button"
 import { useAuthModal } from "@/lib/auth-modal-context"
+import { clearPendingInquiry } from "@/lib/inquiry-draft"
 import { cn } from "@/lib/utils"
 
 export function AuthModal() {
   const { view, next, close, openLogin, openRegister } = useAuthModal()
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = "auth-modal-title"
+
+  const dismiss = useCallback(() => {
+    clearPendingInquiry()
+    close()
+  }, [close])
 
   useEffect(() => {
     if (!view) return
@@ -21,7 +27,7 @@ export function AuthModal() {
     panelRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close()
+      if (event.key === "Escape") dismiss()
     }
     window.addEventListener("keydown", onKeyDown)
 
@@ -29,7 +35,7 @@ export function AuthModal() {
       document.body.style.overflow = previousOverflow
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [close, view])
+  }, [close, dismiss, view])
 
   if (!view) return null
 
@@ -40,7 +46,7 @@ export function AuthModal() {
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-        onClick={close}
+        onClick={dismiss}
       />
       <div
         ref={panelRef}
@@ -60,7 +66,7 @@ export function AuthModal() {
           size="icon"
           className="absolute right-3 top-4 rounded-full"
           aria-label="Закрыть"
-          onClick={close}
+          onClick={dismiss}
         >
           <X className="size-5" />
         </Button>

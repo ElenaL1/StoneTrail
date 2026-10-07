@@ -4,7 +4,6 @@ import { Box } from "lucide-react"
 import { LotTable } from "@/components/products/lot-table"
 import type { IndividualBlank, Product } from "@/lib/mock-data"
 import {
-  getBlankContactsHref,
   getBlankLotSectionTitle,
   getBlankPageTitle,
 } from "@/lib/blank-utils"
@@ -21,7 +20,6 @@ export function BlankLotTable({
       product={product}
       items={blanks}
       icon={Box}
-      contactsHref={getBlankContactsHref}
       copy={{
         headingId: "blanks-list-heading",
         title: getBlankLotSectionTitle(product.stoneType, product.stoneName),

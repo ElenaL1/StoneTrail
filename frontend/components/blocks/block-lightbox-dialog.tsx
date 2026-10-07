@@ -1,12 +1,13 @@
 "use client"
 
-import Link from "next/link"
 import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BlockPhoto } from "@/components/blocks/block-photo"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { CatalogLightboxShell } from "@/components/catalog/catalog-lightbox-shell"
 import { displayMeasure } from "@/lib/block-utils"
+import { blockInquiryLine } from "@/lib/inquiry-draft"
+import { useRequestInquiry } from "@/lib/use-request-inquiry"
 import type { StoneBlock } from "@/lib/mock-data"
 
 type Props = {
@@ -25,9 +26,8 @@ export function BlockLightboxDialog({
   onNavigate,
 }: Props) {
   const ib = block.blocks?.[index]
+  const requestInquiry = useRequestInquiry()
   if (!ib) return null
-
-  const contactsHref = `/contacts?block=${encodeURIComponent(block.slug)}&ref=${encodeURIComponent(ib.label)}`
 
   return (
     <CatalogLightboxShell
@@ -70,11 +70,13 @@ export function BlockLightboxDialog({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <Button asChild className="h-12 gap-2 text-base">
-            <Link href={contactsHref}>
-              Запросить блок
-              <Send className="size-4" />
-            </Link>
+          <Button
+            type="button"
+            className="h-12 gap-2 text-base"
+            onClick={() => requestInquiry(blockInquiryLine(block, ib))}
+          >
+            Запросить блок
+            <Send className="size-4" />
           </Button>
           <p className="text-xs text-muted-foreground sm:max-w-xs sm:text-right">
             Цена и условия раскрою после осмотра блока — напишите, что планируете резать.

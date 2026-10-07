@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { RotateCcw, Send, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/blocks/status-badge"
 import { ColumnHeaderFilter } from "@/components/products/column-header-filter"
 import { SlabLightboxDialog } from "@/components/products/slab-lightbox-dialog"
+import { productInquiryLine } from "@/lib/inquiry-draft"
+import { useRequestInquiry } from "@/lib/use-request-inquiry"
 import type { IndividualSlab, Product } from "@/lib/mock-data"
 import {
   EMPTY_SLAB_LOT_FILTERS,
@@ -38,16 +39,15 @@ export function LotTable({
   items,
   copy,
   icon: Icon,
-  contactsHref,
 }: {
   product: Product
   items: IndividualSlab[]
   copy: LotTableCopy
   icon: LucideIcon
-  contactsHref: (product: Product, item: IndividualSlab) => string
 }) {
   const [filters, setFilters] = useState<SlabLotFilterState>(EMPTY_SLAB_LOT_FILTERS)
   const [activeLabel, setActiveLabel] = useState<string | null>(null)
+  const requestInquiry = useRequestInquiry()
 
   const visibleKeys = useMemo(() => getVisibleSlabLotFilterKeys(items), [items])
   const filtered = useMemo(() => filterSlabLot(items, filters), [items, filters])
@@ -249,16 +249,17 @@ export function LotTable({
                   ) : null}
                   <td className="px-5 py-4 align-middle text-right">
                     <Button
-                      asChild
+                      type="button"
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        requestInquiry(productInquiryLine(product, item))
+                      }}
                     >
-                      <Link href={contactsHref(product, item)}>
-                        <Send className="size-3.5" />
-                        Запросить
-                      </Link>
+                      <Send className="size-3.5" />
+                      Запросить
                     </Button>
                   </td>
                 </tr>
@@ -334,11 +335,14 @@ export function LotTable({
                   </div>
                 ) : null}
               </dl>
-              <Button asChild size="sm" className="mt-3 w-full gap-1.5">
-                <Link href={contactsHref(product, item)}>
-                  <Send className="size-3.5" />
-                  Запросить
-                </Link>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3 w-full gap-1.5"
+                onClick={() => requestInquiry(productInquiryLine(product, item))}
+              >
+                <Send className="size-3.5" />
+                Запросить
               </Button>
             </li>
           ))}
@@ -357,7 +361,6 @@ export function LotTable({
           slabs={filtered}
           index={activeIndex}
           pageTitle={copy.pageTitle}
-          contactsHref={contactsHref}
           requestLabel={copy.requestLabel}
           hint={copy.hint}
           itemNoun={copy.itemNoun}

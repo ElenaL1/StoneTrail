@@ -73,6 +73,8 @@ python scripts/seed_catalog.py
 
 SMTP (Selectel): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` (`starttls` или `tls`), `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`. Письмо отправляется после commit пользователя/токена; ошибка SMTP логируется и не откатывает регистрацию. Пароль SMTP в логи и ответы не пишется. Selectel принимает SMTP только со своих серверов — локально поля можно оставить пустыми.
 
+Заявки с сайта уходят на адреса из `INQUIRY_TO` (один или несколько через запятую). Пустое значение или выключенный SMTP отвечают 503, черновик на сайте при этом остаётся.
+
 Ошибки — единый JSON: `{ message, code, fieldErrors, retryAfterSeconds, requestId }`, без FastAPI `detail`. У каждого ответа есть заголовок `X-Request-ID`. Уровень логов задаётся `LOG_LEVEL` (`debug`, `info`, `warning`, `error`, по умолчанию `info`). Подробности — в `docs/error-handling.md`.
 
 Rate limit process-local (in-memory): сбрасывается при рестарте процесса и **не** шарится между uvicorn workers.

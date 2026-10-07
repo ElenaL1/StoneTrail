@@ -85,6 +85,13 @@ BUTTON_LABEL_LONG = "Подпись кнопки не длиннее 80 симв
 EXPIRES_REQUIRED = "Укажите дату окончания."
 EXCERPT_REQUIRED = "Добавьте короткий лид."
 DESCRIPTION_REQUIRED = "Добавьте описание для баннера."
+INQUIRY_NAME_REQUIRED = "Укажите имя."
+INQUIRY_NAME_LONG = "Имя не длиннее 120 символов."
+INQUIRY_EMPTY = "Добавьте позицию или опишите задачу."
+INQUIRY_MESSAGE_LONG = "Текст заявки не длиннее 4000 символов."
+INQUIRY_LINE_REQUIRED = "Укажите название позиции."
+INQUIRY_LINE_LONG = "Описание позиции слишком длинное."
+INQUIRY_TOO_MANY = "В одной заявке не больше 30 позиций."
 
 
 def resend_wait(seconds: int) -> str:

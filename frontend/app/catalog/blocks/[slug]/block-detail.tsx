@@ -18,6 +18,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { blockInquiryLine } from "@/lib/inquiry-draft"
+import { useRequestInquiry } from "@/lib/use-request-inquiry"
 import type { Material, StoneBlock } from "@/lib/types"
 import {
   displayMeasure,
@@ -47,6 +49,7 @@ export function BlockDetailPage({
   relatedMaterial: Material | null
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const requestInquiry = useRequestInquiry()
 
   const items = block.blocks ?? []
   const showPrice = items.some((item) => Boolean(item.price))
@@ -90,13 +93,6 @@ export function BlockDetailPage({
 
   const closeLightbox = () => setActiveIndex(null)
   const openLightboxAt = (i: number) => setActiveIndex(i)
-
-  const contactsHref = (index: number) => {
-    const ib = items[index]
-    return `/contacts?block=${encodeURIComponent(
-      block.slug,
-    )}&ref=${encodeURIComponent(ib?.label ?? "")}`
-  }
 
   return (
     <div
@@ -381,19 +377,17 @@ export function BlockDetailPage({
                     </td>
                     <td className="px-5 py-4 align-middle text-right">
                       <Button
-                        asChild
+                        type="button"
                         variant="outline"
                         size="sm"
                         className="gap-1.5"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openLightboxAt(i)
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          requestInquiry(blockInquiryLine(block, ib))
                         }}
                       >
-                        <Link href={contactsHref(i)}>
-                          <Send className="size-3.5" />
-                          Запросить
-                        </Link>
+                        <Send className="size-3.5" />
+                        Запросить
                       </Button>
                     </td>
                   </tr>
@@ -459,14 +453,13 @@ export function BlockDetailPage({
                   ) : null}
                 </dl>
                 <Button
-                  asChild
+                  type="button"
                   size="sm"
                   className="mt-3 w-full gap-1.5"
+                  onClick={() => requestInquiry(blockInquiryLine(block, ib))}
                 >
-                  <Link href={contactsHref(i)}>
-                    <Send className="size-3.5" />
-                    Запросить
-                  </Link>
+                  <Send className="size-3.5" />
+                  Запросить
                 </Button>
               </li>
             ))}

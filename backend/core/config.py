@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = ""
     smtp_from_name: str = "StoneTrail"
+    inquiry_to: str = ""
+    inquiry_max_attempts: int = 5
+    inquiry_window_seconds: int = 15 * 60
 
     register_max_attempts: int = 3
     register_window_seconds: int = 15 * 60
@@ -109,6 +112,10 @@ class Settings(BaseSettings):
             and self.smtp_password
             and self.smtp_from.strip()
         )
+
+    @property
+    def inquiry_recipients(self) -> list[str]:
+        return [item.strip() for item in self.inquiry_to.split(",") if item.strip()]
 
     @property
     def sync_database_url(self) -> str:

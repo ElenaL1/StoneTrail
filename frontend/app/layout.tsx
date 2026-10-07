@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import { YandexMetrika } from '@/components/yandex-metrika'
 import { Inter, Manrope } from 'next/font/google'
 import { AuthModal } from '@/components/auth/auth-modal'
+import { InquiryDraftSync } from '@/components/inquiry/inquiry-draft-sync'
 import { AuthModalProvider } from '@/lib/auth-modal-context'
 import { AuthProvider } from '@/lib/auth-context'
 import { AdminModeProvider } from '@/lib/admin-mode'
@@ -82,6 +83,7 @@ export default async function RootLayout({
               </main>
               <SiteFooter />
             </div>
+            <InquiryDraftSync />
             <AuthModal />
           </AuthModalProvider>
           </AdminModeProvider>

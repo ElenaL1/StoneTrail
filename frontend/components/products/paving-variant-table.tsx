@@ -6,7 +6,6 @@ import {
   EMPTY_PAVING_VARIANT_FILTERS,
   PAVING_VARIANT_FILTER_DEFS,
   filterPavingVariants,
-  getPavingContactsHref,
   getPavingVariantSectionTitle,
   getVisiblePavingVariantFilterKeys,
   hasActivePavingVariantFilters,
@@ -32,7 +31,6 @@ export function PavingVariantTable({
       pruneFilters={prunePavingVariantFilters}
       filterOptions={pavingVariantFilterOptions}
       hasActiveFilters={hasActivePavingVariantFilters}
-      contactsHref={getPavingContactsHref}
       copy={{
         headingId: "paving-list-heading",
         title: getPavingVariantSectionTitle(product.stoneType, product.stoneName),
