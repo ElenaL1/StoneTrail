@@ -85,6 +85,67 @@ async def test_import_preview_matches_existing_stone(client: AsyncClient) -> Non
 
 
 @pytest.mark.asyncio
+async def test_import_preview_matches_decorated_stone_names(
+    client: AsyncClient,
+) -> None:
+    await _editor(client)
+    catalog_names = ("гр. Ладожский Розовый", "гр.Мансуровский", "Берёзовский.")
+    created = []
+    for name in catalog_names:
+        response = await client.post(
+            "/api/catalog/stones",
+            json={
+                "name": name,
+                "stoneTypeCode": "marble",
+                "quarry": "Карелия",
+                "country": "Россия",
+            },
+        )
+        assert response.status_code == 200, response.text
+        created.append(response.json()["id"])
+    book = Workbook()
+    sheet = book.active
+    assert sheet is not None
+    sheet.append(
+        ["Наименование", "Длина", "Ширина", "Толщина", "Фактура", "Кв метр", "Цена"]
+    )
+    groups = (
+        (
+            "гр. Ладожский Розовый полированный 30 мм",
+            30,
+            "полированный",
+            "Ладожский Розовый",
+        ),
+        ("гр.Мансуровский термо 20 мм", 20, "термо", "Мансуровский"),
+        ("Березовский полированный 20 мм", 20, "полированный", "Березовский"),
+    )
+    for title, thickness, finish, _stone in groups:
+        sheet.append([title, None, None, None, None, None, None])
+        sheet.append([title, 600, 300, thickness, finish, 10, 2897])
+    buffer = BytesIO()
+    book.save(buffer)
+    preview = await client.post(
+        "/api/promotions/import",
+        files={
+            "file": (
+                "offer.xlsx",
+                buffer.getvalue(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        },
+    )
+    assert preview.status_code == 200, preview.text
+    by_stone = {
+        line["stoneName"]: line["stoneSlug"] for line in preview.json()["lines"]
+    }
+    assert by_stone["Ладожский Розовый"] == created[0]
+    assert by_stone["Мансуровский"] == created[1]
+    assert by_stone["Березовский"] == created[2]
+    for slug in created:
+        await client.delete(f"/api/catalog/stones/{slug}")
+
+
+@pytest.mark.asyncio
 async def test_catalog_price_lasts_until_expiry(client: AsyncClient) -> None:
     await _editor(client)
     stone = await client.post(

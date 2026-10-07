@@ -119,9 +119,11 @@ def parse_offer_rows(rows: list[list[Any]]) -> ParsedSheet:
     return ParsedSheet(lines=lines, offer_note=" ".join(notes).strip())
 
 
+_TRADE_PREFIX = re.compile(r"^(?:гр\.\s*|гранит\s+)", re.IGNORECASE)
+
+
 def parse_group_title(value: str) -> tuple[str, str | None, int | None]:
-    text = value.strip()
-    text = re.sub(r"^(гр\.|гранит)\s*", "", text, flags=re.IGNORECASE)
+    text = _TRADE_PREFIX.sub("", value.strip())
     thickness = None
     thick = re.search(r"(\d+)\s*мм", text, flags=re.IGNORECASE)
     if thick:
@@ -141,7 +143,9 @@ def parse_group_title(value: str) -> tuple[str, str | None, int | None]:
 
 def normalize_stone_name(value: str) -> str:
     text = value.lower().replace("ё", "е")
-    text = re.sub(r"^(гр\.|гранит)\s+", "", text)
+    text = _TRADE_PREFIX.sub("", text)
+    text = re.sub(r"[-/]", " ", text)
+    text = re.sub(r"[^\w\s]", "", text)
     return re.sub(r"\s+", " ", text).strip()
 
 

@@ -3,7 +3,13 @@ from io import BytesIO
 import pytest
 from openpyxl import Workbook
 
-from services.offer_sheet import OfferReadError, parse_offer_rows, parse_offer_sheet
+from services.offer_sheet import (
+    OfferReadError,
+    normalize_stone_name,
+    parse_group_title,
+    parse_offer_rows,
+    parse_offer_sheet,
+)
 
 
 def test_tile_sheet_groups_sizes_and_keeps_note() -> None:
@@ -151,3 +157,18 @@ def test_xlsx_bytes_round_trip() -> None:
     assert parsed.lines[0].kind == "tile"
     assert parsed.lines[0].stone_name == "Куртинский"
     assert parsed.lines[0].finish == "термо"
+
+
+def test_stone_names_ignore_prefix_punctuation_and_yo() -> None:
+    assert normalize_stone_name("гр. Ладожский Розовый") == normalize_stone_name(
+        "Ладожский Розовый"
+    )
+    assert normalize_stone_name("гр.Мансуровский") == normalize_stone_name(
+        "Мансуровский"
+    )
+    assert normalize_stone_name("Берёзовский.") == normalize_stone_name("Березовский")
+    assert normalize_stone_name("Ладожский-Розовый") == normalize_stone_name(
+        "Ладожский Розовый"
+    )
+    assert normalize_stone_name("гранитный") == "гранитный"
+    assert parse_group_title("гр.Мансуровский термо 20 мм")[0] == "Мансуровский"

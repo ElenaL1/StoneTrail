@@ -424,6 +424,7 @@ function OfferPreview({
       </p>
       {names.map((name) => {
         const choice = choices[name] ?? { slug: "", create: false, quarry: "", country: "Россия", typeCode: "granite" }
+        if (choice.slug) return null
         return (
           <div key={name} className="space-y-2">
             <p className="text-sm font-medium">{name}</p>
