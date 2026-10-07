@@ -42,7 +42,7 @@ export function StoneInventoryLinks({
               </span>
             )}
             {enabled ? (
-              <Link href={href} className="text-muted-foreground transition-colors hover:text-primary">
+              <Link href={href} className="font-medium text-primary transition-colors hover:text-primary/80">
                 {action.label}
               </Link>
             ) : (

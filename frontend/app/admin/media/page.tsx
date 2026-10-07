@@ -15,6 +15,7 @@ export default function AdminMediaPage() {
   const [blocks, setBlocks] = useState<StoneBlock[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [alt, setAlt] = useState("")
+  const [caption, setCaption] = useState("")
   const [ownerType, setOwnerType] = useState("stone")
   const [ownerSlug, setOwnerSlug] = useState("")
   const [error, setError] = useState("")
@@ -95,6 +96,12 @@ export default function AdminMediaPage() {
         <select className="rounded-md border border-border bg-background px-3 py-2 text-sm" value={ownerSlug} onChange={(event) => setOwnerSlug(event.target.value)}>
           {owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.label}</option>)}
         </select>
+        <Input
+          className="max-w-xs"
+          placeholder="Подпись фактуры"
+          value={caption}
+          onChange={(event) => setCaption(event.target.value)}
+        />
       </div>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
@@ -102,7 +109,14 @@ export default function AdminMediaPage() {
             <img src={item.publicUrl} alt={item.alt} className="aspect-video w-full object-cover" />
             <div className="space-y-2 p-4">
               <p className="text-sm">{item.alt}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void adminApi.linkMedia(item.id, { ownerType, ownerSlug, isPrimary: false, caption: caption.trim() }).then(() => setNotice("Добавлено в галерею.")).catch((err: unknown) => setError(err instanceof ContentRequestError ? err.message : "Не удалось привязать."))}
+                >
+                  В галерею
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"

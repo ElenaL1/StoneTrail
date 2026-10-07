@@ -69,6 +69,7 @@ async def add_media(
     is_primary: bool = True,
     sort_order: int = 0,
     storage_key: str | None = None,
+    caption: str = "",
 ) -> Media:
     key = storage_key or f"dev{public_url}"
     media = await session.scalar(select(Media).where(Media.storage_key == key))
@@ -89,6 +90,7 @@ async def add_media(
             owner_id=owner_id,
             sort_order=sort_order,
             is_primary=is_primary,
+            caption=caption,
         )
     )
     await session.flush()

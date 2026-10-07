@@ -202,8 +202,39 @@ async def test_cover_fallback_and_low_stock(client: AsyncClient) -> None:
 
     data = (await client.get("/api/catalog/stones/white-macaubas")).json()
     assert data["image"] == "/stone/first.png"
+    assert data["textures"] == [{"url": "/stone/second.png", "caption": ""}]
     assert data["status"] == "Мало"
     assert data["slabs"] == 1
+
+
+@pytest.mark.asyncio
+async def test_stone_textures_keep_caption_and_skip_cover(client: AsyncClient) -> None:
+    async with SessionLocal() as session:
+        stone = await add_stone(session, slug="negro-marquina", name="Negro Marquina")
+        await add_media(
+            session,
+            owner_type=MediaOwner.STONE,
+            owner_id=stone.id,
+            public_url="/stone/cover.png",
+            is_primary=True,
+            sort_order=0,
+            storage_key="dev/stone/cover.png",
+        )
+        await add_media(
+            session,
+            owner_type=MediaOwner.STONE,
+            owner_id=stone.id,
+            public_url="/stone/brushed.png",
+            is_primary=False,
+            sort_order=1,
+            storage_key="dev/stone/brushed.png",
+            caption="Браш",
+        )
+        await session.commit()
+
+    data = (await client.get("/api/catalog/stones/negro-marquina")).json()
+    assert data["image"] == "/stone/cover.png"
+    assert data["textures"] == [{"url": "/stone/brushed.png", "caption": "Браш"}]
 
 
 @pytest.mark.asyncio

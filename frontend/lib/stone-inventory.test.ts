@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest"
-import type { Material, Product } from "@/lib/types"
+import type { Material, Product, StoneBlock } from "@/lib/types"
 import {
   getFinishedProductsForStone,
   getStoneInventory,
   productStoneLabel,
+  stoneMatchesWarehouse,
 } from "@/lib/stone-inventory"
 
 function material(overrides: Partial<Material> = {}): Material {
@@ -45,6 +46,45 @@ describe("getStoneInventory", () => {
     expect(inventory.hasBlocks).toBe(false)
     expect(inventory.hasSlabs).toBe(false)
     expect(inventory.hasTiles).toBe(false)
+  })
+
+  test("блоки подсвечиваются, когда в партии есть камень в наличии", () => {
+    const lot: StoneBlock = {
+      id: "lot",
+      slug: "lot",
+      stoneName: "Дымовский",
+      stoneType: "Гранит",
+      quarry: "",
+      country: "",
+      blocks: [{ label: "A", dimensions: "", weight: "", status: "В наличии" }],
+      image: "",
+      description: "",
+      expertNote: "",
+      blockStoneId: "dymovsky",
+    }
+    const inventory = getStoneInventory(material({ blockSlug: "lot" }), [lot])
+    expect(inventory.hasBlocks).toBe(true)
+  })
+})
+
+describe("stoneMatchesWarehouse", () => {
+  test("все оставляет сорт, у которого в каталоге есть хотя бы один формат", () => {
+    expect(stoneMatchesWarehouse(material({ slabs: 1, status: "Продано" }), "all")).toBe(true)
+    expect(stoneMatchesWarehouse(material({ blockSlug: "lot" }), "all")).toBe(true)
+    expect(stoneMatchesWarehouse(material({ tiles: 2 }), "all")).toBe(true)
+    expect(stoneMatchesWarehouse(material({ hasProducts: true }), "all")).toBe(true)
+    expect(stoneMatchesWarehouse(material(), "all")).toBe(false)
+  })
+
+  test("фильтр склада смотрит на наличие формата в каталоге", () => {
+    const blocksOnly = material({ blockSlug: "lot" })
+    expect(stoneMatchesWarehouse(blocksOnly, "blocks")).toBe(true)
+    expect(stoneMatchesWarehouse(blocksOnly, "slabs")).toBe(false)
+    expect(stoneMatchesWarehouse(blocksOnly, "tiles")).toBe(false)
+    expect(stoneMatchesWarehouse(blocksOnly, "products")).toBe(false)
+    expect(stoneMatchesWarehouse(material({ slabs: 3, status: "Продано" }), "slabs")).toBe(true)
+    expect(stoneMatchesWarehouse(material({ tiles: 1 }), "tiles")).toBe(true)
+    expect(stoneMatchesWarehouse(material({ hasProducts: true }), "products")).toBe(true)
   })
 })
 

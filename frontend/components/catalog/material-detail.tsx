@@ -1,13 +1,13 @@
 "use client"
 
 import React from "react"
-import Image from "next/image"
 import type { Material, StoneBlock } from "@/lib/types"
 import { useCatalog } from "@/lib/catalog-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { StoneGallery } from "@/components/catalog/stone-gallery"
 import { StoneInventoryLinks } from "@/components/catalog/stone-inventory-links"
-import { ArrowLeft, Clock, MapPin, Layers, Mountain, CheckCircle2, Info, Box, ArrowUpRight } from "lucide-react"
+import { ArrowLeft, Clock, MapPin, Layers, Mountain, CheckCircle2, Box, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 
 export function MaterialDetailPage({
@@ -32,24 +32,7 @@ export function MaterialDetailPage({
         </Link>
 
         <div className="grid gap-12 lg:grid-cols-2">
-          <div className="space-y-4">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border bg-secondary">
-              <Image
-                src={material.image}
-                alt={material.name}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-square rounded-xl border border-border bg-muted overflow-hidden relative group cursor-pointer">
-                  <Image src={material.image} alt="Detail view" fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" unoptimized />
-                </div>
-              ))}
-            </div>
-          </div>
+          <StoneGallery name={material.name} image={material.image} textures={material.textures} />
 
           <div className="flex flex-col">
             <div className="mb-6">
@@ -99,19 +82,6 @@ export function MaterialDetailPage({
               </div>
             </div>
 
-            <div className="mb-10 space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Поставщик</h3>
-              <div className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-card">
-                <div className="size-12 rounded-full bg-[var(--primary-soft)] flex items-center justify-center text-primary font-bold">
-                  {material.supplier[0]}
-                </div>
-                <div>
-                  <p className="font-bold text-foreground">{material.supplier}</p>
-                  <p className="text-sm text-muted-foreground">Верифицированный партнер</p>
-                </div>
-              </div>
-            </div>
-
             <div className="mt-auto flex gap-3">
               <Button
                 className="flex-1 h-12 text-lg"
@@ -130,14 +100,6 @@ export function MaterialDetailPage({
               <Button variant="outline" className="h-12 px-6">
                 Запросить цену
               </Button>
-            </div>
-
-            <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-sm border border-blue-100 dark:border-blue-900/50">
-              <Info className="size-5 shrink-0" />
-              <p>
-                Данные обновляются в реальном времени. В связи с высокой востребованностью материала,
-                рекомендуем подтвердить наличие перед выездом на склад.
-              </p>
             </div>
 
             {material.blockSlug && (

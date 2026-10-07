@@ -22,7 +22,13 @@ from models.enums import (
     ProductItemKind,
 )
 from repositories.catalog import CatalogRepository
-from schemas.catalog import LotItemOut, MaterialOut, ProductOut, StoneBlockOut
+from schemas.catalog import (
+    LotItemOut,
+    MaterialOut,
+    ProductOut,
+    StoneBlockOut,
+    StoneTextureOut,
+)
 from services.catalog_admin import CatalogAdminMixin
 
 SUPPLIER = "StoneTrail"
@@ -54,6 +60,31 @@ SUMMARY_KINDS = {
     ProductItemKind.TILE,
     ProductItemKind.BLANK,
 }
+
+
+def _cover_and_textures(
+    images: list[tuple[str, str, bool]],
+) -> tuple[str, list[StoneTextureOut]]:
+    ordered: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    primary: str | None = None
+    for url, caption, is_primary in images:
+        if not url:
+            continue
+        if url not in seen:
+            ordered.append((url, caption.strip()))
+            seen.add(url)
+        if is_primary:
+            primary = url
+    if not ordered:
+        return "", []
+    cover = primary or ordered[0][0]
+    textures = [
+        StoneTextureOut(url=url, caption=caption)
+        for url, caption in ordered
+        if url != cover
+    ]
+    return cover, textures
 
 
 def _cover(media: dict[UUID, tuple[str, list[str]]], owner_id: UUID) -> str:
@@ -333,7 +364,7 @@ class CatalogService(CatalogAdminMixin):
         stone_ids = [stone.id for stone in stones]
         products = await self._repo.living_products_for_stones(stone_ids)
         lots = await self._repo.living_lots_for_stones(stone_ids)
-        media = await self._repo.media_for(MediaOwner.STONE, stone_ids)
+        images = await self._repo.linked_images(MediaOwner.STONE, stone_ids)
         with_products = await self._repo.stone_ids_with_products(stone_ids)
 
         products_by_stone: dict[UUID, list[Product]] = defaultdict(list)
@@ -371,6 +402,7 @@ class CatalogService(CatalogAdminMixin):
                 ]
             )
             block_slug = related_lots[0].slug if related_lots else None
+            cover, textures = _cover_and_textures(images.get(stone.id, []))
             out.append(
                 MaterialOut(
                     id=stone.slug,
@@ -378,7 +410,8 @@ class CatalogService(CatalogAdminMixin):
                     type=stone.stone_type.label,
                     finish=finish,
                     thickness=thickness,
-                    image=_cover(media, stone.id),
+                    image=cover,
+                    textures=textures,
                     supplier=SUPPLIER,
                     location=LOCATION,
                     quarry=stone.quarry,

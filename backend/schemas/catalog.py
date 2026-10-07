@@ -24,6 +24,11 @@ class LotItemOut(CamelModel):
     price: str | None = None
 
 
+class StoneTextureOut(CamelModel):
+    url: str
+    caption: str = ""
+
+
 class MaterialOut(CamelModel):
     id: str
     name: str
@@ -42,6 +47,7 @@ class MaterialOut(CamelModel):
     updated: str
     block_slug: str | None = None
     has_products: bool = False
+    textures: list[StoneTextureOut] = []
 
 
 class StoneBlockOut(CamelModel):

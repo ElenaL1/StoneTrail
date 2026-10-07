@@ -182,6 +182,29 @@ class CatalogRepository:
             packed[owner_id] = (cover, urls)
         return packed
 
+    async def linked_images(
+        self, owner_type: MediaOwner, owner_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, list[tuple[str, str, bool]]]:
+        if not owner_ids:
+            return {}
+        stmt = (
+            select(MediaLink, Media)
+            .join(Media, Media.id == MediaLink.media_id)
+            .where(
+                MediaLink.owner_type == owner_type,
+                MediaLink.owner_id.in_(list(owner_ids)),
+                Media.status == MediaStatus.READY,
+            )
+            .order_by(MediaLink.sort_order.asc(), MediaLink.id.asc())
+        )
+        result = await self._session.execute(stmt)
+        images: dict[uuid.UUID, list[tuple[str, str, bool]]] = {}
+        for link, media in result.all():
+            images.setdefault(link.owner_id, []).append(
+                (media.public_url, link.caption, link.is_primary)
+            )
+        return images
+
     async def get_stone_any(self, slug: str) -> Stone | None:
         result = await self._session.execute(
             select(Stone)

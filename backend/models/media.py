@@ -100,5 +100,8 @@ class MediaLink(Base):
     is_primary: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
+    caption: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''"), default=""
+    )
 
     media: Mapped[Media] = relationship(back_populates="links")

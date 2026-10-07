@@ -90,6 +90,7 @@ class MediaLinkIn(CamelModel):
     owner_slug: str
     is_primary: bool = False
     sort_order: int = 0
+    caption: str = ""
 
 
 class MediaLinkOut(CamelModel):
@@ -100,6 +101,7 @@ class MediaLinkOut(CamelModel):
     is_primary: bool
     public_url: str
     alt: str
+    caption: str = ""
 
 
 class AttachmentOut(CamelModel):
@@ -262,6 +264,7 @@ class MediaService:
                 MediaLink.owner_id == owner.id,
             )
         )
+        caption = payload.caption.strip()
         if link is None:
             link = MediaLink(
                 media_id=media.id,
@@ -269,11 +272,13 @@ class MediaService:
                 owner_id=owner.id,
                 sort_order=payload.sort_order,
                 is_primary=payload.is_primary,
+                caption=caption,
             )
             self._session.add(link)
         else:
             link.sort_order = payload.sort_order
             link.is_primary = payload.is_primary
+            link.caption = caption
         await self._session.commit()
         await self._session.refresh(link)
         return MediaLinkOut(
@@ -284,6 +289,7 @@ class MediaService:
             is_primary=link.is_primary,
             public_url=self._display(media),
             alt=media.alt,
+            caption=link.caption,
         )
 
     async def unlink(self, link_id: uuid.UUID) -> None:

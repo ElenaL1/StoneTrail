@@ -7,6 +7,9 @@ export const metadata = {
 }
 
 export default async function CatalogPage() {
-  const materials = await catalogApi.listStones()
-  return <CatalogIndex materials={materials} />
+  const [materials, lots] = await Promise.all([
+    catalogApi.listStones(),
+    catalogApi.listBlocks(),
+  ])
+  return <CatalogIndex materials={materials} lots={lots} />
 }

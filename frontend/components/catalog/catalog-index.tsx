@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, useState } from "react"
-import type { Material } from "@/lib/types"
+import type { Material, StoneBlock } from "@/lib/types"
 import { MaterialCard } from "@/components/material-card"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,13 +15,27 @@ import { Search, Package, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useHasBanner } from "@/lib/promotions/presence"
-import { stoneOrigin } from "@/lib/stone-inventory"
+import { stoneMatchesWarehouse, stoneOrigin, type WarehouseFormat } from "@/lib/stone-inventory"
 
-export function CatalogIndex({ materials }: { materials: Material[] }) {
+const warehouseOptions: { id: WarehouseFormat; label: string }[] = [
+  { id: "all", label: "Все" },
+  { id: "blocks", label: "Блоки" },
+  { id: "slabs", label: "Слэбы" },
+  { id: "tiles", label: "Плитка" },
+  { id: "products", label: "Изделия из камня" },
+]
+
+export function CatalogIndex({
+  materials,
+  lots = [],
+}: {
+  materials: Material[]
+  lots?: StoneBlock[]
+}) {
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [originFilter, setOriginFilter] = useState("all")
-  const [locationFilter, setLocationFilter] = useState("all")
+  const [warehouseFilter, setWarehouseFilter] = useState<WarehouseFormat>("all")
   const isBannerEnabled = useHasBanner()
 
   const origins = useMemo(
@@ -29,16 +43,15 @@ export function CatalogIndex({ materials }: { materials: Material[] }) {
     [materials],
   )
   const types = Array.from(new Set(materials.map((m) => m.type)))
-  const locations = Array.from(new Set(materials.map((m) => m.location)))
 
   const hasActiveFilters =
-    searchQuery.trim() !== "" || typeFilter !== "all" || originFilter !== "all" || locationFilter !== "all"
+    searchQuery.trim() !== "" || typeFilter !== "all" || originFilter !== "all" || warehouseFilter !== "all"
 
   function resetFilters() {
     setSearchQuery("")
     setTypeFilter("all")
     setOriginFilter("all")
-    setLocationFilter("all")
+    setWarehouseFilter("all")
   }
 
   const filteredMaterials = useMemo(() => {
@@ -51,10 +64,9 @@ export function CatalogIndex({ materials }: { materials: Material[] }) {
         m.country.toLowerCase().includes(q)
       const matchesType = typeFilter === "all" || m.type === typeFilter
       const matchesOrigin = originFilter === "all" || stoneOrigin(m) === originFilter
-      const matchesLocation = locationFilter === "all" || m.location === locationFilter
-      return matchesSearch && matchesType && matchesOrigin && matchesLocation
+      return matchesSearch && matchesType && matchesOrigin && stoneMatchesWarehouse(m, warehouseFilter)
     })
-  }, [materials, searchQuery, typeFilter, originFilter, locationFilter])
+  }, [materials, searchQuery, typeFilter, originFilter, warehouseFilter])
 
   return (
     <div className={cn("min-h-screen py-24 px-5 lg:px-8", !isBannerEnabled ? "bg-muted/30" : "bg-background")}>
@@ -120,16 +132,15 @@ export function CatalogIndex({ materials }: { materials: Material[] }) {
 
             <div className="flex items-end gap-2">
               <div className="min-w-0 flex-1 space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Локация</label>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Склад</label>
+                <Select value={warehouseFilter} onValueChange={(value) => setWarehouseFilter(value as WarehouseFormat)}>
                   <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Любая" />
+                    <SelectValue placeholder="Все" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Любая</SelectItem>
-                    {locations.map((l) => (
-                      <SelectItem key={l} value={l}>
-                        {l}
+                    {warehouseOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -154,7 +165,7 @@ export function CatalogIndex({ materials }: { materials: Material[] }) {
         {filteredMaterials.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredMaterials.map((material) => (
-              <MaterialCard key={material.id} material={material} />
+              <MaterialCard key={material.id} material={material} lots={lots} />
             ))}
           </div>
         ) : (

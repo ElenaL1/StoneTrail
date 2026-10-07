@@ -42,6 +42,21 @@ export function getStoneInventory(material: Material, lots: StoneBlock[] = []) {
   }
 }
 
+export type WarehouseFormat = "all" | "blocks" | "slabs" | "tiles" | "products"
+
+export function stoneMatchesWarehouse(material: Material, format: WarehouseFormat): boolean {
+  const inCatalog = {
+    blocks: Boolean(material.blockSlug),
+    slabs: material.slabs > 0,
+    tiles: material.tiles > 0,
+    products: material.hasProducts === true,
+  }
+  if (format === "all") {
+    return inCatalog.blocks || inCatalog.slabs || inCatalog.tiles || inCatalog.products
+  }
+  return inCatalog[format]
+}
+
 export function productStoneNames(
   product: Pick<Product, "stoneName" | "stoneNames">,
 ): string[] {

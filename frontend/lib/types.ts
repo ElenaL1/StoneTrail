@@ -1,3 +1,8 @@
+export type StoneTexture = {
+  url: string
+  caption: string
+}
+
 export type Material = {
   id: string
   name: string
@@ -18,6 +23,8 @@ export type Material = {
   blockSlug?: string
   /** True when any catalog product, of any category, uses this stone. */
   hasProducts?: boolean
+  /** Extra stone photos besides the cover, for example other surface finishes. */
+  textures?: StoneTexture[]
 }
 
 export type BlockStatus = "В наличии" | "Зарезервирован" | "Под заказ"
