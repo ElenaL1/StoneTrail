@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from io import BytesIO
 from typing import Any
 
@@ -61,6 +61,10 @@ class ParsedSheet:
     offer_note: str = ""
 
 
+class OfferReadError(Exception):
+    """The upload is not a readable xls or xlsx workbook."""
+
+
 @dataclass
 class _Group:
     group_name: str
@@ -76,6 +80,8 @@ def parse_offer_sheet(data: bytes, filename: str) -> ParsedSheet:
 
 def parse_offer_rows(rows: list[list[Any]]) -> ParsedSheet:
     header_at, columns, price_unit = _find_header(rows)
+    if price_unit is None and header_at is not None:
+        price_unit = _unit_below_header(rows, header_at, columns)
     if header_at is None:
         return ParsedSheet(
             lines=[
@@ -140,16 +146,42 @@ def normalize_stone_name(value: str) -> str:
 
 
 def _read_rows(data: bytes, filename: str) -> list[list[Any]]:
+    kind = _workbook_kind(data, filename)
+    try:
+        if kind == "xls":
+            return _read_xls(data)
+        return _read_xlsx(data)
+    except OfferReadError:
+        raise
+    except Exception as exc:
+        raise OfferReadError from exc
+
+
+def _workbook_kind(data: bytes, filename: str) -> str:
+    if data.startswith(b"PK"):
+        return "xlsx"
+    if data.startswith(b"\xd0\xcf\x11\xe0"):
+        return "xls"
     name = filename.lower()
     if name.endswith(".xls") and not name.endswith(".xlsx"):
-        import xlrd
+        return "xls"
+    if name.endswith(".xlsx"):
+        return "xlsx"
+    raise OfferReadError
 
-        book = xlrd.open_workbook(file_contents=data)
-        sheet = book.sheet_by_index(0)
-        return [
-            [sheet.cell_value(row, col) for col in range(sheet.ncols)]
-            for row in range(sheet.nrows)
-        ]
+
+def _read_xls(data: bytes) -> list[list[Any]]:
+    import xlrd
+
+    book = xlrd.open_workbook(file_contents=data)
+    sheet = book.sheet_by_index(0)
+    return [
+        [sheet.cell_value(row, col) for col in range(sheet.ncols)]
+        for row in range(sheet.nrows)
+    ]
+
+
+def _read_xlsx(data: bytes) -> list[list[Any]]:
     from openpyxl import load_workbook
 
     workbook = load_workbook(BytesIO(data), data_only=True, read_only=True)
@@ -160,6 +192,35 @@ def _read_rows(data: bytes, filename: str) -> list[list[Any]]:
         return [list(row) for row in worksheet.iter_rows(values_only=True)]
     finally:
         workbook.close()
+
+
+def _unit_below_header(
+    rows: list[list[Any]], header_at: int, columns: dict[int, str]
+) -> str | None:
+    if header_at + 1 >= len(rows):
+        return None
+    price_col = next(
+        (index for index, role in columns.items() if role == "price"), None
+    )
+    if price_col is None or price_col >= len(rows[header_at + 1]):
+        return None
+    return _unit_in_text(rows[header_at + 1][price_col])
+
+
+def _unit_in_text(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).lower().replace("ё", "е").replace("²", "2")
+    compact = "".join(text.split())
+    if "м2" in compact or "кв" in compact:
+        return "m2"
+    if "слэб" in compact or "слеб" in compact:
+        return "slab"
+    if "тон" in compact:
+        return "ton"
+    if "шт" in compact:
+        return "piece"
+    return None
 
 
 def _find_header(
@@ -263,10 +324,12 @@ def _is_group(cells: dict[str, Any]) -> bool:
 
 
 def _has_measure(cells: dict[str, Any]) -> bool:
-    return any(
+    if any(
         not _empty(cells.get(key))
-        for key in ("length", "width", "height", "price", "area", "weight")
-    )
+        for key in ("length", "width", "height", "area", "weight")
+    ):
+        return True
+    return _parse_decimal(cells.get("price")) is not None
 
 
 def _loose_text(row: list[Any]) -> str:
@@ -445,16 +508,24 @@ def _parse_mm(value: Any) -> tuple[int | None, str | None]:
 
 
 def _parse_decimal(value: Any) -> Decimal | None:
-    if _empty(value):
-        return None
-    if isinstance(value, bool):
+    if _empty(value) or isinstance(value, bool):
         return None
     if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
+        return None if not value.is_finite() else value
+    if isinstance(value, int):
+        return Decimal(value)
+    if isinstance(value, float):
+        if value != value or value in {float("inf"), float("-inf")}:
+            return None
+        try:
+            return Decimal(str(value))
+        except InvalidOperation:
+            return None
     text = str(value).strip().replace("\xa0", "").replace(" ", "").replace(",", ".")
     text = re.sub(r"[^0-9.]", "", text)
-    if not text or text == ".":
+    if not re.fullmatch(r"\d+(\.\d+)?", text):
         return None
-    return Decimal(text)
+    try:
+        return Decimal(text)
+    except InvalidOperation:
+        return None

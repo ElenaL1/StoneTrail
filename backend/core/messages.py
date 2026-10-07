@@ -61,6 +61,7 @@ SLUG_INVALID = "Адрес может содержать только строч
 STONE_IN_USE = "Сначала удалите связанные партии и изделия."
 LOOKUP_INVALID = "Выберите значение из списка."
 MEDIA_TYPE_INVALID = "Допустимы изображения JPEG, PNG и WebP."
+EXCEL_UNREADABLE = "Не удалось прочитать файл Excel."
 MEDIA_VIDEO_TYPE_INVALID = "Допустимы видео MP4 и WebM."
 MEDIA_TOO_LARGE = "Изображение больше допустимого размера."
 MEDIA_AVATAR_TOO_LARGE = "Размер фото не должен превышать 1 МБ."

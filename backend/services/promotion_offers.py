@@ -34,6 +34,7 @@ from schemas.feed import (
 )
 from services.media_storage import detect_image
 from services.offer_sheet import (
+    OfferReadError,
     ParsedLine,
     normalize_stone_name,
     parse_offer_sheet,
@@ -67,7 +68,12 @@ class PromotionOfferService:
         self._storage = storage
 
     async def preview(self, data: bytes, filename: str) -> OfferPreviewOut:
-        parsed = parse_offer_sheet(data, filename)
+        try:
+            parsed = parse_offer_sheet(data, filename)
+        except OfferReadError:
+            raise AuthError.validation(
+                messages.EXCEL_UNREADABLE, {"file": messages.EXCEL_UNREADABLE}
+            ) from None
         stones = await self._catalog.list_stones()
         by_name = {normalize_stone_name(stone.name): stone for stone in stones}
         lines = [

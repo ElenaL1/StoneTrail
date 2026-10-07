@@ -1,8 +1,9 @@
 from io import BytesIO
 
+import pytest
 from openpyxl import Workbook
 
-from services.offer_sheet import parse_offer_rows, parse_offer_sheet
+from services.offer_sheet import OfferReadError, parse_offer_rows, parse_offer_sheet
 
 
 def test_tile_sheet_groups_sizes_and_keeps_note() -> None:
@@ -75,6 +76,56 @@ def test_slab_sheet_prices_per_slab() -> None:
     assert line.label == "SL-1"
     assert line.price_unit == "slab"
     assert line.length_mm == 2800
+
+
+def test_price_subtitle_is_skipped() -> None:
+    rows = [
+        [
+            "Наименование",
+            "Длина",
+            "Ширина",
+            "Толщина",
+            "Фактура",
+            "Кв метр",
+            "Цена",
+        ],
+        [None, None, None, None, None, None, "руб./м2 в т.ч. НДС 22%"],
+        ["гр. Дымовский полированный 30 мм", None, None, None, None, None, None],
+        [
+            "гр. Дымовский полированный 30 мм",
+            600,
+            300,
+            30,
+            "полированный",
+            "20,52",
+            "2 897",
+        ],
+    ]
+    parsed = parse_offer_rows(rows)
+    assert len(parsed.lines) == 1
+    assert parsed.lines[0].price_unit == "m2"
+    assert str(parsed.lines[0].price_amount) == "2897"
+    assert parsed.lines[0].unresolved is False
+
+
+def test_xlsx_bytes_are_read_even_with_xls_name() -> None:
+    book = Workbook()
+    sheet = book.active
+    assert sheet is not None
+    sheet.append(
+        ["Наименование", "Длина", "Ширина", "Толщина", "Фактура", "Кв метр", "Цена"]
+    )
+    sheet.append(["гр. Куртинский термо 20 мм", 600, 300, 20, "термо", 18.36, 4468])
+    buffer = BytesIO()
+    book.save(buffer)
+    parsed = parse_offer_sheet(buffer.getvalue(), "offer.xls")
+    assert parsed.lines[0].stone_name == "Куртинский"
+    assert parsed.lines[0].kind == "tile"
+
+
+def test_unreadable_workbook_raises() -> None:
+    with pytest.raises(OfferReadError):
+        parse_offer_sheet(b"this is not a workbook", "offer.xlsx")
 
 
 def test_xlsx_bytes_round_trip() -> None:
