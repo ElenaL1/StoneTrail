@@ -105,10 +105,25 @@ describe("sortCatalogProducts", () => {
     expect(new Set(orders).size).toBeGreaterThan(1)
   })
 
+  test("один и тот же раздел сохраняет порядок, другой раздел может его изменить", () => {
+    const items = [slabBlack, slabWhite, tileBlack]
+    const tiles = sortCatalogProducts(items, "relevance", "", 42, "tiles").map((item) => item.id)
+
+    expect(shuffleCatalogProducts(items, 42, "tiles").map((item) => item.id)).toEqual(tiles)
+
+    const orders = ["tiles", "blanks", "slabs", "paving", "custom", "all"].map((scope) =>
+      sortCatalogProducts(items, "relevance", "", 42, scope)
+        .map((item) => item.id)
+        .join(","),
+    )
+
+    expect(new Set(orders).size).toBeGreaterThan(1)
+  })
+
   test("поиск и явная сортировка не перемешивают выдачу", () => {
     const items = [slabWhite, slabBlack, tileBlack]
 
-    expect(sortCatalogProducts(items, "name", "", 7).map((item) => item.id)).toEqual(
+    expect(sortCatalogProducts(items, "name", "", 7, "tiles").map((item) => item.id)).toEqual(
       sortCatalogProducts(items, "name", "").map((item) => item.id),
     )
     expect(sortCatalogProducts(items, "relevance", "bianco", 7).map((item) => item.id)).toEqual(

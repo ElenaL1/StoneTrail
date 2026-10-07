@@ -49,6 +49,9 @@ export const CATALOG_VIEW_IDS: CatalogView[] = [CATALOG_ALL, ...PRODUCT_CATEGORY
 
 export const PRODUCT_PAGE_SIZE = 12
 
+/** Одинаковое зерно на сервере и в браузере: порядок не прыгает после загрузки. */
+export const CATALOG_SHUFFLE_SEED = 1
+
 export type ProductSortId = "relevance" | "name" | "availability"
 
 export const PRODUCT_SORT_OPTIONS: { id: ProductSortId; label: string }[] = [
@@ -323,9 +326,14 @@ function mixShuffleSeed(seed: number, id: string): number {
   return hash
 }
 
-export function shuffleCatalogProducts<T extends { id: string }>(items: T[], seed: number): T[] {
+export function shuffleCatalogProducts<T extends { id: string }>(
+  items: T[],
+  seed: number,
+  scope = "",
+): T[] {
+  const rank = (id: string) => mixShuffleSeed(seed, scope ? `${scope}\0${id}` : id)
   return [...items].sort((a, b) => {
-    const diff = mixShuffleSeed(seed, a.id) - mixShuffleSeed(seed, b.id)
+    const diff = rank(a.id) - rank(b.id)
     return diff !== 0 ? diff : a.id.localeCompare(b.id)
   })
 }
@@ -335,6 +343,7 @@ export function sortCatalogProducts(
   sort: ProductSortId,
   query: string,
   shuffleSeed?: number,
+  shuffleScope = "",
 ): Product[] {
   const copy = [...products]
   if (sort === "name") {
@@ -349,7 +358,7 @@ export function sortCatalogProducts(
   if (query.trim()) {
     return copy.sort((a, b) => relevanceScore(b, query) - relevanceScore(a, query))
   }
-  if (shuffleSeed !== undefined) return shuffleCatalogProducts(copy, shuffleSeed)
+  if (shuffleSeed !== undefined) return shuffleCatalogProducts(copy, shuffleSeed, shuffleScope)
   return copy
 }
 

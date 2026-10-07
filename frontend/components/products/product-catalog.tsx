@@ -12,6 +12,7 @@ import {
 } from "@/lib/custom-catalog"
 import {
   CATALOG_ALL,
+  CATALOG_SHUFFLE_SEED,
   EMPTY_PRODUCT_FILTERS,
   PRODUCT_PAGE_SIZE,
   filterCatalogProducts,
@@ -21,6 +22,7 @@ import {
   parseProductCategory,
   sortCatalogProducts,
   type CatalogView,
+  type ProductFilterState,
   type ProductSortId,
 } from "@/lib/product-catalog"
 import { ProductCategoryTabs } from "@/components/products/product-category-tabs"
@@ -33,6 +35,20 @@ import { onPrimaryCtaClass } from "@/lib/on-primary-cta"
 import { useHasBanner } from "@/lib/promotions/presence"
 import { cn } from "@/lib/utils"
 
+function filtersForCustomGroup(current: ProductFilterState): ProductFilterState {
+  const next: ProductFilterState = {
+    ...EMPTY_PRODUCT_FILTERS,
+    search: current.search,
+    stoneType: current.stoneType,
+    origin: current.origin,
+    availability: current.availability,
+  }
+  const unchanged = (Object.keys(next) as (keyof ProductFilterState)[]).every(
+    (key) => current[key] === next[key],
+  )
+  return unchanged ? current : next
+}
+
 export function ProductCatalog({ products }: { products: Product[] }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -42,15 +58,21 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const customGroup = category === "custom" ? resolveCustomGroup(requestedGroup, products) : CUSTOM_GROUP_ALL
   const [filters, setFilters] = useState(EMPTY_PRODUCT_FILTERS)
   const [sort, setSort] = useState<ProductSortId>("relevance")
-  const [shuffleSeed, setShuffleSeed] = useState(0)
-  const [visibleCount, setVisibleCount] = useState(PRODUCT_PAGE_SIZE)
+  const [view, setView] = useState({ category, customGroup })
   const hasBanner = useHasBanner()
   const categoryMeta = getCatalogViewMeta(category)
   const groupMeta = customGroup === CUSTOM_GROUP_ALL ? null : getCustomGroup(customGroup)
 
-  useEffect(() => {
-    setShuffleSeed(Math.floor(Math.random() * 0x100000000))
-  }, [])
+  let activeFilters = filters
+  let activeSort = sort
+  if (view.category !== category || view.customGroup !== customGroup) {
+    const categoryChanged = view.category !== category
+    activeFilters = categoryChanged ? EMPTY_PRODUCT_FILTERS : filtersForCustomGroup(filters)
+    activeSort = categoryChanged ? "relevance" : sort
+    setView({ category, customGroup })
+    if (activeFilters !== filters) setFilters(activeFilters)
+    if (activeSort !== sort) setSort(activeSort)
+  }
 
   useEffect(() => {
     if (category !== "custom" || !requestedGroup || requestedGroup === customGroup) return
@@ -59,40 +81,6 @@ export function ProductCatalog({ products }: { products: Product[] }) {
     const query = params.toString()
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
   }, [category, customGroup, pathname, requestedGroup, router, searchParams])
-
-  useEffect(() => {
-    setFilters(EMPTY_PRODUCT_FILTERS)
-    setSort("relevance")
-  }, [category])
-
-  function reshuffle() {
-    setShuffleSeed(Math.floor(Math.random() * 0x100000000))
-  }
-
-  const selectionKey = [
-    category,
-    customGroup,
-    shuffleSeed,
-    sort,
-    filters.search,
-    filters.productType,
-    filters.stoneType,
-    filters.origin,
-    filters.availability,
-    filters.color,
-    filters.thickness,
-    filters.finish,
-    filters.size,
-    filters.purpose,
-    filters.height,
-    filters.diameter,
-    filters.format,
-    filters.dimensions,
-  ].join("|")
-
-  useEffect(() => {
-    setVisibleCount(PRODUCT_PAGE_SIZE)
-  }, [selectionKey])
 
   const categoryProducts = useMemo(
     () =>
@@ -109,19 +97,45 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   const filtered = useMemo(
     () =>
       sortCatalogProducts(
-        filterCatalogProducts(categoryProducts, category, filters, customGroup),
-        sort,
-        filters.search,
-        shuffleSeed,
+        filterCatalogProducts(categoryProducts, category, activeFilters, customGroup),
+        activeSort,
+        activeFilters.search,
+        CATALOG_SHUFFLE_SEED,
+        `${category}:${customGroup}`,
       ),
-    [categoryProducts, category, filters, customGroup, sort, shuffleSeed],
+    [categoryProducts, category, activeFilters, customGroup, activeSort],
   )
 
+  const selectionKey = [
+    category,
+    customGroup,
+    activeSort,
+    activeFilters.search,
+    activeFilters.productType,
+    activeFilters.stoneType,
+    activeFilters.origin,
+    activeFilters.availability,
+    activeFilters.color,
+    activeFilters.thickness,
+    activeFilters.finish,
+    activeFilters.size,
+    activeFilters.purpose,
+    activeFilters.height,
+    activeFilters.diameter,
+    activeFilters.format,
+    activeFilters.dimensions,
+  ].join("|")
+
+  const [page, setPage] = useState({ key: selectionKey, count: PRODUCT_PAGE_SIZE })
+  if (page.key !== selectionKey) {
+    setPage({ key: selectionKey, count: PRODUCT_PAGE_SIZE })
+  }
+  const visibleCount = page.key === selectionKey ? page.count : PRODUCT_PAGE_SIZE
   const visible = filtered.slice(0, visibleCount)
   const hasMore = filtered.length > visibleCount
 
   function selectCategory(next: CatalogView) {
-    reshuffle()
+    if (next === category) return
     const params = new URLSearchParams(searchParams.toString())
     params.set("category", next)
     params.delete("group")
@@ -129,19 +143,12 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   }
 
   function selectGroup(next: string) {
-    reshuffle()
+    if (next === customGroup) return
     const params = new URLSearchParams(searchParams.toString())
     params.set("category", "custom")
     if (next === CUSTOM_GROUP_ALL) params.delete("group")
     else params.set("group", next)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    setFilters((current) => ({
-      ...EMPTY_PRODUCT_FILTERS,
-      search: current.search,
-      stoneType: current.stoneType,
-      origin: current.origin,
-      availability: current.availability,
-    }))
   }
 
   function resetFilters() {
@@ -156,10 +163,10 @@ export function ProductCatalog({ products }: { products: Product[] }) {
 
   const summaryParts = [
     groupMeta?.label,
-    filters.productType !== "all" ? filters.productType.toLowerCase() : null,
-    filters.stoneType !== "all" ? filters.stoneType.toLowerCase() : null,
-    filters.origin !== "all" ? filters.origin : null,
-    filters.availability !== "all" ? filters.availability.toLowerCase() : null,
+    activeFilters.productType !== "all" ? activeFilters.productType.toLowerCase() : null,
+    activeFilters.stoneType !== "all" ? activeFilters.stoneType.toLowerCase() : null,
+    activeFilters.origin !== "all" ? activeFilters.origin : null,
+    activeFilters.availability !== "all" ? activeFilters.availability.toLowerCase() : null,
   ].filter(Boolean)
 
   return (
@@ -203,7 +210,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
         <ProductFilters
           category={category}
           products={categoryProducts}
-          filters={filters}
+          filters={activeFilters}
           onChange={(patch) =>
             setFilters((current) => {
               const next = { ...current, ...patch }
@@ -213,11 +220,11 @@ export function ProductCatalog({ products }: { products: Product[] }) {
               return changed ? next : current
             })
           }
-          sort={sort}
+          sort={activeSort}
           onSortChange={setSort}
           customGroup={customGroup}
           onReset={resetFilters}
-          canReset={hasActiveProductFilters(filters) || sort !== "relevance"}
+          canReset={hasActiveProductFilters(activeFilters) || activeSort !== "relevance"}
         />
 
         <div id="product-catalog-panel" role="tabpanel" aria-labelledby={`product-category-${category}`}>
@@ -239,7 +246,12 @@ export function ProductCatalog({ products }: { products: Product[] }) {
                       type="button"
                       variant="outline"
                       className="h-11 min-h-11 px-6"
-                      onClick={() => setVisibleCount((count) => count + PRODUCT_PAGE_SIZE)}
+                      onClick={() =>
+                        setPage((current) => ({
+                          key: selectionKey,
+                          count: current.count + PRODUCT_PAGE_SIZE,
+                        }))
+                      }
                     >
                       Показать ещё
                     </Button>
@@ -252,14 +264,14 @@ export function ProductCatalog({ products }: { products: Product[] }) {
                   <PencilRuler className="size-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground">
-                  {hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL
+                  {hasActiveProductFilters(activeFilters) || customGroup !== CUSTOM_GROUP_ALL
                     ? "Ничего не найдено"
                     : categoryMeta.emptyTitle}
                 </h3>
                 <p className="mx-auto mt-2 max-w-xs text-muted-foreground">
                   {categoryMeta.emptyDescription}
                 </p>
-                {(hasActiveProductFilters(filters) || customGroup !== CUSTOM_GROUP_ALL) && (
+                {(hasActiveProductFilters(activeFilters) || customGroup !== CUSTOM_GROUP_ALL) && (
                   <Button type="button" variant="outline" className="mt-6 h-11 min-h-11" onClick={resetFilters}>
                     Сбросить фильтры
                   </Button>
