@@ -464,7 +464,7 @@ function OfferPreview({
           </div>
         )
       })}
-      <div className="max-h-64 overflow-auto text-xs">
+      <div className="text-xs">
         {lines.map((line, index) => (
           <div key={`${line.groupName}-${line.label}-${index}`} className="flex flex-wrap items-center gap-2 border-t border-border py-1">
             <span className="min-w-40">{line.groupName}</span>
